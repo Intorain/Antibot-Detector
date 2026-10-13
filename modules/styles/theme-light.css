@@ -48,12 +48,12 @@
 :root[data-theme="light"] .combo-chip,
 :root[data-theme="light"] .method-type-badge,
 :root[data-theme="light"] .history-modal-method-badge,
-:root[data-theme="light"] .method-tag {
+:root[data-theme="light"] .method-tag,
+:root[data-theme="light"] .card-evidence-item svg {
   filter: brightness(0.62) saturate(1.4);
 }
 
 /* Shadows: softer on white */
-:root[data-theme="light"] .detection-card:hover,
 :root[data-theme="light"] .rule-modal-content {
   box-shadow: 0 6px 24px rgba(9, 30, 66, 0.12);
 }

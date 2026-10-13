@@ -93,12 +93,12 @@ DetectionUI.handleLoadingTimeout = function() {
               if (chrome.runtime.lastError) {
                 if (this.debugMode) Logger.debug('UI', '[Detection] Error checking for results:', chrome.runtime.lastError);
                 if (!this.isShowingResults || this.currentResults.length === 0) {
-                  this.showEmptyState();
+                  this.showEmptyState({ outcome: 'interrupted' });
                 }
                 return;
               }
 
-              if (response?.data?.detectionResults?.length > 0) {
+              if (Array.isArray(response?.data?.detectionResults)) {
                 // Detection completed! Show results instead of interrupted state
                 if (this.debugMode) Logger.debug('UI', '[Detection] Timeout but results exist - showing results instead of interrupted state');
                 // The tab's own engine and detectors, as every other caller
@@ -129,7 +129,7 @@ DetectionUI.handleLoadingTimeout = function() {
                   // Truly stuck/no data - normalize to empty state
                   if (this.debugMode) Logger.debug('UI', '[Detection] Timeout with no results - showing empty state');
                   if (!this.isShowingResults || this.currentResults.length === 0) {
-                    this.showEmptyState();
+                    this.showEmptyState({ outcome: 'interrupted' });
                   }
                 }
               }
@@ -138,7 +138,7 @@ DetectionUI.handleLoadingTimeout = function() {
         } else {
           // No tab found - normalize to empty state
           if (!this.isShowingResults || this.currentResults.length === 0) {
-            this.showEmptyState();
+            this.showEmptyState({ outcome: 'interrupted' });
           }
         }
       });
@@ -196,8 +196,12 @@ DetectionUI.applyEmptyStateCopy = function(options = {}) {
         emptyStateTitle.textContent = options.title;
         emptyStateTitle.removeAttribute('data-i18n');
       } else {
-        const titleKey = options.noCache ? 'noDetectionsFound' : 'detectionEmptyTitle';
-        const titleFallback = options.noCache ? 'No detections found' : 'Nothing Detected';
+        const titleKey = options.outcome === 'failed' ? 'detectionFailedTitle'
+          : options.outcome === 'interrupted' ? 'detectionInterruptedTitle'
+          : options.noCache ? 'detectionUnscannedTitle' : 'detectionEmptyTitle';
+        const titleFallback = options.outcome === 'failed' ? 'Scan failed'
+          : options.outcome === 'interrupted' ? 'Scan interrupted'
+          : options.noCache ? 'No completed scan' : 'Nothing Detected';
         emptyStateTitle.setAttribute('data-i18n', titleKey);
         emptyStateTitle.textContent = tr(titleKey, titleFallback);
       }
@@ -208,8 +212,10 @@ DetectionUI.applyEmptyStateCopy = function(options = {}) {
         emptyStateText.textContent = options.description;
         emptyStateText.removeAttribute('data-i18n');
       } else {
-        const descKey = options.noCache ? 'detectionNoCachedDataDesc' : 'detectionNoDetectionsDesc';
-        const descFallback = options.noCache
+        const descKey = options.outcome === 'failed' || options.outcome === 'interrupted'
+          ? 'detectionRetryScanDesc' : options.noCache ? 'detectionNoCachedDataDesc' : 'detectionNoDetectionsDesc';
+        const descFallback = options.outcome === 'failed' || options.outcome === 'interrupted'
+          ? 'The scan did not finish. Reload the page to try again.' : options.noCache
           ? 'No cached detection data is available for this page. Reload the page to run a fresh scan.'
           : 'No matching antibot, CAPTCHA, or fingerprinting signals were found on this page.';
         emptyStateText.setAttribute('data-i18n', descKey);
@@ -252,10 +258,12 @@ DetectionUI.applyDisabledStateCopy = function() {
 DetectionUI.showEmptyState = function(options = {}) {
     if (DetectionUI.showUnavailableState.call(this)) return;
 
+    if (options.outcome) options = { ...options, noCache: true, showBadges: false };
+    this.scanOutcome = options.outcome || (options.noCache ? 'unscanned' : 'complete');
     if (this.uiStateMachine) {
       this.uiStateMachine.setState(this.uiStates.EMPTY);
     }
-    this.wasInterrupted = false; // Reset flag when showing successful state
+    this.wasInterrupted = options.outcome === 'interrupted';
     this.isShowingResults = false;
     this.hideLoadingState();
     this.clearLoadingTimeout(); // Clear timeout when showing empty state
@@ -267,7 +275,7 @@ DetectionUI.showEmptyState = function(options = {}) {
     // Reset clear cache button to default state
     this.resetClearCacheButton();
 
-    this.clearBadgeForEmptyState();
+    if (!options.noCache) this.clearBadgeForEmptyState();
 
     const emptyState = document.querySelector('#emptyState');
     const emptyStateIcon = emptyState?.querySelector('.state-card-logo');
@@ -386,7 +394,7 @@ DetectionUI.displayResults = async function(detections = [], options = {}) {
       const isExpired = Date.now() > options.cacheMetadata.expiry;
       if (isExpired) {
         Logger.debug('UI', '[Detection] Cache expired, showing empty state instead of stale data');
-        this.showEmptyState();
+        this.showEmptyState({ outcome: 'unscanned' });
         return;
       }
     }
@@ -920,9 +928,10 @@ DetectionUI.buildDetectionCardHtml = function(detection, index, isSingleResult =
     const inlineCategory = DetectionUI.showsGroups.call(this) ? ''
       : `<span class="card-meta-category"><span class="category-icon" style="color:${categoryColor}" aria-hidden="true">${FormatUtils.categoryIconSvg(categoryKey)}</span>${FormatUtils.escapeHtml(DetectionUI.categoryLabel(detection.category || categoryKey))}</span><span class="card-meta-sep" aria-hidden="true">·</span>`;
     const sure = Math.max(0, Math.min(100, Math.round(Number(confidence) || 0)));
-    // Every method, wrapping to a second line when it does not fit; the tip counts each
+    // Every method as its icon and count (the words go to screen readers); the tip names each
     const evidence = DetectionUI.evidenceSummary(matchList, combos.length > 0, DetectionUI.METHOD_ORDER.length);
     const evidenceTip = DetectionUI.evidenceRows(matchList);
+    const evidenceIcons = DetectionUI.evidenceIconsHtml.call(this, matchList, combos.length > 0);
 
     return `
       <div class="detection-card ${isSingleResult ? 'single-result' : ''}" data-detection-index="${globalIndex}" style="--conf:${sure}%;--cat-color:${categoryColor}">
@@ -935,7 +944,7 @@ DetectionUI.buildDetectionCardHtml = function(detection, index, isSingleResult =
               <h3 class="detector-name" title="${FormatUtils.escapeAttr(detectorName)}">${safeDetectorName}</h3>
               ${FormatUtils.difficultyHtml(difficulty, difficultyText, 'card-difficulty', difficultyTip)}
             </div>
-            <p class="card-row-meta">${inlineCategory}<span class="card-sure" ${FormatUtils.tipAttrs(confidenceTip.title, confidenceTip.detail, confidenceTip.rows)}>${FormatUtils.escapeHtml(t('detectionCardSureFmt', '{0}% sure', sure))}</span>${evidence ? `<span class="card-meta-sep" aria-hidden="true">·</span><span class="card-evidence" ${FormatUtils.tipAttrs(matchList.length === 1 ? t('historyOneMatch', '1 match') : t('historyMatchCountFmt', '{0} matches', matchList.length), '', evidenceTip)}>${FormatUtils.escapeHtml(evidence)}</span>` : ''}</p>
+            <p class="card-row-meta">${inlineCategory}<span class="card-sure" ${FormatUtils.tipAttrs(confidenceTip.title, confidenceTip.detail, confidenceTip.rows)}>${FormatUtils.escapeHtml(t('detectionCardSureFmt', '{0}% sure', sure))}</span>${evidence ? `<span class="card-meta-sep" aria-hidden="true">·</span><span class="card-evidence" ${FormatUtils.tipAttrs(matchList.length === 1 ? t('historyOneMatch', '1 match') : t('historyMatchCountFmt', '{0} matches', matchList.length), combos.length > 0 ? t('detectionCardCombination', 'Combination') : '', evidenceTip)}><span class="visually-hidden">${FormatUtils.escapeHtml(evidence)}</span>${evidenceIcons}</span>` : ''}</p>
           </div>
         </div>
         <div class="card-conf-bar" aria-hidden="true"></div>
@@ -974,6 +983,35 @@ DetectionUI.evidenceSummary = function(matches, combined = false, max = 3) {
       text = text ? `${word} · ${text}` : word;
     }
     return text;
+};
+
+/**
+ * The evidence line as icons: a combination mark when a combination decided
+ * the detection, then each matched method's icon with its count, most
+ * matches first. Methods without an icon show their name instead.
+ */
+DetectionUI.evidenceIconsHtml = function(matches, combined = false) {
+    const parts = combined ? [`<span class="card-evidence-item is-combination" aria-hidden="true">${FormatUtils.METHOD_ICONS.combination}</span>`] : [];
+    for (const row of DetectionUI.evidenceCounts(matches)) {
+      const icon = FormatUtils.methodIconSvg(row.type);
+      // Each method in its colour from Settings → Tag Colors
+      const color = icon ? FormatUtils.methodColor(row.type, this?.tagColors) : '';
+      const style = color ? ` style="--method-color:${color}"` : '';
+      parts.push(`<span class="card-evidence-item"${style} aria-hidden="true">${icon || `<span class="card-evidence-name">${FormatUtils.escapeHtml(DetectionUI.getMethodLabel(row.type))}</span>`}<span class="card-evidence-count">${row.count}</span></span>`);
+    }
+    return parts.join('');
+};
+
+/** Each matched method and its number of matches, most first (ties in the editor's order). */
+DetectionUI.evidenceCounts = function(matches) {
+    const aliases = { cookies: 'cookie', headers: 'header', urls: 'url' };
+    const counts = new Map();
+    (Array.isArray(matches) ? matches : []).forEach(match => {
+      const raw = String(match?.type || '').toLowerCase();
+      if (raw) counts.set(aliases[raw] || raw, (counts.get(aliases[raw] || raw) || 0) + 1);
+    });
+    const rank = type => { const i = DetectionUI.METHOD_ORDER.indexOf(type); return i === -1 ? 99 : i; };
+    return [...counts.entries()].sort((a, b) => (b[1] - a[1]) || (rank(a[0]) - rank(b[0]))).map(([type, count]) => ({ type, count }));
 };
 
 /** Tooltip rows of the evidence line: each matched method and how many matches it has. */

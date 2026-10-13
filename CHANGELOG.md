@@ -5,6 +5,48 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [2.8.6] - 2026-10-13
+
+### Added
+
+- Rule editor: each combination has Name translations with Translate automatically, like a pattern's description, so your own combinations show in every language.
+
+### Changed
+
+- History: a card's lower row reads detections, confidence and difficulty, then the category totals, with the time at the far right.
+- History: cards show the page's full address instead of only its domain, cut off when long; hover shows all of it.
+- Settings: changes wait for Save; theme and language clearly indicate when they apply immediately.
+- Keyboard navigation now supports the main tabs and returns focus after closing tool and History dialogs.
+- Detection: larger cards with a bigger icon and name; a card's evidence shows each method as an icon with its count, in its Settings → Tag Colors colour, plus a mark when a combination decided it; hover names them.
+- Detection and History: hovering a card tints it light blue instead of outlining it.
+- Settings: cards with a title start folded and open on click, so each tab is shorter.
+- Detection and History details: matched combinations start folded, showing their name and confidence; a click opens what was found.
+- Detection and History details: section titles such as Description and Matched combinations stand out from the text, in blue with a rule beside them.
+- Settings: JS API events are off by default; a choice already saved is kept.
+- Rule editor: a pattern's settings button no longer gets a coloured background when settings are set; the RX and CS tags already show them.
+
+### Fixed
+
+- Rule editor: a combination's confidence and delete button line up with its name.
+- Toolbar: the scanning spinner turns from the moment a page loads instead of freezing on its first frame, and keeps turning while the rules run.
+- Rule editor: a pattern's Translations count includes the translations the extension ships, so an official text no longer reads "0 of 11".
+- Rule editor: "Translate automatically" fills every language without a translation in one click, instead of only the first, and leaves shipped translations alone.
+- Rule editor: combination names and pattern descriptions in combinations show in the extension's language; editing one still edits the original text.
+- Detection no longer stops after three strong matches, missing other protections on the same page.
+- Failed and interrupted scans no longer appear as completed scans with no detections.
+- Reloading or switching pages no longer lets an older scan overwrite the current scan’s state.
+- Rules: failed saves preserve the draft; invalid imports leave existing rules intact, and updates protect custom patterns and edits.
+- Settings: concurrent saves preserve unrelated changes, and failed imports retain the current settings and language.
+- Advanced: overlapping captures stay separate, analysis jobs have a deadline, and saved tool results survive closing the popup.
+- Advanced: capture history writes no longer overwrite one another, and generated examples run without extension-only helpers.
+- Scrape with Scrapfly: terminal instructions match Bash or WSL, and embedded scripts cannot prematurely end their generated file.
+
+### Security
+
+- Page-facing detection events expose summaries without raw cookie, header or payload evidence.
+- Settings exports omit integration connection details; imports preserve local connections, and webhook requests refuse redirects.
+- Scrape with Scrapfly: Copy for AI removes header values from generated examples as well as their description.
+
 ## [2.8.5] - 2026-10-12
 
 ### Added
@@ -328,6 +370,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[2.8.6]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.5...v2.8.6
 [2.8.5]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.4...v2.8.5
 [2.8.4]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.3...v2.8.4
 [2.8.3]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.2...v2.8.3

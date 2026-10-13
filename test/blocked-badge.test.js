@@ -37,7 +37,7 @@ function harness(textColorMode = 'supported') {
         clearInterval: (id) => timers.delete(id)
     });
     for (const file of ['modules/core/badge-constants.js', 'background/utilities.js',
-        'modules/detection/engine/detection-engine-manager.js', 'sections/settings/settings-runtime.js',
+        'modules/detection/engine/detection-engine-manager.js', 'modules/settings/settings-runtime.js',
         'sections/detection/detection-ui.js']) {
         vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), context, { filename: file });
     }
@@ -283,4 +283,40 @@ test('production empty-result badge update rechecks exclusion after its asynchro
     await clearing;
     assert.equal(h.last('setBadgeText').text, h.context.BADGE.TEXT.BLACKLISTED);
     assert.equal(h.last('setBadgeTextColor').color, '#7dd3fc');
+});
+
+test('a spinner started before its scan registers keeps turning, then stops once the scan ends', async () => {
+    // A page load starts the spinner before the page's data registers the scan:
+    // the first tick used to find nothing, stop, and leave the first frame frozen
+    const h = harness();
+    h.context.startBadgeSpinner(7);
+    for (let tick = 1; tick <= 3; tick++) {
+        h.timers.get(1)();
+        await new Promise((resolve) => setImmediate(resolve));
+        assert.equal(h.last('setBadgeText').text, h.context.BADGE.SPINNER_FRAMES[tick], `frame ${tick} while the scan is starting`);
+    }
+    h.context.activeDetections.set(7, {});
+    h.timers.get(1)();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(h.timers.size, 1, 'the scan registered: still turning');
+    h.context.activeDetections.delete(7);
+    h.timers.get(1)();
+    assert.equal(h.timers.size, 0, 'the scan ended: the spinner stops at once, no grace');
+});
+
+test('a spinner whose scan never registers stops after the start grace', () => {
+    const h = harness();
+    const realNow = Date.now;
+    try {
+        let now = 1000;
+        Date.now = () => now;
+        h.context.Date = Date;
+        h.context.startBadgeSpinner(7);
+        now += 7900; h.timers.get(1)();
+        assert.equal(h.timers.size, 1);
+        now += 200; h.timers.get(1)();
+        assert.equal(h.timers.size, 0);
+    } finally {
+        Date.now = realNow;
+    }
 });

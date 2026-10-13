@@ -7,7 +7,9 @@
  * added at the top level, changed, filled from their own picker and deleted;
  * a sentence says when the combination fires. "These patterns only count together" sets the
  * patterns' standalone flag, which is shared by the whole rule; it never
- * changes on its own when rows are added or removed.
+ * changes on its own when rows are added or removed. Under the conditions,
+ * Name translations (nameI18n) work like a pattern description's
+ * Translations (rules-translations-ui.js).
  */
 const combosText = (key, fallback) =>
   (typeof I18n !== 'undefined' && typeof I18n.tr === 'function') ? I18n.tr(key, fallback) : fallback;
@@ -113,6 +115,8 @@ Rules.prototype.initCombinationsEditor = function(detector) {
   this._comboPickerPath = '';
   this._comboPickerSelected = new Set();
   this._comboOpenIds = new Set();
+  this._comboTranslationsOpen = new Set();
+  this._comboTranslateStatus = new Map();
   // Descriptions of the stored patterns; a row shows one only while its text still matches
   this._comboStored = new Map();
   if (detector && typeof DetectionCombinations !== 'undefined') {
@@ -124,6 +128,8 @@ Rules.prototype.initCombinationsEditor = function(detector) {
     const when = JSON.parse(JSON.stringify(combo.when || { all: [] }));
     return {
       id: combo.id || `c${i + 1}`, name: combo.name || '',
+      // Its own translations of the name (Name translations)
+      nameI18n: combo.nameI18n && typeof combo.nameI18n === 'object' && !Array.isArray(combo.nameI18n) ? { ...combo.nameI18n } : null,
       confidence: Number.isFinite(Number(combo.confidence)) && Number(combo.confidence) > 0
         ? Math.min(100, Math.round(Number(combo.confidence))) : null,
       when: Rules.comboGroupKey(Rules.comboUnwrap(when).node) ? when : { all: [when] }
@@ -154,6 +160,15 @@ Rules.prototype.bindCombinationsEditor = function() {
     this.renderCombinations({ focusPicker: true });
   });
   ['click', 'input', 'change'].forEach(kind => container.addEventListener(kind, event => this.handleCombinationAction(event, kind)));
+  // Name translations: stays open across redraws; opening it shows the shipped translations (toggle does not bubble)
+  container.addEventListener('toggle', event => {
+    const details = event.target;
+    if (!details.classList?.contains('combo-translations')) return;
+    const id = details.dataset.comboId;
+    if (details.open) this._comboTranslationsOpen.add(id); else this._comboTranslationsOpen.delete(id);
+    const combo = this.combinationsModel.find(c => c.id === id);
+    if (details.open && combo && typeof this.fillShippedPlaceholders === 'function') this.fillShippedPlaceholders(details, combo.name, { load: true });
+  }, true);
   container.addEventListener('keydown', event => {
     // A description is one line: Enter finishes it
     if (event.key === 'Enter' && event.target.dataset?.comboField === 'description') {
@@ -218,7 +233,11 @@ Rules.prototype.setComboPatternDescription = function(id, text, source) {
   const inline = row.querySelector('.method-description-inline');
   if (inline) inline.value = value;
   document.querySelectorAll('#combinationsContainer .combo-item-desc[data-combo-field="description"]').forEach(el => {
-    if (el !== source && el.dataset.pattern === id) el.textContent = value;
+    if (el !== source && el.dataset.pattern === id) {
+      // Another copy of the same description: shows the new text as typed
+      delete el.dataset.i18nSource; delete el.dataset.i18nShown; delete el.dataset.i18nShowing;
+      el.textContent = value;
+    }
   });
 };
 Rules.prototype.getComboPatternRow = function(id) {
@@ -269,6 +288,10 @@ Rules.prototype.addComboItems = function(combo, values, path = '') {
     group[key].push(leaf);
   }
 };
+// A rule text in the UI language while not edited (rules-translations-ui.js); as written without it
+const comboLocalized = (text, map) => (typeof Rules.localizedEditable === 'function'
+  ? Rules.localizedEditable(text, map) : { shown: String(text || ''), attrs: '' });
+
 Rules.prototype.handleCombinationAction = function(event, kind) {
   const target = event.target;
   const card = target.closest('.combo-card');
@@ -280,8 +303,16 @@ Rules.prototype.handleCombinationAction = function(event, kind) {
     if (kind === 'input') this.setComboPatternDescription(target.dataset.pattern, target.textContent, target);
     return;
   }
+  if (target.classList?.contains('rule-translation-input')) {
+    if (kind === 'input') this.setComboNameTranslation(combo, target.dataset.locale, target.value);
+    return;
+  }
   if (field && kind === 'input') {
-    if (field === 'name') combo.name = target.value;
+    if (field === 'name') {
+      combo.name = target.value;
+      // The shipped translations are looked up by the name as it is now
+      if (typeof this.fillShippedPlaceholders === 'function') this.fillShippedPlaceholders(card.querySelector?.('.combo-translations'), combo.name);
+    }
     if (field === 'confidence') {
       const digits = target.value.replace(/[^0-9]/g, '').slice(0, 3);
       const value = Number(digits);
@@ -294,6 +325,10 @@ Rules.prototype.handleCombinationAction = function(event, kind) {
   const el = target.closest('[data-combo-action]');
   if (!el) return;
   const action = el.dataset.comboAction;
+  if (action === 'translate-name') {
+    if (kind === 'click') this.autoTranslateComboName(combo);
+    return;
+  }
   if (action === 'picker-search') {
     if (kind === 'input') this.filterComboPicker(el.closest('.combo-picker'), el.value);
     return;
@@ -396,7 +431,7 @@ Rules.prototype.handleCombinationAction = function(event, kind) {
       ? `${scope} > .combo-items > .combo-item[data-idx="${itemIndex}"] [data-combo-action="remove"]`
       : `${scope} > .combo-group-actions [data-combo-action="open-picker"]`;
   } else if (action === 'delete-combo') {
-    const name = combo.name.trim() || combosFormat('combinationDefaultNameFmt', 'Combination {0}', index + 1);
+    const name = FormatUtils.ruleText(combo.name.trim(), combo.nameI18n) || combosFormat('combinationDefaultNameFmt', 'Combination {0}', index + 1);
     const ask = typeof NotificationHelper !== 'undefined' && typeof NotificationHelper.confirm === 'function'
       ? NotificationHelper.confirm({ title: combosText('combinationDelete', 'Delete combination'),
           message: combosFormat('combinationDeleteConfirmFmt', 'Delete the combination "{0}"? Its patterns stay in the rule.', FormatUtils.escapeHtml(name)),
@@ -453,6 +488,52 @@ Rules.prototype.updateComboPickerFooter = function(picker) {
     : combosFormat('combinationAddSelectedFmt', 'Add {0} selected', count);
 };
 
+
+/** A combination's Name translations (rules-translations-ui.js); none without that file. */
+Rules.prototype.comboTranslationsHtml = function(combo, index) {
+  if (typeof Rules.translationRowsHtml !== 'function') return '';
+  const esc = FormatUtils.escapeHtml;
+  const attr = FormatUtils.escapeAttr;
+  const status = this._comboTranslateStatus?.get(combo.id);
+  const supported = typeof self !== 'undefined' && 'Translator' in self;
+  const unavailable = combosText('ruleTranslateUnavailable', 'Automatic translation needs Chrome 138 or newer.');
+  return `<details class="rule-translations combo-translations" data-combo-id="${attr(combo.id)}"${this._comboTranslationsOpen?.has(combo.id) ? ' open' : ''}>
+          <summary><span>${esc(combosText('combinationTranslationsTitle', 'Name translations'))}</span><span class="rule-translations-count"></span></summary>
+          <p class="option-hint">${esc(combosText('combinationTranslationsHint', 'Shown instead of the name when the extension is in that language. Empty: the name is shown.'))}</p>
+          <div class="rule-translations-actions">
+            <button type="button" class="action-btn" data-rule-translate="combo" data-combo-action="translate-name"${supported && !status?.busy ? '' : ' disabled'}${supported ? '' : ` title="${attr(unavailable)}"`}>${esc(combosText('ruleTranslateAuto', 'Translate automatically'))}</button>
+            <span class="rule-translations-status" aria-live="polite">${esc(status?.text || '')}</span>
+          </div>
+          <div class="rule-translations-fields">${Rules.translationRowsHtml(combo.name, combo.nameI18n, `combo-${index}-translation`)}</div>
+        </details>`;
+};
+Rules.prototype.setComboNameTranslation = function(combo, locale, text) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim();
+  const map = { ...(combo.nameI18n || {}) };
+  if (value) map[locale] = value; else delete map[locale];
+  combo.nameI18n = Object.keys(map).length ? map : null;
+};
+/** "Translate automatically" for a combination's name: the fills go to the model, so a redraw keeps them. */
+Rules.prototype.autoTranslateComboName = function(combo) {
+  if (typeof this.autoTranslateFields !== 'function') return Promise.resolve();
+  const panel = () => [...document.querySelectorAll('#combinationsContainer .combo-translations')].find(d => d.dataset.comboId === combo.id) || null;
+  return this.autoTranslateFields(panel, combo.name, {
+    needsText: combosText('combinationTranslateNeedsName', 'Write the name first.'),
+    onFill: (locale, text) => this.setComboNameTranslation(combo, locale, text),
+    onStatus: (text, busy) => this._comboTranslateStatus.set(combo.id, { text, busy })
+  });
+};
+/** The shipped translation files, read once, for the greyed translations and the counts. */
+Rules.prototype.loadComboTranslationFiles = function() {
+  if (this._comboTranslationFiles || typeof RuleI18n === 'undefined' || !(this.combinationsModel || []).length) return;
+  this._comboTranslationFiles = Promise.all(RuleI18n.LOCALES.map(locale => RuleI18n.load(locale).catch(() => false))).then(() => {
+    if (typeof this.fillShippedPlaceholders !== 'function') return;
+    document.querySelectorAll('#combinationsContainer .combo-translations').forEach(details => {
+      const combo = this.combinationsModel.find(c => c.id === details.dataset.comboId);
+      if (combo) this.fillShippedPlaceholders(details, combo.name);
+    });
+  });
+};
 
 Rules.prototype.isComboOpen = function(combo) { return !!this._comboOpenIds?.has(combo.id); };
 Rules.prototype.setComboOpen = function(combo, open) {
@@ -520,12 +601,14 @@ Rules.prototype.renderCombinations = function({ focusPicker = false } = {}) {
     const require = refs.length > 0 && refs.every(p => p.strict);
     const mixed = refs.some(p => p.strict) && !require;
     const sentences = this.comboSentences(combo, options);
+    // The name in the UI language while not edited
+    const shownName = comboLocalized(combo.name, combo.nameI18n);
     return `<div class="combo-card${open ? '' : ' collapsed'}" data-combo="${index}">
       <div class="combo-summary">
         <button type="button" class="combo-toggle" data-combo-action="toggle-card" aria-expanded="${open}"
           aria-label="${attr(combosText('combinationEditConditions', 'Edit conditions'))}">${COMBO_ICONS.chevron}</button>
         <div class="combo-summary-main">
-          <input type="text" class="combo-summary-name" data-combo-field="name" value="${attr(combo.name)}" dir="auto"
+          <input type="text" class="combo-summary-name" data-combo-field="name" value="${attr(shownName.shown)}"${shownName.attrs} dir="auto"
             placeholder="${attr(combosFormat('combinationDefaultNameFmt', 'Combination {0}', index + 1))}"
             aria-label="${attr(combosText('ruleFieldName', 'Name'))}">
           <button type="button" class="combo-summary-count" data-combo-action="toggle-card" aria-expanded="${open}">${esc(sentences[0])}</button>
@@ -548,10 +631,13 @@ Rules.prototype.renderCombinations = function({ focusPicker = false } = {}) {
             : combosText('combinationOnlyTogetherHint', 'On their own they detect nothing. Applies to these patterns in every combination of this rule.'))}</small></span>
         </label>
         <p class="combo-preview" aria-live="polite">${esc(sentences.join(' '))}</p>
+        ${this.comboTranslationsHtml(combo, index)}
       </div>
     </div>`;
   }).join('');
   container.querySelectorAll('[data-mixed]').forEach(input => { input.indeterminate = true; });
+  if (typeof this.updateTranslationsCount === 'function') container.querySelectorAll('.combo-translations').forEach(details => this.updateTranslationsCount(details));
+  this.loadComboTranslationFiles();
   const search = container.querySelector('.combo-picker-search');
   if (search && query) { search.value = query; this.filterComboPicker(search.closest('.combo-picker'), query); }
   const list = container.querySelector('.combo-picker-list');
@@ -631,6 +717,10 @@ Rules.prototype.renderComboItem = function(tree, index, labels) {
   const method = node.method || option?.method || '';
   const raw = node.method ? '' : (option?.label || combosText('combinationEmptyPattern', '(empty pattern)'));
   const description = node.method ? combosFormat('combinationAnyOfMethodFmt', 'Any {0} pattern', this.getMethodLabel(method)) : this.comboDescriptionOf(option);
+  // The description in the UI language while not edited (the pattern's own translations first)
+  let ownTranslations = null;
+  try { ownTranslations = node.pattern ? JSON.parse(this.getComboPatternRow(node.pattern)?.dataset.descriptionI18n || 'null') : null; } catch (_) { ownTranslations = null; }
+  const shownDescription = node.method ? { shown: description, attrs: '' } : comboLocalized(description, ownTranslations);
   // A pattern's description is edited right here (same value as its Settings → Description)
   const addDescription = combosText('combinationAddDescription', 'Add a description');
   const strict = option?.strict ? `<span class="combo-item-tag">${esc(combosText('patternCombinationsOnlyBadge', 'Combinations only'))}</span>` : '';
@@ -641,7 +731,7 @@ Rules.prototype.renderComboItem = function(tree, index, labels) {
       <div class="combo-item-body">
         ${node.method
           ? `<p class="combo-item-line">${this.renderMethodChip(method, 'combo-chip')}<span class="combo-item-desc" dir="auto">${esc(description)}</span></p>`
-          : `<p class="combo-item-line">${this.renderMethodChip(method, 'combo-chip')}<span class="combo-item-desc" dir="auto" contenteditable="plaintext-only" role="textbox" spellcheck="false" data-combo-field="description" data-pattern="${attr(node.pattern)}" data-placeholder="${attr(addDescription)}" aria-label="${attr(addDescription)}">${esc(description)}</span></p><span class="combo-leaf-text" dir="ltr" title="${attr(raw)}">${esc(raw)}</span>`}
+          : `<p class="combo-item-line">${this.renderMethodChip(method, 'combo-chip')}<span class="combo-item-desc" dir="auto" contenteditable="plaintext-only" role="textbox" spellcheck="false" data-combo-field="description" data-pattern="${attr(node.pattern)}" data-placeholder="${attr(addDescription)}" aria-label="${attr(addDescription)}"${shownDescription.attrs}>${esc(shownDescription.shown)}</span></p><span class="combo-leaf-text" dir="ltr" title="${attr(raw)}">${esc(raw)}</span>`}
         <div class="combo-item-meta">
           <select data-combo-action="presence" aria-label="${attr(combosText('combinationMatchState', 'Pattern condition'))}">
             <option value="present"${negative ? '' : ' selected'}>${esc(combosText('combinationMustBeFound', 'Must be found'))}</option>
@@ -726,7 +816,9 @@ Rules.prototype.buildCombinationsForSave = function(detection, { validate = true
       if (problem) { invalidIndex = index; invalidMessage = problem; }
     }
     const name = combo.name.trim() || combosFormat('combinationDefaultNameFmt', 'Combination {0}', index + 1);
-    return { id: combo.id, name, ...(combo.confidence ? { confidence: combo.confidence } : {}), when };
+    const translations = Object.entries(combo.nameI18n || {}).filter(([, v]) => typeof v === 'string' && v.trim());
+    const nameI18n = translations.length ? { nameI18n: Object.fromEntries(translations.map(([k, v]) => [k, v.trim()])) } : {};
+    return { id: combo.id, name, ...nameI18n, ...(combo.confidence ? { confidence: combo.confidence } : {}), when };
   });
   return { combinations, invalidIndex, invalidMessage };
 };
