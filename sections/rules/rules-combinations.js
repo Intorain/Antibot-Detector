@@ -7,7 +7,8 @@
  * added at the top level, changed, filled from their own picker and deleted;
  * a sentence says when the combination fires. "These patterns only count together" sets the
  * patterns' standalone flag, which is shared by the whole rule; it never
- * changes on its own when rows are added or removed. Under the conditions,
+ * changes on its own when rows are added or removed. A combination with no
+ * patterns yet keeps the tick and applies it to the first ones added. Under the conditions,
  * Name translations (nameI18n) work like a pattern description's
  * Translations (rules-translations-ui.js).
  */
@@ -287,6 +288,11 @@ Rules.prototype.addComboItems = function(combo, values, path = '') {
     if (Rules.comboLeaves(group).some(item => type === 'method' ? item.method === ref : item.id === ref)) continue;
     group[key].push(leaf);
   }
+  // Ticked while still empty: the patterns just added only count together
+  if (combo.pendingStrict) {
+    delete combo.pendingStrict;
+    this.comboReferencedOptions(combo).forEach(p => this.setComboPatternStrict(p.id, true));
+  }
 };
 // A rule text in the UI language while not edited (rules-translations-ui.js); as written without it
 const comboLocalized = (text, map) => (typeof Rules.localizedEditable === 'function'
@@ -419,8 +425,17 @@ Rules.prototype.handleCombinationAction = function(event, kind) {
     this.clampComboThresholds(combo);
     focus = `.combo-card[data-combo="${index}"] .combo-group[data-path="${path}"] > .combo-items > .combo-item[data-idx="${itemIndex}"] [data-combo-action="presence"]`;
   } else if (action === 'require') {
-    this.comboReferencedOptions(combo).forEach(p => this.setComboPatternStrict(p.id, el.checked));
+    const refs = this.comboReferencedOptions(combo);
+    if (refs.length) delete combo.pendingStrict;
+    else if (el.checked) combo.pendingStrict = true;
+    else delete combo.pendingStrict;
+    refs.forEach(p => this.setComboPatternStrict(p.id, el.checked));
     focus = `.combo-card[data-combo="${index}"] [data-combo-action="require"]`;
+  } else if (action === 'strict' && el.dataset.pattern) {
+    const option = this.getComboPatternOptions().find(p => p.id === el.dataset.pattern);
+    if (!option) return;
+    this.setComboPatternStrict(option.id, !option.strict);
+    focus = `.combo-card[data-combo="${index}"] .combo-group[data-path="${path}"] > .combo-items > .combo-item[data-idx="${itemIndex}"] [data-combo-action="strict"]`;
   } else if (action === 'remove' && children?.[itemIndex]) {
     children.splice(itemIndex, 1);
     this.clampComboThresholds(combo);
@@ -598,7 +613,7 @@ Rules.prototype.renderCombinations = function({ focusPicker = false } = {}) {
   container.innerHTML = this.combinationsModel.map((combo, index) => {
     const open = this.isComboOpen(combo);
     const refs = this.comboReferencedOptions(combo, options);
-    const require = refs.length > 0 && refs.every(p => p.strict);
+    const require = refs.length > 0 ? refs.every(p => p.strict) : combo.pendingStrict === true;
     const mixed = refs.some(p => p.strict) && !require;
     const sentences = this.comboSentences(combo, options);
     // The name in the UI language while not edited
@@ -624,7 +639,7 @@ Rules.prototype.renderCombinations = function({ focusPicker = false } = {}) {
             aria-label="${attr(combosText('combinationConfidenceWhenFound', 'Confidence when found'))}"
             title="${attr(combosText('combinationConfidenceAutoHint', 'Leave empty for Auto: the highest confidence of the patterns found.'))}"><span>%</span></span>
         </label>
-        <label class="combo-require"><input type="checkbox" data-combo-action="require"${require ? ' checked' : ''}${mixed ? ' data-mixed="true"' : ''}${refs.length ? '' : ' disabled'}>
+        <label class="combo-require"><input type="checkbox" data-combo-action="require"${require ? ' checked' : ''}${mixed ? ' data-mixed="true"' : ''}>
           <span><strong>${esc(combosText('combinationOnlyTogether', 'These patterns only count together'))}</strong>
           <small>${esc(mixed
             ? combosText('combinationOnlyTogetherMixed', 'Some of these patterns also count on their own. Tick to make them all count only in combinations.')
@@ -723,7 +738,11 @@ Rules.prototype.renderComboItem = function(tree, index, labels) {
   const shownDescription = node.method ? { shown: description, attrs: '' } : comboLocalized(description, ownTranslations);
   // A pattern's description is edited right here (same value as its Settings → Description)
   const addDescription = combosText('combinationAddDescription', 'Add a description');
-  const strict = option?.strict ? `<span class="combo-item-tag">${esc(combosText('patternCombinationsOnlyBadge', 'Combinations only'))}</span>` : '';
+  // Turns this pattern's "Combinations only" on or off (shared by the whole rule)
+  const strict = !node.method && option
+    ? `<button type="button" class="combo-item-tag${option.strict ? ' is-on' : ''}" data-combo-action="strict" data-pattern="${attr(node.pattern)}" aria-pressed="${option.strict ? 'true' : 'false'}"
+        title="${attr(combosText('combinationOnlyTogetherHint', 'On their own they detect nothing. Applies to these patterns in every combination of this rule.'))}">${esc(combosText('patternCombinationsOnlyBadge', 'Combinations only'))}</button>`
+    : '';
   // The method chip starts the first line and the text flows after it, so a
   // wide chip ("Window properties") does not squeeze the description
   return `<div class="combo-item${negative ? ' is-not' : ''}" data-idx="${index}">

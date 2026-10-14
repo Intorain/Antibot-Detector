@@ -426,6 +426,9 @@ DetectionUI.displayResults = async function(detections = [], options = {}) {
     // Sort items by category priority before displaying
     itemsToShow = this.sortDetectionsByCategory(itemsToShow);
 
+    // New results fade in (a search only filters them: see handleSearch)
+    DetectionUI.setResultsFiltering(false);
+
     // Use pagination to display results
     // PaginationManager will handle showing/hiding pagination based on whether it's needed
     if (this.paginationManager) {
@@ -1340,7 +1343,6 @@ DetectionUI.getMethodBadges = function(matches) {
     }
 
     const t = (typeof I18n !== 'undefined') ? I18n : null;
-    const clickToCopy = (t && t.get('advCommonClickToCopy')) || 'Click to copy';
     const unknownValue = (t && t.get('detectionUiUnknownValue')) || 'unknown';
 
     // Show all methods as individual cards
@@ -1409,14 +1411,13 @@ DetectionUI.getMethodBadges = function(matches) {
       // Replace underscores with hyphens for CSS compatibility, then handle plural to singular
       const methodClass = matchType.replace(/_/g, '-').replace(/s$/, ''); // js_hooks -> js-hooks, cookies -> cookie
 
-      const encodedValue = encodeURIComponent(copyValue);
       const safeDisplayValue = FormatUtils.escapeHtml(displayValue);
       const safeFullValue = FormatUtils.escapeHtml(copyValue);
 
       return `
-        <div class="method-item-card method-${methodClass}" data-copy-value="${encodedValue}" data-method-type="${methodType}" title="${FormatUtils.escapeAttr(clickToCopy)}">
+        <div class="method-item-card method-${methodClass}" data-method-type="${methodType}">
           <span class="method-type-badge" ${badgeStyle}>${FormatUtils.escapeHtml(DetectionUI.getMethodLabel(matchType || 'unknown'))}</span>
-          <button type="button" class="method-value-btn" data-copy-target="value" title="${safeFullValue}">${safeDisplayValue}</button>
+          <span class="method-value-btn" dir="ltr" title="${safeFullValue}">${safeDisplayValue}</span>
           ${FormatUtils.confidenceHtml(confidence, 'method-confidence')}
         </div>
       `;
@@ -1453,6 +1454,13 @@ DetectionUI.sortDetectionsByCategory = function(detections) {
     });
 };
 
+/** While filtering, the result cards are redrawn per keystroke without their fade-in. */
+DetectionUI.setResultsFiltering = function(on) {
+    const list = typeof document !== 'undefined' && typeof document.querySelector === 'function'
+      ? document.querySelector('#resultsList') : null;
+    if (list && list.classList) list.classList.toggle('is-filtering', on);
+};
+
 DetectionUI.handleSearch = function(query) {
     this.searchQuery = query.toLowerCase().trim();
 
@@ -1461,6 +1469,9 @@ DetectionUI.handleSearch = function(query) {
     const itemsToShow = this.searchQuery
       ? this.getFilteredResults()
       : this.sortDetectionsByCategory(this.currentResults || []);
+
+    // Each keystroke redraws the cards: without the fade-in, or they flash while typing
+    DetectionUI.setResultsFiltering(true);
 
     // Update pagination with filtered results
     if (this.paginationManager) {

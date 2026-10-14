@@ -24,6 +24,19 @@
   "advToolCaptureHint": { "message": "इस पेज से डेटा रिकॉर्ड करें" },
   "advToolStopCaptureHint": { "message": "इस पेज से डेटा रिकॉर्ड करना रोकें" },
   "advToolWorking": { "message": "कार्य जारी है…" },
+  "advToolWaitingReload": { "message": "पेज फिर से लोड हो रहा है और परिणाम जुटाए जा रहे हैं। इसमें कुछ सेकंड लगते हैं…" },
+  "advToolNoResult": { "message": "कोई परिणाम नहीं: सुरक्षा ने कोई डेटा नहीं भेजा। पेज फिर से लोड करें और दोबारा कोशिश करें।" },
+  "advSiteKeyTitleFmt": { "message": "{0} साइट की" },
+  "advSiteKeyNotFound": { "message": "इस पेज पर कोई साइट की नहीं मिली। CAPTCHA खोलें या चालू करें, फिर दोबारा कोशिश करें।" },
+  "advSiteKeyFoundIn": { "message": "यहाँ मिली" },
+  "advSiteKeySourceWidget": { "message": "विजेट" },
+  "advSiteKeySourceRequest": { "message": "अनुरोध" },
+  "advSiteKeySourceScript": { "message": "पेज स्क्रिप्ट" },
+  "advSiteKeySourceGlobal": { "message": "पेज वेरिएबल" },
+  "advSiteKeyFrame": { "message": "फ़्रेम" },
+  "advSiteKeyScriptsOnPage": { "message": "इस पेज पर स्क्रिप्ट" },
+  "advancedInfoCaptchaKeyDesc": { "message": "साइट की निकालता है और उसकी स्क्रिप्ट का विश्लेषण करता है" },
+  "advancedInfoCaptchaScriptsDesc": { "message": "उसकी स्क्रिप्ट का विश्लेषण करता है" },
   "advToolActionFailedFmt": { "message": "यह कार्रवाई पूरी नहीं हो सकी: {0}", "description": "Advanced tool action failure. {0} = error details" },
   "statsChartPrevious": { "message": "चार्ट का पिछला पेज" },
   "statsChartNext": { "message": "चार्ट का अगला पेज" },
@@ -1468,6 +1481,7 @@
   "btnExtractSiteKey": {
     "message": "SiteKey निकालें"
   },
+  "btnExtractPublicKey": { "message": "पब्लिक की निकालें" },
   "btnObtainSelector": {
     "message": "सेलेक्टर प्राप्त करें"
   },
@@ -1661,11 +1675,11 @@
     "message": "और कार्रवाइयाँ"
   },
   "advancedToolsEmptyTitle": {
-    "message": "कोई टूल उपलब्ध नहीं"
+    "message": "कोई सुरक्षा नहीं मिली"
   },
-  "advancedToolsEmptyDesc": {
-    "message": "इस पेज पर कोई समर्थित सुरक्षा नहीं मिली। किसी सुरक्षा के पहचाने जाते ही टूल यहाँ अपने-आप दिखेंगे।"
-  },
+  "advancedToolsEmptyDescFmt": { "message": "इस पेज पर {0}% से अधिक विश्वसनीयता वाली कोई समर्थित सुरक्षा नहीं है। आप यह न्यूनतम मान सेटिंग्स → जांच में बदल सकते हैं।", "description": "{0} = minimum confidence for Advanced tools (percent)" },
+  "advancedToolsLowConfidenceTitle": { "message": "कम विश्वसनीयता के साथ सुरक्षा मिली" },
+  "advancedToolsLowConfidenceDescFmt": { "message": "{0} {1}% विश्वसनीयता के साथ मिला। टूल केवल {2}% से अधिक होने पर दिखते हैं। आप यह न्यूनतम मान सेटिंग्स → जांच में कम कर सकते हैं।", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
   "advancedToolsSupportedLabel": {
     "message": "समर्थित सुरक्षा प्रणालियाँ"
   },
@@ -2440,6 +2454,9 @@
   "advCommonUrlCopied": {
     "message": "URL कॉपी हो गया"
   },
+  "advScriptTypeCollector": { "message": "कलेक्टर" },
+  "advScriptTypeCaptchaCheck": { "message": "CAPTCHA जाँच" },
+  "advScriptTypeInterstitial": { "message": "इंटरस्टिशियल" },
   "advCommonCaptured": {
     "message": "कैप्चर किया गया"
   },
@@ -2473,9 +2490,6 @@
   "advCommonFailedStartExtractionFmt": {
     "message": "निष्कर्षण शुरू नहीं हो सका: {0}"
   },
-  "advCommonFailedOpenExportFmt": {
-    "message": "निर्यात विंडो नहीं खुल सकी: {0}"
-  },
   "advCommonNoScriptsToExport": {
     "message": "निर्यात करने के लिए कोई स्क्रिप्ट नहीं है"
   },
@@ -2505,9 +2519,6 @@
   },
   "advCommonFoundScriptsFmt": {
     "message": "{0} संबंधित स्क्रिप्ट मिलीं"
-  },
-  "advCommonScriptAnalysis": {
-    "message": "स्क्रिप्ट विश्लेषण"
   },
   "advCommonTotalScripts": {
     "message": "कुल स्क्रिप्ट:"
@@ -2550,9 +2561,6 @@
   },
   "advCodeDescBrowserParseFmt": {
     "message": "{0} स्क्रिप्ट को इंटरसेप्ट और पार्स करने वाला ब्राउज़र कंसोल कोड"
-  },
-  "advCodeDescBrowserFetchFmt": {
-    "message": "{0} स्क्रिप्ट लाने वाला ब्राउज़र कंसोल कोड"
   },
   "advCodeDescPythonBs": {
     "message": "requests और BeautifulSoup वाली Python स्क्रिप्ट"
@@ -2770,9 +2778,6 @@
   "advImpervaSensorUrl": {
     "message": "सेंसर URL:"
   },
-  "advImpervaScriptsHeading": {
-    "message": "Imperva स्क्रिप्ट"
-  },
   "advImpervaScriptTypeFmt": {
     "message": "{0} स्क्रिप्ट"
   },
@@ -2827,18 +2832,6 @@
   "advRecaptchaExecuteFailedFmt": {
     "message": "grecaptcha.execute() विफल: {0}"
   },
-  "advRecaptchaNoSiteKey": {
-    "message": "कोई साइट कुंजी नहीं मिली"
-  },
-  "advRecaptchaExtractedSiteKey": {
-    "message": "निकाली गई साइट कुंजी"
-  },
-  "advRecaptchaSiteKeyCopied": {
-    "message": "साइट कुंजी क्लिपबोर्ड पर कॉपी हो गई!"
-  },
-  "advRecaptchaSiteKeyCopiedShort": {
-    "message": "साइट कुंजी कॉपी हो गई"
-  },
   "advRecaptchaCallbacksTitle": {
     "message": "reCAPTCHA कॉलबैक"
   },
@@ -2875,20 +2868,8 @@
   "advRecaptchaAction": {
     "message": "एक्शन"
   },
-  "advRecaptchaVersionCopied": {
-    "message": "संस्करण कॉपी हो गया"
-  },
-  "advRecaptchaActionCopied": {
-    "message": "एक्शन कॉपी हो गया"
-  },
-  "advRecaptchaApiDomainCopied": {
-    "message": "API डोमेन कॉपी हो गया"
-  },
   "advRecaptchaRequiredCookie": {
     "message": "आवश्यक कुकी"
-  },
-  "advRecaptchaCookieCopied": {
-    "message": "कुकी कॉपी हो गई"
   },
   "advRecaptchaFeaturesDetected": {
     "message": "पहचानी गई सुविधाएँ"
@@ -2898,9 +2879,6 @@
   },
   "advRecaptchaHasSession": {
     "message": "सेशन मौजूद"
-  },
-  "advRecaptchaCapturedLabel": {
-    "message": "कैप्चर किया गया:"
   },
   "advRecaptchaFailedClickFmt": {
     "message": "क्लिक नहीं हो सका: {0}"
@@ -2962,9 +2940,6 @@
   "advShapeSeedScriptsLabel": {
     "message": "seed वाली स्क्रिप्ट:"
   },
-  "advShapeScriptsHeading": {
-    "message": "Shape Security स्क्रिप्ट"
-  },
   "advShapeInitJsScript": {
     "message": "Init.js स्क्रिप्ट"
   },
@@ -2976,9 +2951,6 @@
   },
   "advShapeSeedScripts": {
     "message": "seed वाली स्क्रिप्ट"
-  },
-  "advShapeNoActiveTab": {
-    "message": "कोई सक्रिय टैब नहीं मिला"
   },
   "advShapeErrorFmt": {
     "message": "त्रुटि: {0}"
@@ -3040,9 +3012,6 @@
   "advHcaptchaNotAvailable": {
     "message": "उपलब्ध नहीं"
   },
-  "advHcaptchaScriptNumberFmt": {
-    "message": "स्क्रिप्ट {0}"
-  },
   "advHcaptchaCheckingVersionReload": {
     "message": "hCaptcha संस्करण जाँचा जा रहा है… पेज फिर से लोड होगा"
   },
@@ -3058,56 +3027,8 @@
   "advHcaptchaNoticeCaptured": {
     "message": "hCaptcha डेटा सफलतापूर्वक कैप्चर हुआ"
   },
-  "advAwswafNoScripts": {
-    "message": "कोई AWS WAF स्क्रिप्ट नहीं मिली"
-  },
-  "advAwswafDeleteCookieHint": {
-    "message": "चैलेंज ट्रिगर करने के लिए aws-waf-token कुकी हटाएँ और पेज फिर से लोड करें"
-  },
   "advAwswafTypeChallenge": {
     "message": "चैलेंज"
-  },
-  "advAwswafClickToCopyUrl": {
-    "message": "URL कॉपी करने के लिए क्लिक करें"
-  },
-  "advAwswafFetchCodeTitle": {
-    "message": "AWS WAF स्क्रिप्ट प्राप्त करने का कोड"
-  },
-  "advAwswafScriptsLabel": {
-    "message": "AWS WAF स्क्रिप्ट"
-  },
-  "advAwswafChallengeScript": {
-    "message": "चैलेंज स्क्रिप्ट"
-  },
-  "advAwswafApiScript": {
-    "message": "API स्क्रिप्ट (jsapi.js)"
-  },
-  "advAwswafProblemEndpoint": {
-    "message": "प्रॉब्लम एंडपॉइंट"
-  },
-  "advAwswafApiKey": {
-    "message": "API कुंजी"
-  },
-  "advAwswafApiKeyCopied": {
-    "message": "API कुंजी कॉपी हो गई"
-  },
-  "advAwswafToken": {
-    "message": "AWS WAF टोकन"
-  },
-  "advAwswafTokenCopied": {
-    "message": "टोकन कॉपी हो गया"
-  },
-  "advAwswafDetectionIndicators": {
-    "message": "पहचान संकेतक"
-  },
-  "advAwswafStatus405": {
-    "message": "स्टेटस 405"
-  },
-  "advAwswafDetected": {
-    "message": "पहचाना गया"
-  },
-  "advAwswafChallengeEndpoint": {
-    "message": "चैलेंज एंडपॉइंट"
   },
   "advAwswafDeletingCookieFmt": {
     "message": "{0} कुकी हटाई जा रही है… पेज फिर से लोड होगा"
@@ -3118,12 +3039,6 @@
   "advCloudflareSiteKeyCopied": {
     "message": "Site Key कॉपी हो गई"
   },
-  "advCloudflareSitekeyLabel": {
-    "message": "Sitekey:"
-  },
-  "advCloudflareUrlLabel": {
-    "message": "URL:"
-  },
   "advCloudflareTypeChallenge": {
     "message": "चैलेंज"
   },
@@ -3132,9 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "बॉट प्रबंधन"
-  },
-  "advCloudflareCheckingVersion": {
-    "message": "Cloudflare संस्करण जाँचा जा रहा है… पेज फिर से लोड होगा"
   },
   "advCloudflareNoSitekey": {
     "message": "पेज पर कोई sitekey नहीं मिली"
@@ -3153,12 +3065,6 @@
   },
   "advFuncaptchaBlobData": {
     "message": "Blob डेटा"
-  },
-  "advFuncaptchaBlobDataNotCaptured": {
-    "message": "Blob डेटा (कैप्चर नहीं हुआ)"
-  },
-  "advFuncaptchaStatus": {
-    "message": "स्थिति"
   },
   "advFuncaptchaNotCaptured": {
     "message": "कैप्चर नहीं हुआ"
@@ -3193,14 +3099,8 @@
   "advGeetestSourceJsonConfig": {
     "message": "JSON कॉन्फ़िग"
   },
-  "advGeetestSourceLabel": {
-    "message": "स्रोत:"
-  },
   "advGeetestExtractedCaptchaId": {
     "message": "निकाला गया captchaId"
-  },
-  "advGeetestClickToCopyCaptchaId": {
-    "message": "captchaId कॉपी करने के लिए क्लिक करें"
   },
   "advGeetestProductLabel": {
     "message": "प्रोडक्ट:"
@@ -4162,9 +4062,6 @@
   "advTurnstileSiteKeysTitle": {
     "message": "Turnstile साइट कुंजियाँ"
   },
-  "advTurnstileReloadingScripts": {
-    "message": "Turnstile स्क्रिप्ट एकत्र करने के लिए पेज फिर से लोड हो रहा है"
-  },
   "settingsGroupAdvancedTools": {
     "message": "उन्नत टूल"
   },
@@ -4945,5 +4842,23 @@
   },
   "combinationTranslateNeedsName": {
     "message": "पहले नाम लिखें।"
+  },
+  "advancedInfoCloudflareDesc": {
+    "message": "चैलेंज कुकीज़ जांचता है, Turnstile साइट कुंजियाँ ढूँढता है और उसकी स्क्रिप्ट का विश्लेषण करता है"
+  },
+  "advancedInfoDataDomeDesc": {
+    "message": "DataDome कुकीज़ जांचता है और उसकी स्क्रिप्ट का विश्लेषण करता है"
+  },
+  "advancedInfoFunCaptchaDesc": {
+    "message": "पब्लिक की ढूँढता है, ब्राउज़र डेटा (BDA) कैप्चर करता है और उसकी स्क्रिप्ट का विश्लेषण करता है"
+  },
+  "advancedInfoGeetestDesc": {
+    "message": "GeeTest संस्करण (v3 या v4) पहचानता है और उसकी स्क्रिप्ट का विश्लेषण करता है"
+  },
+  "advancedInfoHcaptchaDesc": {
+    "message": "साइट की ढूँढता है, hCaptcha संस्करण पहचानता है और उसकी स्क्रिप्ट का विश्लेषण करता है"
+  },
+  "advancedInfoTurnstileDesc": {
+    "message": "साइट कुंजी निकालता है और Turnstile स्क्रिप्ट का विश्लेषण करता है"
   }
 }

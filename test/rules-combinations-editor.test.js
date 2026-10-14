@@ -250,7 +250,8 @@ test('rows show the stored description first, but not after the pattern text was
   assert.ok(!html.includes('Old description'), 'an edited pattern shows its new text, not the old description');
   assert.match(html, /data-pattern="b"[^>]*><\/span><\/p><span class="combo-leaf-text" dir="ltr" title="\/b-edited">\/b-edited<\/span>/,
     'no description: an empty editable line (placeholder) above the pattern text');
-  assert.match(html, /class="combo-item-tag">Combinations only</);
+  assert.match(html, /class="combo-item-tag is-on" data-combo-action="strict" data-pattern="a" aria-pressed="true"/);
+  assert.match(html, /class="combo-item-tag" data-combo-action="strict" data-pattern="b" aria-pressed="false"/);
   assert.ok(!html.includes('<script>'));
 });
 
@@ -304,4 +305,50 @@ test('a description typed on a combination row is saved on the pattern and mirro
   assert.equal(typed.textContent, '  Hidden   metadata1 field ', 'the row being typed in is left alone');
   const html = rules.renderComboItem({ pattern: 'a' }, 0, new Map([['a', { id: 'a', method: 'url', label: '/a', description: 'Typed' }]]));
   assert.match(html, /contenteditable="plaintext-only"[^>]*data-combo-field="description"[^>]*>Typed</);
+});
+
+test('"only count together" can be ticked on a new, empty combination and applies to the patterns added', () => {
+  const detector = base({ all: [{ pattern: 'a' }] });
+  detector.detection.url.forEach(p => { p.standalone = true; });
+  const { rules, options, container, act } = editor(detector);
+  rules.combinationsModel = [{ id: 'c2', name: '', confidence: null, when: { all: [] } }];
+  rules.setComboOpen(rules.combinationsModel[0], true);
+  rules.renderCombinations();
+  assert.doesNotMatch(container.innerHTML, /data-combo-action="require"[^>]*disabled/, 'the tick is available before any pattern');
+  act('require', { checked: true });
+  assert.equal(options.every(p => !p.strict), true, 'nothing changes while the combination is empty');
+  assert.match(container.innerHTML, /data-combo-action="require" checked/);
+  rules.addComboItems(rules.combinationsModel[0], ['pattern:b', 'pattern:c']);
+  assert.deepEqual(options.map(p => [p.id, p.strict]), [['a', false], ['b', true], ['c', true]]);
+  assert.equal(rules.combinationsModel[0].pendingStrict, undefined);
+  rules.addComboItems(rules.combinationsModel[0], ['pattern:a']);
+  assert.equal(options.find(p => p.id === 'a').strict, false, 'later additions keep their own flag');
+  assert.equal('pendingStrict' in plain(rules.buildCombinationsForSave(null, { validate: false }).combinations[0]), false);
+  // Unticked before adding anything: the patterns keep counting on their own
+  const combo = rules.combinationsModel[0];
+  combo.when = { all: [] };
+  combo.pendingStrict = true;
+  act('require', { checked: false });
+  assert.equal(combo.pendingStrict, undefined);
+});
+
+test('each pattern row turns its own "Combinations only" on and off', () => {
+  const detector = base({ all: [{ pattern: 'a' }, { pattern: 'b' }, { method: 'url' }] });
+  detector.detection.url.forEach(p => { p.standalone = true; });
+  const { rules, options, container } = editor(detector);
+  rules.setComboOpen(rules.combinationsModel[0], true);
+  rules.renderCombinations();
+  assert.equal((container.innerHTML.match(/data-combo-action="strict"/g) || []).length, 2, 'patterns get the button, an "any pattern" row does not');
+  const press = id => {
+    const button = { dataset: { comboAction: 'strict', pattern: id } };
+    const target = { dataset: {}, closest: s => s === '.combo-card' ? { dataset: { combo: '0' } } : s === '.combo-group' ? { dataset: { path: '' } }
+      : s === '.combo-item' ? { dataset: { idx: '0' } } : s === '[data-combo-action]' ? button : null };
+    button.closest = target.closest;
+    rules.handleCombinationAction({ target }, 'click');
+  };
+  press('a');
+  assert.deepEqual(options.map(p => [p.id, p.strict]), [['a', true], ['b', false], ['c', false]]);
+  assert.match(container.innerHTML, /data-pattern="a" aria-pressed="true"/);
+  press('a');
+  assert.equal(options.every(p => !p.strict), true);
 });

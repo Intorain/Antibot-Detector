@@ -103,7 +103,11 @@ function buildAdvancedCaptureRegistryMap(handlers, messageTypes) {
                 messageTypes.FUNCAPTCHA_GET_CAPTURE_STATE,
                 messageTypes.FUNCAPTCHA_CAPTURE_COMPLETED
             ]
-        }
+        },
+        // CAPTCHA vendors described as data: one Analyze Scripts message each
+        ...((typeof AdvancedCaptchaVendors !== 'undefined' && AdvancedCaptchaVendors.list) || [])
+            .filter(vendor => Array.isArray(vendor.scripts) && messageTypes[`${vendor.vendorId.toUpperCase()}_START_ANALYSIS`])
+            .map(vendor => ({ handler: handlers.captcha, messageKeys: [messageTypes[`${vendor.vendorId.toUpperCase()}_START_ANALYSIS`]] }))
     ];
 }
 
@@ -140,7 +144,7 @@ function registerAdvancedCaptureHandlers(registry, context) {
 
     const handleAwsWaf = function({ request, sender, sendResponse }) {
         if (typeof handleAwsWafMessage === 'function') {
-            return handleAwsWafMessage(request, sender, sendResponse, awsWafCaptureState);
+            return handleAwsWafMessage(request, sender, sendResponse);
         }
         return false;
     };
@@ -176,6 +180,13 @@ function registerAdvancedCaptureHandlers(registry, context) {
     const handleHCaptcha = function({ request, sender, sendResponse }) {
         if (typeof handleHCaptchaMessage === 'function') {
             return handleHCaptchaMessage(request, sender, sendResponse, hcaptchaCaptureState);
+        }
+        return false;
+    };
+
+    const handleCaptcha = function({ request, sendResponse }) {
+        if (typeof AdvancedCaptchaAnalysis !== 'undefined') {
+            return AdvancedCaptchaAnalysis.handle(request, sendResponse);
         }
         return false;
     };
@@ -231,7 +242,8 @@ function registerAdvancedCaptureHandlers(registry, context) {
         cloudflare: handleCloudflare,
         turnstile: handleTurnstile,
         hcaptcha: handleHCaptcha,
-        funcaptcha: handleFunCaptcha
+        funcaptcha: handleFunCaptcha,
+        captcha: handleCaptcha
     }, messageTypes);
 
     const captureStores = {

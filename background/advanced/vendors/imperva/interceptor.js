@@ -4,6 +4,8 @@
 // Guard against re-initialization (use var for service worker reload compatibility)
 var impervaInterceptionListener = impervaInterceptionListener || null;
 var impervaCaptureStateRef = impervaCaptureStateRef || null;
+// Analyze Scripts: how long after the reloaded page loads to wait for late challenge requests
+var IMPERVA_EXTRACT_SETTLE_MS = 8000;
 
 // Destructure helpers from BaseInterceptorHelpers (use var to avoid redeclaration errors)
 var checkCookies = self.BaseInterceptorHelpers?.checkCookies;
@@ -151,6 +153,22 @@ function impervaStartExtraction(tabId, url) {
         }
     });
 
+    // No challenge POST on the page: finish a few seconds after the reloaded page loads,
+    // like the other Analyze Scripts tools, instead of waiting for the 60 s stop
+    const onLoaded = (details) => {
+        if (details.tabId !== tabId || details.frameId !== 0) return;
+        chrome.webNavigation.onCompleted.removeListener(onLoaded);
+        setTimeout(() => {
+            const current = impervaCaptureStateRef.get(tabId);
+            if (current && current.extractMode) {
+                handleImpervaExtractionCompleted(tabId, current).finally(() => impervaRemoveListenerIfIdle());
+            }
+        }, IMPERVA_EXTRACT_SETTLE_MS);
+    };
+    chrome.webNavigation.onCompleted.addListener(onLoaded);
+    const extractionState = impervaCaptureStateRef.get(tabId);
+    if (extractionState) extractionState.removeLoadListener = () => chrome.webNavigation.onCompleted.removeListener(onLoaded);
+
     // Auto-stop after 60 seconds
     const state = (typeof getCaptureState === 'function')
         ? getCaptureState(impervaCaptureStateRef, tabId)
@@ -170,6 +188,25 @@ function impervaStartExtraction(tabId, url) {
     return { status: 'started' };
 }
 
+/** Remove the request interceptor when no capture or extraction is running. */
+function impervaRemoveListenerIfIdle() {
+    if (typeof removeListenerIfIdle === 'function') {
+        const removed = removeListenerIfIdle({
+            captureStateRef: impervaCaptureStateRef,
+            listenerRef: impervaInterceptionListener,
+            removeFn: chrome.webRequest.onBeforeRequest.removeListener.bind(chrome.webRequest.onBeforeRequest)
+        });
+        if (removed) {
+            impervaInterceptionListener = null;
+            Logger.network('[IMPERVA-CAPTURE] Removed request interceptor (no active captures)');
+        }
+    } else if (impervaCaptureStateRef.size === 0 && impervaInterceptionListener) {
+        chrome.webRequest.onBeforeRequest.removeListener(impervaInterceptionListener);
+        impervaInterceptionListener = null;
+        Logger.network('[IMPERVA-CAPTURE] Removed request interceptor (no active captures)');
+    }
+}
+
 /**
  * Stop capturing for a specific tab
  * @param {number} tabId - Tab ID to stop capture for
@@ -182,6 +219,11 @@ function impervaStopCapture(tabId) {
     const state = (typeof getCaptureState === 'function')
         ? getCaptureState(impervaCaptureStateRef, tabId)
         : impervaCaptureStateRef.get(tabId);
+    // Analyze Scripts (extraction mode) timed out: report what it saw, even if nothing
+    if (state && state.extractMode) {
+        handleImpervaExtractionCompleted(tabId, state).finally(() => impervaRemoveListenerIfIdle());
+        return { status: 'stopped', results: state };
+    }
     if (state) {
         Logger.network('[IMPERVA-CAPTURE] Capture Results:');
         Logger.network('[IMPERVA-CAPTURE]   reese84 found:', state.foundCookies.reese84);
@@ -223,22 +265,7 @@ function impervaStopCapture(tabId) {
         Logger.network('[IMPERVA-CAPTURE] No capture state found for tab');
     }
 
-    // If no more active captures, remove listener
-    if (typeof removeListenerIfIdle === 'function') {
-        const removed = removeListenerIfIdle({
-            captureStateRef: impervaCaptureStateRef,
-            listenerRef: impervaInterceptionListener,
-            removeFn: chrome.webRequest.onBeforeRequest.removeListener.bind(chrome.webRequest.onBeforeRequest)
-        });
-        if (removed) {
-            impervaInterceptionListener = null;
-            Logger.network('[IMPERVA-CAPTURE] Removed request interceptor (no active captures)');
-        }
-    } else if (impervaCaptureStateRef.size === 0 && impervaInterceptionListener) {
-        chrome.webRequest.onBeforeRequest.removeListener(impervaInterceptionListener);
-        impervaInterceptionListener = null;
-        Logger.network('[IMPERVA-CAPTURE] Removed request interceptor (no active captures)');
-    }
+    impervaRemoveListenerIfIdle();
 
     Logger.network('[IMPERVA-CAPTURE] ========================================');
 
@@ -379,7 +406,7 @@ async function checkImpervaCookies(tabId, url) {
         }
 
         // Check for utmvc
-        const hasUtmvc = cookies.some(c => c.name === 'utmvc');
+        const hasUtmvc = cookies.some(c => /^_*utmvc$/.test(c.name));
         if (hasUtmvc) {
             Logger.network('[IMPERVA-CAPTURE] Found utmvc cookie');
             state.foundCookies.utmvc = true;
@@ -474,7 +501,7 @@ async function handleImpervaCaptureCompleted(tabId, interceptorData) {
         Logger.network('[IMPERVA-CAPTURE] Total Imperva cookies found:', cookies.length);
 
         const hasReese84 = cookies.some(c => c.name === 'reese84');
-        const hasUtmvc = cookies.some(c => c.name === 'utmvc');
+        const hasUtmvc = cookies.some(c => /^_*utmvc$/.test(c.name));
         const incapSesCookies = cookies.filter(c => /^incap_ses_\d+_\d+$/.test(c.name));
         const nlbiCookies = cookies.filter(c => /^nlbi_\d+/.test(c.name));
         const visidCookies = cookies.filter(c => /^visid_incap_\d+/.test(c.name));
@@ -594,6 +621,7 @@ async function handleImpervaCaptureCompleted(tabId, interceptorData) {
  * @param {object} extractionState - Extraction state with captured data
  */
 async function handleImpervaExtractionCompleted(tabId, extractionState) {
+    if (extractionState && typeof extractionState.removeLoadListener === 'function') extractionState.removeLoadListener();
     Logger.network('[IMPERVA-EXTRACT] ========== EXTRACTION COMPLETED ==========');
     Logger.network('[IMPERVA-EXTRACT] Tab ID:', tabId);
 
@@ -617,7 +645,7 @@ async function handleImpervaExtractionCompleted(tabId, extractionState) {
         // Organize cookies by type
         const cookieData = {
             reese84: cookies.find(c => c.name === 'reese84'),
-            utmvc: cookies.find(c => c.name === 'utmvc'),
+            utmvc: cookies.find(c => /^_*utmvc$/.test(c.name)),
             incap_ses: cookies.filter(c => /^incap_ses_/.test(c.name)),
             nlbi: cookies.filter(c => /^nlbi_/.test(c.name)),
             visid: cookies.filter(c => /^visid_incap_/.test(c.name))
@@ -644,6 +672,7 @@ async function handleImpervaExtractionCompleted(tabId, extractionState) {
         // Send extraction results to popup
         chrome.runtime.sendMessage({
             type: 'IMPERVA_EXTRACTION_COMPLETED',
+            tabId,
             extractedData: extractedData
         }).catch(err => {
             Logger.network('[IMPERVA-EXTRACT] Popup not open (this is normal):', err.message);

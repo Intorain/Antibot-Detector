@@ -24,6 +24,19 @@
   "advToolCaptureHint": { "message": "このページのデータを記録する" },
   "advToolStopCaptureHint": { "message": "このページのデータ記録を停止する" },
   "advToolWorking": { "message": "処理中…" },
+  "advToolWaitingReload": { "message": "ページを再読み込みして結果を収集しています。数秒かかります…" },
+  "advToolNoResult": { "message": "結果がありません：保護機能からデータが送信されませんでした。ページを再読み込みして、もう一度お試しください。" },
+  "advSiteKeyTitleFmt": { "message": "{0} のサイトキー" },
+  "advSiteKeyNotFound": { "message": "このページにサイトキーが見つかりません。CAPTCHA を開くか表示させてから、もう一度お試しください。" },
+  "advSiteKeyFoundIn": { "message": "検出元" },
+  "advSiteKeySourceWidget": { "message": "ウィジェット" },
+  "advSiteKeySourceRequest": { "message": "リクエスト" },
+  "advSiteKeySourceScript": { "message": "ページのスクリプト" },
+  "advSiteKeySourceGlobal": { "message": "ページの変数" },
+  "advSiteKeyFrame": { "message": "フレーム" },
+  "advSiteKeyScriptsOnPage": { "message": "このページのスクリプト" },
+  "advancedInfoCaptchaKeyDesc": { "message": "サイトキーを抽出し、スクリプトを分析します" },
+  "advancedInfoCaptchaScriptsDesc": { "message": "スクリプトを分析します" },
   "advToolActionFailedFmt": { "message": "この操作を完了できませんでした: {0}", "description": "Advanced tool action failure. {0} = error details" },
   "statsChartPrevious": { "message": "グラフの前のページ" },
   "statsChartNext": { "message": "グラフの次のページ" },
@@ -1468,6 +1481,7 @@
   "btnExtractSiteKey": {
     "message": "SiteKeyを抽出"
   },
+  "btnExtractPublicKey": { "message": "公開鍵を抽出" },
   "btnObtainSelector": {
     "message": "セレクタを取得"
   },
@@ -1661,11 +1675,11 @@
     "message": "その他の操作"
   },
   "advancedToolsEmptyTitle": {
-    "message": "利用できるツールはありません"
+    "message": "保護は検出されませんでした"
   },
-  "advancedToolsEmptyDesc": {
-    "message": "このページではサポート対象の保護が見つかりませんでした。検出されると、ここにツールが自動的に表示されます。"
-  },
+  "advancedToolsEmptyDescFmt": { "message": "このページには信頼度 {0}% を超える対応の保護がありません。この最小値は 設定 → 検出 で変更できます。", "description": "{0} = minimum confidence for Advanced tools (percent)" },
+  "advancedToolsLowConfidenceTitle": { "message": "低い信頼度で保護を検出" },
+  "advancedToolsLowConfidenceDescFmt": { "message": "{0} が信頼度 {1}% で検出されました。ツールは {2}% を超える場合にのみ表示されます。この最小値は 設定 → 検出 で下げられます。", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
   "advancedToolsSupportedLabel": {
     "message": "サポート対象の保護"
   },
@@ -2440,6 +2454,9 @@
   "advCommonUrlCopied": {
     "message": "URLをコピーしました"
   },
+  "advScriptTypeCollector": { "message": "コレクター" },
+  "advScriptTypeCaptchaCheck": { "message": "CAPTCHA チェック" },
+  "advScriptTypeInterstitial": { "message": "インタースティシャル" },
   "advCommonCaptured": {
     "message": "キャプチャ日時"
   },
@@ -2473,9 +2490,6 @@
   "advCommonFailedStartExtractionFmt": {
     "message": "抽出を開始できませんでした: {0}"
   },
-  "advCommonFailedOpenExportFmt": {
-    "message": "エクスポート画面を開けませんでした: {0}"
-  },
   "advCommonNoScriptsToExport": {
     "message": "エクスポートできるスクリプトがありません"
   },
@@ -2505,9 +2519,6 @@
   },
   "advCommonFoundScriptsFmt": {
     "message": "関連するスクリプトが {0} 件見つかりました"
-  },
-  "advCommonScriptAnalysis": {
-    "message": "スクリプト分析"
   },
   "advCommonTotalScripts": {
     "message": "スクリプト合計:"
@@ -2550,9 +2561,6 @@
   },
   "advCodeDescBrowserParseFmt": {
     "message": "{0} のスクリプトを傍受して解析するブラウザコンソール用コード"
-  },
-  "advCodeDescBrowserFetchFmt": {
-    "message": "{0} のスクリプトを取得するブラウザコンソール用コード"
   },
   "advCodeDescPythonBs": {
     "message": "requests と BeautifulSoup を使う Python スクリプト"
@@ -2770,9 +2778,6 @@
   "advImpervaSensorUrl": {
     "message": "センサー URL:"
   },
-  "advImpervaScriptsHeading": {
-    "message": "Imperva スクリプト"
-  },
   "advImpervaScriptTypeFmt": {
     "message": "{0} スクリプト"
   },
@@ -2827,18 +2832,6 @@
   "advRecaptchaExecuteFailedFmt": {
     "message": "grecaptcha.execute() が失敗しました: {0}"
   },
-  "advRecaptchaNoSiteKey": {
-    "message": "サイトキーが見つかりません"
-  },
-  "advRecaptchaExtractedSiteKey": {
-    "message": "抽出したサイトキー"
-  },
-  "advRecaptchaSiteKeyCopied": {
-    "message": "サイトキーをクリップボードにコピーしました!"
-  },
-  "advRecaptchaSiteKeyCopiedShort": {
-    "message": "サイトキーをコピーしました"
-  },
   "advRecaptchaCallbacksTitle": {
     "message": "reCAPTCHA のコールバック"
   },
@@ -2875,20 +2868,8 @@
   "advRecaptchaAction": {
     "message": "アクション"
   },
-  "advRecaptchaVersionCopied": {
-    "message": "バージョンをコピーしました"
-  },
-  "advRecaptchaActionCopied": {
-    "message": "アクションをコピーしました"
-  },
-  "advRecaptchaApiDomainCopied": {
-    "message": "API ドメインをコピーしました"
-  },
   "advRecaptchaRequiredCookie": {
     "message": "必須のCookie"
-  },
-  "advRecaptchaCookieCopied": {
-    "message": "Cookieをコピーしました"
   },
   "advRecaptchaFeaturesDetected": {
     "message": "検出された機能"
@@ -2898,9 +2879,6 @@
   },
   "advRecaptchaHasSession": {
     "message": "セッションあり"
-  },
-  "advRecaptchaCapturedLabel": {
-    "message": "キャプチャ日時:"
   },
   "advRecaptchaFailedClickFmt": {
     "message": "クリックに失敗しました: {0}"
@@ -2962,9 +2940,6 @@
   "advShapeSeedScriptsLabel": {
     "message": "seed 付きスクリプト:"
   },
-  "advShapeScriptsHeading": {
-    "message": "Shape Security のスクリプト"
-  },
   "advShapeInitJsScript": {
     "message": "Init.js スクリプト"
   },
@@ -2976,9 +2951,6 @@
   },
   "advShapeSeedScripts": {
     "message": "seed 付きスクリプト"
-  },
-  "advShapeNoActiveTab": {
-    "message": "アクティブなタブが見つかりません"
   },
   "advShapeErrorFmt": {
     "message": "エラー: {0}"
@@ -3040,9 +3012,6 @@
   "advHcaptchaNotAvailable": {
     "message": "なし"
   },
-  "advHcaptchaScriptNumberFmt": {
-    "message": "スクリプト {0}"
-  },
   "advHcaptchaCheckingVersionReload": {
     "message": "hCaptcha のバージョンを確認中…ページが再読み込みされます"
   },
@@ -3058,56 +3027,8 @@
   "advHcaptchaNoticeCaptured": {
     "message": "hCaptcha のデータをキャプチャしました"
   },
-  "advAwswafNoScripts": {
-    "message": "AWS WAF のスクリプトが見つかりません"
-  },
-  "advAwswafDeleteCookieHint": {
-    "message": "Cookie aws-waf-token を削除して再読み込みすると、チャレンジが発生します"
-  },
   "advAwswafTypeChallenge": {
     "message": "チャレンジ"
-  },
-  "advAwswafClickToCopyUrl": {
-    "message": "クリックしてURLをコピー"
-  },
-  "advAwswafFetchCodeTitle": {
-    "message": "AWS WAF スクリプト取得コード"
-  },
-  "advAwswafScriptsLabel": {
-    "message": "AWS WAF のスクリプト"
-  },
-  "advAwswafChallengeScript": {
-    "message": "チャレンジスクリプト"
-  },
-  "advAwswafApiScript": {
-    "message": "APIスクリプト (jsapi.js)"
-  },
-  "advAwswafProblemEndpoint": {
-    "message": "問題エンドポイント"
-  },
-  "advAwswafApiKey": {
-    "message": "APIキー"
-  },
-  "advAwswafApiKeyCopied": {
-    "message": "APIキーをコピーしました"
-  },
-  "advAwswafToken": {
-    "message": "AWS WAF トークン"
-  },
-  "advAwswafTokenCopied": {
-    "message": "トークンをコピーしました"
-  },
-  "advAwswafDetectionIndicators": {
-    "message": "検出の指標"
-  },
-  "advAwswafStatus405": {
-    "message": "ステータス 405"
-  },
-  "advAwswafDetected": {
-    "message": "検出"
-  },
-  "advAwswafChallengeEndpoint": {
-    "message": "チャレンジエンドポイント"
   },
   "advAwswafDeletingCookieFmt": {
     "message": "Cookie {0} を削除しています… ページを再読み込みします"
@@ -3118,12 +3039,6 @@
   "advCloudflareSiteKeyCopied": {
     "message": "Site Key をコピーしました"
   },
-  "advCloudflareSitekeyLabel": {
-    "message": "Sitekey:"
-  },
-  "advCloudflareUrlLabel": {
-    "message": "URL:"
-  },
   "advCloudflareTypeChallenge": {
     "message": "チャレンジ"
   },
@@ -3132,9 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "ボット管理"
-  },
-  "advCloudflareCheckingVersion": {
-    "message": "Cloudflare のバージョンを確認しています… ページを再読み込みします"
   },
   "advCloudflareNoSitekey": {
     "message": "ページに sitekey が見つかりません"
@@ -3153,12 +3065,6 @@
   },
   "advFuncaptchaBlobData": {
     "message": "Blob データ"
-  },
-  "advFuncaptchaBlobDataNotCaptured": {
-    "message": "Blob データ（未キャプチャ）"
-  },
-  "advFuncaptchaStatus": {
-    "message": "ステータス"
   },
   "advFuncaptchaNotCaptured": {
     "message": "未キャプチャ"
@@ -3193,14 +3099,8 @@
   "advGeetestSourceJsonConfig": {
     "message": "JSON 設定"
   },
-  "advGeetestSourceLabel": {
-    "message": "ソース:"
-  },
   "advGeetestExtractedCaptchaId": {
     "message": "抽出した captchaId"
-  },
-  "advGeetestClickToCopyCaptchaId": {
-    "message": "クリックして captchaId をコピー"
   },
   "advGeetestProductLabel": {
     "message": "プロダクト:"
@@ -4162,9 +4062,6 @@
   "advTurnstileSiteKeysTitle": {
     "message": "Turnstile サイトキー"
   },
-  "advTurnstileReloadingScripts": {
-    "message": "Turnstile のスクリプトを収集するためにページを再読み込みしています"
-  },
   "settingsGroupAdvancedTools": {
     "message": "高度なツール"
   },
@@ -4945,5 +4842,23 @@
   },
   "combinationTranslateNeedsName": {
     "message": "先に名前を入力してください。"
+  },
+  "advancedInfoCloudflareDesc": {
+    "message": "チャレンジの Cookie を確認し、Turnstile のサイトキーを見つけ、スクリプトを分析します"
+  },
+  "advancedInfoDataDomeDesc": {
+    "message": "DataDome の Cookie を確認し、スクリプトを解析します"
+  },
+  "advancedInfoFunCaptchaDesc": {
+    "message": "公開鍵を見つけ、ブラウザーデータ (BDA) を取得し、スクリプトを解析します"
+  },
+  "advancedInfoGeetestDesc": {
+    "message": "GeeTest のバージョン (v3 または v4) を検出し、スクリプトを解析します"
+  },
+  "advancedInfoHcaptchaDesc": {
+    "message": "サイトキーを見つけ、hCaptcha のバージョンを検出し、スクリプトを解析します"
+  },
+  "advancedInfoTurnstileDesc": {
+    "message": "サイトキーを抽出し、Turnstile のスクリプトを解析します"
   }
 }

@@ -58,182 +58,28 @@ CloudflareAdvanced.prototype.setupToolListeners = function() {
     };
 
 
-CloudflareAdvanced.prototype.renderCaptureHistoryItems = function(historyItems) {
-        const items = Array.isArray(historyItems) ? historyItems : [historyItems];
-        return items.map((item, index) => {
-            const data = item.captureData || item.data || {};
-            const timestamp = new Date(item.timestamp).toLocaleString();
-            const type = data.type || 'Unknown';
-
-            let typeColor = '#6366F1';
-            if (type === 'Turnstile') {
-                typeColor = '#0074BF';
-            } else if (type === 'Challenge') {
-                typeColor = '#F97316';
-            } else if (type === 'Turnstile + Challenge') {
-                typeColor = '#9333EA';
-            }
-
-            return `
-                <div class="history-item" data-id="capture-${index}" style="background: var(--bg-tertiary); padding: 12px; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="background: linear-gradient(135deg, ${typeColor} 0%, ${typeColor}dd 100%); color: white; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 500;">${this.cloudflareTypeLabel(type)}</span>
-                        </div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">${timestamp}</div>
-                    </div>
-                    ${data.sitekey ? `<div style="font-size: 12px; color: var(--text-secondary);">${this._txt('advCloudflareSitekeyLabel', 'Sitekey:')} ${data.sitekey.substring(0, 30)}${data.sitekey.length > 30 ? '...' : ''}</div>` : ''}
-                    ${data.siteURL ? `<div style="font-size: 12px; color: var(--text-secondary);">${this._txt('advCloudflareUrlLabel', 'URL:')} ${data.siteURL.substring(0, 50)}${data.siteURL.length > 50 ? '...' : ''}</div>` : ''}
-                </div>
-            `;
-        }).join('');
-    };
-
 
 CloudflareAdvanced.prototype.renderCaptureDetailsContent = function(capture) {
+        const K = BaseAdvancedModule;
         const data = capture.captureData || capture.data || {};
-        const timestamp = new Date(capture.timestamp).toLocaleString();
-        const url = AdvancedUtils.escapeHtml(capture.url || 'N/A');
-
         const type = data.type || 'Unknown';
-        const cdata = data.cdata || 'N/A';
-        const cAction = data.cAction || 'N/A';
-        const sitekey = data.sitekey || 'N/A';
-        const siteURL = data.siteURL || 'N/A';
-
-        return `
-            <div class="advanced-modal-section">
-                <label class="advanced-modal-label">${this._txt('advCommonUrl', 'URL')}</label>
-                <div class="advanced-modal-code-block" data-copy="${url}">${url}</div>
-            </div>
-
-            <div class="advanced-modal-section">
-                <label class="advanced-modal-label">${this._txt('advCloudflareTypeLabel', 'Type')}</label>
-                <div class="advanced-modal-code-block" data-copy="${type}">${this.cloudflareTypeLabel(type)}</div>
-            </div>
-
-            ${type.includes('Turnstile') ? `
-                <div class="advanced-modal-section">
-                    <label class="advanced-modal-label">${this._txt('advCommonSiteKey', 'Site Key')}</label>
-                    <div class="advanced-modal-code-block" data-copy="${sitekey}" style="word-break: break-all;">${FormatUtils.escapeHtml(sitekey)}</div>
-                </div>
-
-                <div class="advanced-modal-section">
-                    <label class="advanced-modal-label">cdata</label>
-                    <div class="advanced-modal-code-block" data-copy="${cdata}" style="word-break: break-all; font-size: 11px;">${cdata === 'N/A' ? cdata : cdata.substring(0, 100) + (cdata.length > 100 ? '...' : '')}</div>
-                </div>
-
-                <div class="advanced-modal-section">
-                    <label class="advanced-modal-label">cAction</label>
-                    <div class="advanced-modal-code-block" data-copy="${cAction}" style="word-break: break-all;">${cAction}</div>
-                </div>
-            ` : ''}
-
-            <div class="advanced-modal-section">
-                <label class="advanced-modal-label">${this._txt('advCommonSiteUrl', 'Site URL')}</label>
-                <div class="advanced-modal-code-block" data-copy="${siteURL}" style="word-break: break-all;">${FormatUtils.escapeHtml(siteURL)}</div>
-            </div>
-
-            <!-- Timestamp Section (at bottom) -->
-            <div class="advanced-modal-section" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="advanced-modal-info-row">
-                    <span class="advanced-modal-info-label">${this._txt('advCommonCaptured', 'Captured')}</span>
-                    <span class="advanced-modal-info-value">${timestamp}</span>
-                </div>
-            </div>
-        `;
+        const turnstile = type.includes('Turnstile');
+        const facts = K.kitFacts([
+            { label: this._txt('advCloudflareTypeLabel', 'Type'), value: this.cloudflareTypeLabel(type) },
+            { label: this._txt('advCommonCaptured', 'Captured'), value: K.kitDateTime(capture.timestamp) }
+        ]);
+        const fields = K.kitField(this._txt('advCommonUrl', 'URL'), capture.url, { mono: false, wrap: true })
+            + (turnstile ? K.kitField(this._txt('advCommonSiteKey', 'Site Key'), data.sitekey, { wrap: true })
+                + K.kitField('cdata', data.cdata, { clamp: true })
+                + K.kitField('cAction', data.cAction, { wrap: true }) : '')
+            + K.kitField(this._txt('advCommonSiteUrl', 'Site URL'), data.siteURL, { mono: false, wrap: true });
+        return facts + (fields ? K.kitCard(fields) : '');
     };
 
 
 CloudflareAdvanced.prototype.displayAnalysisModal = function(data) {
-        this.recordStructuredResult('displayAnalysisModal', data);
-        const modal = this.createToolModal();
-
-        const scripts = data?.scripts || [];
-
-        // Group scripts by type
-        const typeColors = {
-            'Turnstile': { gradient: 'linear-gradient(135deg, #0074BF 0%, #0061B3 100%)', bg: '#0074BF' },
-            'Challenge': { gradient: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)', bg: '#F97316' },
-            'CDN': { gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)', bg: '#6B7280' },
-            'Analytics': { gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', bg: '#10B981' },
-            'Bot Management': { gradient: 'linear-gradient(135deg, #9333EA 0%, #7E22CE 100%)', bg: '#9333EA' },
-            'Cloudflare': { gradient: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)', bg: '#F97316' }
-        };
-
-        const groupedScripts = {};
-        scripts.forEach(script => {
-            const type = script.type || 'Cloudflare';
-            if (!groupedScripts[type]) {
-                groupedScripts[type] = [];
-            }
-            groupedScripts[type].push(script);
-        });
-
-        // Generate HTML for grouped scripts
-        let scriptHTML = '';
-        Object.keys(groupedScripts).forEach(type => {
-            const typeScripts = groupedScripts[type];
-            const colors = typeColors[type] || typeColors['Cloudflare'];
-            scriptHTML += `
-                <div style="margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span style="font-weight: 600; color: var(--text-primary);">${this._txt('advCommonScriptsTitleFmt', '{0} Scripts ({1})', this.cloudflareTypeLabel(type), typeScripts.length)}</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        ${typeScripts.map((script, idx) => `
-                            <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 6px;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                    <span style="background: ${colors.gradient}; color: white; padding: 3px 8px; border-radius: 3px; font-size: 10px; font-weight: 500;">${this.cloudflareTypeLabel(type)}</span>
-                                    <span style="font-size: 12px; color: var(--text-secondary);">#${idx + 1}</span>
-                                </div>
-                                <div class="copy-value" data-copy="${AdvancedUtils.escapeHtml(script.url)}" style="font-size: 11px; color: var(--text-primary); word-break: break-all; font-family: var(--font-mono); background: var(--bg-primary); padding: 8px; border-radius: 4px; cursor: pointer; transition: background 0.2s;" title="${this._txt('advCommonClickToCopy', 'Click to copy')}">${script.url}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        });
-
-        modal.innerHTML = `
-            <div class="modal-content" style="background: var(--bg-secondary); border-radius: 8px; padding: 20px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 90%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">${this._txt('advCommonScriptsTitleFmt', '{0} Scripts ({1})', 'Cloudflare', scripts.length)}</h3>
-                    ${CloseButton.html({ className: 'advanced-modal-close-btn' })}
-                </div>
-
-                <div style="display: flex; flex-direction: column;">
-                    ${scriptHTML}
-                </div>
-
-                ${scripts.length > 0 ? `
-                    <button class="modal-export-code-btn" style="margin-top: 16px; width: 100%; padding: 10px; background: linear-gradient(135deg, #F97316 0%, #EA580C 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <span>${this._txt('advCommonExportCode', 'Export Code')}</span>
-                    </button>
-                ` : ''}
-            </div>
-        `;
-
-        this.bindCopyValueHandlers(modal, { defaultMessage: this._txt('advCommonUrlCopied', 'URL copied') });
-        this.bindModalClose(modal);
-
-        const exportBtn = modal.querySelector('.modal-export-code-btn');
-        if (exportBtn && scripts.length > 0) {
-            exportBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.displayExportCodeModal(scripts);
-            });
-        }
-
-        this.showToolModal(modal);
+        return this.showScriptResults(data, { vendor: 'Cloudflare', label: type => this.cloudflareTypeLabel(type) });
     };
 
 
-CloudflareAdvanced.prototype.displayExportCodeModal = function(scripts) {
-        const urls = scripts.map(s => s.url);
-        return AdvancedCodeDialog.open(this, {
-            title: this._txt('advCommonExportCode', 'Export Code'),
-            languages: ['JavaScript', 'Python', 'Node.js', 'PHP', 'C#', 'Go'].map(label => ({ id: label, label })),
-            getCode: (type, language) => this.generateCloudflareParsingCode(urls, language)
-        });
-    };
+

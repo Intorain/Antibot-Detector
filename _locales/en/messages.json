@@ -24,6 +24,19 @@
   "advToolCaptureHint": { "message": "Record data from this page" },
   "advToolStopCaptureHint": { "message": "Stop recording data from this page" },
   "advToolWorking": { "message": "Working…" },
+  "advToolWaitingReload": { "message": "Reloading the page and collecting results. This takes a few seconds…" },
+  "advToolNoResult": { "message": "No result: the protection sent no data. Reload the page and try again." },
+  "advSiteKeyTitleFmt": { "message": "{0} site key" },
+  "advSiteKeyNotFound": { "message": "No site key found on this page. Open or trigger the CAPTCHA, then try again." },
+  "advSiteKeyFoundIn": { "message": "Found in" },
+  "advSiteKeySourceWidget": { "message": "Widget" },
+  "advSiteKeySourceRequest": { "message": "Request" },
+  "advSiteKeySourceScript": { "message": "Page script" },
+  "advSiteKeySourceGlobal": { "message": "Page variable" },
+  "advSiteKeyFrame": { "message": "Frame" },
+  "advSiteKeyScriptsOnPage": { "message": "Scripts on this page" },
+  "advancedInfoCaptchaKeyDesc": { "message": "Extracts the site key and analyzes its scripts" },
+  "advancedInfoCaptchaScriptsDesc": { "message": "Analyzes its scripts" },
   "advToolActionFailedFmt": { "message": "Could not complete this action: {0}", "description": "Advanced tool action failure. {0} = error details" },
   "statsChartPrevious": { "message": "Previous chart page" },
   "statsChartNext": { "message": "Next chart page" },
@@ -1472,6 +1485,7 @@
   "btnExtractSiteKey": {
     "message": "Extract SiteKey"
   },
+  "btnExtractPublicKey": { "message": "Extract Public Key" },
   "btnObtainSelector": {
     "message": "Obtain Selector"
   },
@@ -1665,11 +1679,11 @@
     "message": "More actions"
   },
   "advancedToolsEmptyTitle": {
-    "message": "No tools available"
+    "message": "No protection detected"
   },
-  "advancedToolsEmptyDesc": {
-    "message": "No supported protection was found on this page. Tools appear here automatically when one is detected."
-  },
+  "advancedToolsEmptyDescFmt": { "message": "No supported protection on this page is above {0}% confidence. You can change this minimum in Settings → Detection.", "description": "{0} = minimum confidence for Advanced tools (percent)" },
+  "advancedToolsLowConfidenceTitle": { "message": "Protection detected with low confidence" },
+  "advancedToolsLowConfidenceDescFmt": { "message": "{0} was detected with {1}% confidence. Tools appear only above {2}%. You can lower this minimum in Settings → Detection.", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
   "advancedToolsSupportedLabel": {
     "message": "Supported protections"
   },
@@ -2446,6 +2460,9 @@
   "advCommonUrlCopied": {
     "message": "URL copied"
   },
+  "advScriptTypeCollector": { "message": "Collector" },
+  "advScriptTypeCaptchaCheck": { "message": "CAPTCHA check" },
+  "advScriptTypeInterstitial": { "message": "Interstitial" },
   "advCommonCaptured": {
     "message": "Captured",
     "description": "Label before the capture date"
@@ -2486,10 +2503,6 @@
     "message": "Failed to start extraction: {0}",
     "description": "{0} = error message"
   },
-  "advCommonFailedOpenExportFmt": {
-    "message": "Failed to open export modal: {0}",
-    "description": "{0} = error message"
-  },
   "advCommonNoScriptsToExport": {
     "message": "No scripts available to export"
   },
@@ -2524,9 +2537,6 @@
   "advCommonFoundScriptsFmt": {
     "message": "Found {0} relevant script(s)",
     "description": "{0} = number of scripts"
-  },
-  "advCommonScriptAnalysis": {
-    "message": "Script Analysis"
   },
   "advCommonTotalScripts": {
     "message": "Total Scripts:"
@@ -2574,10 +2584,6 @@
   },
   "advCodeDescBrowserParseFmt": {
     "message": "Browser console code for intercepting and parsing {0} scripts",
-    "description": "{0} = anti-bot product name"
-  },
-  "advCodeDescBrowserFetchFmt": {
-    "message": "Browser console code for fetching {0} scripts",
     "description": "{0} = anti-bot product name"
   },
   "advCodeDescPythonBs": {
@@ -2839,10 +2845,6 @@
     "message": "Sensor URL:",
     "description": "Label followed by a count"
   },
-  "advImpervaScriptsHeading": {
-    "message": "Imperva Scripts",
-    "description": "Section heading (shown in upper case)"
-  },
   "advImpervaScriptTypeFmt": {
     "message": "{0} Script",
     "description": "{0} = script type name (Reese84, UTMVC)"
@@ -2907,19 +2909,6 @@
     "message": "grecaptcha.execute() failed: {0}",
     "description": "{0} = raw error message"
   },
-  "advRecaptchaNoSiteKey": {
-    "message": "No sitekey found"
-  },
-  "advRecaptchaExtractedSiteKey": {
-    "message": "Extracted SiteKey",
-    "description": "Modal title"
-  },
-  "advRecaptchaSiteKeyCopied": {
-    "message": "SiteKey copied to clipboard!"
-  },
-  "advRecaptchaSiteKeyCopiedShort": {
-    "message": "Site Key copied"
-  },
   "advRecaptchaCallbacksTitle": {
     "message": "reCAPTCHA Callbacks",
     "description": "Modal title"
@@ -2966,21 +2955,9 @@
     "message": "Action",
     "description": "Label: reCAPTCHA action name"
   },
-  "advRecaptchaVersionCopied": {
-    "message": "Version copied"
-  },
-  "advRecaptchaActionCopied": {
-    "message": "Action copied"
-  },
-  "advRecaptchaApiDomainCopied": {
-    "message": "API Domain copied"
-  },
   "advRecaptchaRequiredCookie": {
     "message": "Required Cookie",
     "description": "Label: cookie that must be sent"
-  },
-  "advRecaptchaCookieCopied": {
-    "message": "Cookie copied"
   },
   "advRecaptchaFeaturesDetected": {
     "message": "Features Detected",
@@ -2993,10 +2970,6 @@
   "advRecaptchaHasSession": {
     "message": "Has Session",
     "description": "Feature badge: reCAPTCHA runs in session mode"
-  },
-  "advRecaptchaCapturedLabel": {
-    "message": "Captured:",
-    "description": "Label before the capture date and time"
   },
   "advRecaptchaFailedClickFmt": {
     "message": "Failed to click: {0}",
@@ -3074,10 +3047,6 @@
     "message": "Seed Scripts:",
     "description": "Count label. Scripts loaded with a seed= parameter."
   },
-  "advShapeScriptsHeading": {
-    "message": "Shape Security Scripts",
-    "description": "Section heading"
-  },
   "advShapeInitJsScript": {
     "message": "Init.js Script",
     "description": "Heading above one script URL. Keep \"Init.js\" (file name)."
@@ -3093,9 +3062,6 @@
   "advShapeSeedScripts": {
     "message": "Seed Scripts",
     "description": "Heading above several script URLs loaded with a seed= parameter"
-  },
-  "advShapeNoActiveTab": {
-    "message": "No active tab found"
   },
   "advShapeErrorFmt": {
     "message": "Error: {0}",
@@ -3175,10 +3141,6 @@
     "message": "N/A",
     "description": "Shown when a value is missing"
   },
-  "advHcaptchaScriptNumberFmt": {
-    "message": "Script {0}",
-    "description": "{0} = script number in a list"
-  },
   "advHcaptchaCheckingVersionReload": {
     "message": "Checking hCaptcha version... Page will reload"
   },
@@ -3196,64 +3158,9 @@
     "message": "hCaptcha data captured successfully",
     "description": "In-page notice"
   },
-  "advAwswafNoScripts": {
-    "message": "No AWS WAF scripts found"
-  },
-  "advAwswafDeleteCookieHint": {
-    "message": "Delete aws-waf-token cookie and reload to trigger challenge",
-    "description": "Empty-state hint. aws-waf-token is a cookie name (do not translate)"
-  },
   "advAwswafTypeChallenge": {
     "message": "Challenge",
     "description": "Badge: script type (AWS WAF challenge script)"
-  },
-  "advAwswafClickToCopyUrl": {
-    "message": "Click to copy URL"
-  },
-  "advAwswafFetchCodeTitle": {
-    "message": "AWS WAF Script Fetching Code",
-    "description": "Modal title"
-  },
-  "advAwswafScriptsLabel": {
-    "message": "AWS WAF Scripts",
-    "description": "Section label in capture details"
-  },
-  "advAwswafChallengeScript": {
-    "message": "Challenge Script"
-  },
-  "advAwswafApiScript": {
-    "message": "API Script (jsapi.js)",
-    "description": "jsapi.js is a file name (do not translate)"
-  },
-  "advAwswafProblemEndpoint": {
-    "message": "Problem Endpoint",
-    "description": "AWS WAF \"problem\" endpoint (the endpoint that serves the puzzle)"
-  },
-  "advAwswafApiKey": {
-    "message": "API Key"
-  },
-  "advAwswafApiKeyCopied": {
-    "message": "API Key copied"
-  },
-  "advAwswafToken": {
-    "message": "AWS WAF Token"
-  },
-  "advAwswafTokenCopied": {
-    "message": "Token copied"
-  },
-  "advAwswafDetectionIndicators": {
-    "message": "Detection Indicators"
-  },
-  "advAwswafStatus405": {
-    "message": "Status 405",
-    "description": "HTTP status code 405 seen"
-  },
-  "advAwswafDetected": {
-    "message": "Detected",
-    "description": "Value next to an indicator"
-  },
-  "advAwswafChallengeEndpoint": {
-    "message": "Challenge Endpoint"
   },
   "advAwswafDeletingCookieFmt": {
     "message": "Deleting {0} cookie... Page will reload",
@@ -3266,14 +3173,6 @@
   "advCloudflareSiteKeyCopied": {
     "message": "Site Key copied"
   },
-  "advCloudflareSitekeyLabel": {
-    "message": "Sitekey:",
-    "description": "Label before a site key value"
-  },
-  "advCloudflareUrlLabel": {
-    "message": "URL:",
-    "description": "Label before a URL value"
-  },
   "advCloudflareTypeChallenge": {
     "message": "Challenge",
     "description": "Cloudflare protection/script type: challenge page"
@@ -3285,10 +3184,6 @@
   "advCloudflareTypeBotManagement": {
     "message": "Bot Management",
     "description": "Cloudflare script type"
-  },
-  "advCloudflareCheckingVersion": {
-    "message": "Checking Cloudflare version... Page will reload",
-    "description": "Toast"
   },
   "advCloudflareNoSitekey": {
     "message": "No sitekey found on page"
@@ -3309,12 +3204,6 @@
   },
   "advFuncaptchaBlobData": {
     "message": "Blob Data"
-  },
-  "advFuncaptchaBlobDataNotCaptured": {
-    "message": "Blob Data (Not Captured)"
-  },
-  "advFuncaptchaStatus": {
-    "message": "Status"
   },
   "advFuncaptchaNotCaptured": {
     "message": "Not captured"
@@ -3359,16 +3248,8 @@
     "message": "JSON Config",
     "description": "Where a Geetest config was found"
   },
-  "advGeetestSourceLabel": {
-    "message": "Source:",
-    "description": "Label before where a value was found"
-  },
   "advGeetestExtractedCaptchaId": {
     "message": "Extracted captchaId",
-    "description": "captchaId is a parameter name (do not translate)"
-  },
-  "advGeetestClickToCopyCaptchaId": {
-    "message": "Click to copy captchaId",
     "description": "captchaId is a parameter name (do not translate)"
   },
   "advGeetestProductLabel": {
@@ -4438,9 +4319,6 @@
   "advTurnstileSiteKeysTitle": {
     "message": "Turnstile site keys"
   },
-  "advTurnstileReloadingScripts": {
-    "message": "Reloading the page to collect the Turnstile scripts"
-  },
   "settingsGroupAdvancedTools": {
     "message": "Advanced tools"
   },
@@ -5221,5 +5099,23 @@
   },
   "combinationTranslateNeedsName": {
     "message": "Write the name first."
+  },
+  "advancedInfoCloudflareDesc": {
+    "message": "Checks the challenge cookies, finds Turnstile site keys and analyzes its scripts"
+  },
+  "advancedInfoDataDomeDesc": {
+    "message": "Checks DataDome cookies and analyzes its scripts"
+  },
+  "advancedInfoFunCaptchaDesc": {
+    "message": "Finds the public key, captures the browser data (BDA) and analyzes its scripts"
+  },
+  "advancedInfoGeetestDesc": {
+    "message": "Detects the GeeTest version (v3 or v4) and analyzes its scripts"
+  },
+  "advancedInfoHcaptchaDesc": {
+    "message": "Finds the site key, detects the hCaptcha version and analyzes its scripts"
+  },
+  "advancedInfoTurnstileDesc": {
+    "message": "Extracts the site key and analyzes the Turnstile scripts"
   }
 }

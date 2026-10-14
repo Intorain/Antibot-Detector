@@ -24,6 +24,19 @@
   "advToolCaptureHint": { "message": "Registrar dados desta página" },
   "advToolStopCaptureHint": { "message": "Parar de registrar dados desta página" },
   "advToolWorking": { "message": "Processando…" },
+  "advToolWaitingReload": { "message": "Recarregando a página e coletando os resultados. Isso leva alguns segundos…" },
+  "advToolNoResult": { "message": "Sem resultado: a proteção não enviou dados. Recarregue a página e tente novamente." },
+  "advSiteKeyTitleFmt": { "message": "Chave do site do {0}" },
+  "advSiteKeyNotFound": { "message": "Nenhuma chave do site encontrada nesta página. Abra ou acione o CAPTCHA e tente novamente." },
+  "advSiteKeyFoundIn": { "message": "Encontrada em" },
+  "advSiteKeySourceWidget": { "message": "Widget" },
+  "advSiteKeySourceRequest": { "message": "Requisição" },
+  "advSiteKeySourceScript": { "message": "Script da página" },
+  "advSiteKeySourceGlobal": { "message": "Variável da página" },
+  "advSiteKeyFrame": { "message": "Frame" },
+  "advSiteKeyScriptsOnPage": { "message": "Scripts nesta página" },
+  "advancedInfoCaptchaKeyDesc": { "message": "Extrai a chave do site e analisa seus scripts" },
+  "advancedInfoCaptchaScriptsDesc": { "message": "Analisa seus scripts" },
   "advToolActionFailedFmt": { "message": "Não foi possível concluir esta ação: {0}", "description": "Advanced tool action failure. {0} = error details" },
   "statsChartPrevious": { "message": "Página anterior do gráfico" },
   "statsChartNext": { "message": "Próxima página do gráfico" },
@@ -1468,6 +1481,7 @@
   "btnExtractSiteKey": {
     "message": "Extrair SiteKey"
   },
+  "btnExtractPublicKey": { "message": "Extrair chave pública" },
   "btnObtainSelector": {
     "message": "Obter seletor"
   },
@@ -1661,11 +1675,11 @@
     "message": "Mais ações"
   },
   "advancedToolsEmptyTitle": {
-    "message": "Nenhuma ferramenta disponível"
+    "message": "Nenhuma proteção detectada"
   },
-  "advancedToolsEmptyDesc": {
-    "message": "Nenhuma proteção compatível foi encontrada nesta página. As ferramentas aparecerão aqui automaticamente quando uma for detectada."
-  },
+  "advancedToolsEmptyDescFmt": { "message": "Nenhuma proteção compatível nesta página passa de {0}% de confiança. Você pode alterar esse mínimo em Configurações → Detecção.", "description": "{0} = minimum confidence for Advanced tools (percent)" },
+  "advancedToolsLowConfidenceTitle": { "message": "Proteção detectada com baixa confiança" },
+  "advancedToolsLowConfidenceDescFmt": { "message": "{0} foi detectado com {1}% de confiança. As ferramentas só aparecem acima de {2}%. Você pode reduzir esse mínimo em Configurações → Detecção.", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
   "advancedToolsSupportedLabel": {
     "message": "Proteções compatíveis"
   },
@@ -2440,6 +2454,9 @@
   "advCommonUrlCopied": {
     "message": "URL copiada"
   },
+  "advScriptTypeCollector": { "message": "Coletor" },
+  "advScriptTypeCaptchaCheck": { "message": "Verificação CAPTCHA" },
+  "advScriptTypeInterstitial": { "message": "Intersticial" },
   "advCommonCaptured": {
     "message": "Capturado"
   },
@@ -2473,9 +2490,6 @@
   "advCommonFailedStartExtractionFmt": {
     "message": "Não foi possível iniciar a extração: {0}"
   },
-  "advCommonFailedOpenExportFmt": {
-    "message": "Não foi possível abrir a janela de exportação: {0}"
-  },
   "advCommonNoScriptsToExport": {
     "message": "Nenhum script para exportar"
   },
@@ -2505,9 +2519,6 @@
   },
   "advCommonFoundScriptsFmt": {
     "message": "Scripts relevantes encontrados: {0}"
-  },
-  "advCommonScriptAnalysis": {
-    "message": "Análise de scripts"
   },
   "advCommonTotalScripts": {
     "message": "Total de scripts:"
@@ -2550,9 +2561,6 @@
   },
   "advCodeDescBrowserParseFmt": {
     "message": "Código para o console do navegador que intercepta e analisa os scripts do {0}"
-  },
-  "advCodeDescBrowserFetchFmt": {
-    "message": "Código para o console do navegador que baixa os scripts do {0}"
   },
   "advCodeDescPythonBs": {
     "message": "Script Python com requests e BeautifulSoup"
@@ -2770,9 +2778,6 @@
   "advImpervaSensorUrl": {
     "message": "URL do sensor:"
   },
-  "advImpervaScriptsHeading": {
-    "message": "Scripts do Imperva"
-  },
   "advImpervaScriptTypeFmt": {
     "message": "Script {0}"
   },
@@ -2827,18 +2832,6 @@
   "advRecaptchaExecuteFailedFmt": {
     "message": "grecaptcha.execute() falhou: {0}"
   },
-  "advRecaptchaNoSiteKey": {
-    "message": "Nenhuma chave do site encontrada"
-  },
-  "advRecaptchaExtractedSiteKey": {
-    "message": "Chave do site extraída"
-  },
-  "advRecaptchaSiteKeyCopied": {
-    "message": "Chave do site copiada para a área de transferência!"
-  },
-  "advRecaptchaSiteKeyCopiedShort": {
-    "message": "Chave do site copiada"
-  },
   "advRecaptchaCallbacksTitle": {
     "message": "Callbacks do reCAPTCHA"
   },
@@ -2875,20 +2868,8 @@
   "advRecaptchaAction": {
     "message": "Ação"
   },
-  "advRecaptchaVersionCopied": {
-    "message": "Versão copiada"
-  },
-  "advRecaptchaActionCopied": {
-    "message": "Ação copiada"
-  },
-  "advRecaptchaApiDomainCopied": {
-    "message": "Domínio da API copiado"
-  },
   "advRecaptchaRequiredCookie": {
     "message": "Cookie obrigatório"
-  },
-  "advRecaptchaCookieCopied": {
-    "message": "Cookie copiado"
   },
   "advRecaptchaFeaturesDetected": {
     "message": "Recursos detectados"
@@ -2898,9 +2879,6 @@
   },
   "advRecaptchaHasSession": {
     "message": "Com sessão"
-  },
-  "advRecaptchaCapturedLabel": {
-    "message": "Capturado:"
   },
   "advRecaptchaFailedClickFmt": {
     "message": "Falha ao clicar: {0}"
@@ -2962,9 +2940,6 @@
   "advShapeSeedScriptsLabel": {
     "message": "Scripts com seed:"
   },
-  "advShapeScriptsHeading": {
-    "message": "Scripts do Shape Security"
-  },
   "advShapeInitJsScript": {
     "message": "Script Init.js"
   },
@@ -2976,9 +2951,6 @@
   },
   "advShapeSeedScripts": {
     "message": "Scripts com seed"
-  },
-  "advShapeNoActiveTab": {
-    "message": "Nenhuma aba ativa encontrada"
   },
   "advShapeErrorFmt": {
     "message": "Erro: {0}"
@@ -3040,9 +3012,6 @@
   "advHcaptchaNotAvailable": {
     "message": "N/D"
   },
-  "advHcaptchaScriptNumberFmt": {
-    "message": "Script {0}"
-  },
   "advHcaptchaCheckingVersionReload": {
     "message": "Verificando a versão do hCaptcha… A página será recarregada"
   },
@@ -3058,56 +3027,8 @@
   "advHcaptchaNoticeCaptured": {
     "message": "Dados do hCaptcha capturados com sucesso"
   },
-  "advAwswafNoScripts": {
-    "message": "Nenhum script do AWS WAF encontrado"
-  },
-  "advAwswafDeleteCookieHint": {
-    "message": "Exclua o cookie aws-waf-token e recarregue para acionar o desafio"
-  },
   "advAwswafTypeChallenge": {
     "message": "Desafio"
-  },
-  "advAwswafClickToCopyUrl": {
-    "message": "Clique para copiar a URL"
-  },
-  "advAwswafFetchCodeTitle": {
-    "message": "Código para obter os scripts do AWS WAF"
-  },
-  "advAwswafScriptsLabel": {
-    "message": "Scripts do AWS WAF"
-  },
-  "advAwswafChallengeScript": {
-    "message": "Script do desafio"
-  },
-  "advAwswafApiScript": {
-    "message": "Script da API (jsapi.js)"
-  },
-  "advAwswafProblemEndpoint": {
-    "message": "Endpoint de problema"
-  },
-  "advAwswafApiKey": {
-    "message": "Chave de API"
-  },
-  "advAwswafApiKeyCopied": {
-    "message": "Chave de API copiada"
-  },
-  "advAwswafToken": {
-    "message": "Token do AWS WAF"
-  },
-  "advAwswafTokenCopied": {
-    "message": "Token copiado"
-  },
-  "advAwswafDetectionIndicators": {
-    "message": "Indicadores de detecção"
-  },
-  "advAwswafStatus405": {
-    "message": "Status 405"
-  },
-  "advAwswafDetected": {
-    "message": "Detectado"
-  },
-  "advAwswafChallengeEndpoint": {
-    "message": "Endpoint do desafio"
   },
   "advAwswafDeletingCookieFmt": {
     "message": "Excluindo o cookie {0}… A página será recarregada"
@@ -3118,12 +3039,6 @@
   "advCloudflareSiteKeyCopied": {
     "message": "Site Key copiada"
   },
-  "advCloudflareSitekeyLabel": {
-    "message": "Sitekey:"
-  },
-  "advCloudflareUrlLabel": {
-    "message": "URL:"
-  },
   "advCloudflareTypeChallenge": {
     "message": "Desafio"
   },
@@ -3132,9 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Gerenciamento de bots"
-  },
-  "advCloudflareCheckingVersion": {
-    "message": "Verificando a versão do Cloudflare… A página será recarregada"
   },
   "advCloudflareNoSitekey": {
     "message": "Nenhuma sitekey encontrada na página"
@@ -3153,12 +3065,6 @@
   },
   "advFuncaptchaBlobData": {
     "message": "Dados do blob"
-  },
-  "advFuncaptchaBlobDataNotCaptured": {
-    "message": "Dados do blob (não capturados)"
-  },
-  "advFuncaptchaStatus": {
-    "message": "Status"
   },
   "advFuncaptchaNotCaptured": {
     "message": "Não capturado"
@@ -3193,14 +3099,8 @@
   "advGeetestSourceJsonConfig": {
     "message": "Configuração JSON"
   },
-  "advGeetestSourceLabel": {
-    "message": "Origem:"
-  },
   "advGeetestExtractedCaptchaId": {
     "message": "captchaId extraído"
-  },
-  "advGeetestClickToCopyCaptchaId": {
-    "message": "Clique para copiar o captchaId"
   },
   "advGeetestProductLabel": {
     "message": "Produto:"
@@ -4162,9 +4062,6 @@
   "advTurnstileSiteKeysTitle": {
     "message": "Chaves de site do Turnstile"
   },
-  "advTurnstileReloadingScripts": {
-    "message": "Recarregando a página para coletar os scripts do Turnstile"
-  },
   "settingsGroupAdvancedTools": {
     "message": "Ferramentas avançadas"
   },
@@ -4945,5 +4842,23 @@
   },
   "combinationTranslateNeedsName": {
     "message": "Escreva o nome primeiro."
+  },
+  "advancedInfoCloudflareDesc": {
+    "message": "Verifica os cookies do desafio, encontra as chaves de site do Turnstile e analisa seus scripts"
+  },
+  "advancedInfoDataDomeDesc": {
+    "message": "Verifica os cookies do DataDome e analisa seus scripts"
+  },
+  "advancedInfoFunCaptchaDesc": {
+    "message": "Encontra a chave pública, captura os dados do navegador (BDA) e analisa seus scripts"
+  },
+  "advancedInfoGeetestDesc": {
+    "message": "Detecta a versão do GeeTest (v3 ou v4) e analisa seus scripts"
+  },
+  "advancedInfoHcaptchaDesc": {
+    "message": "Encontra a chave do site, detecta a versão do hCaptcha e analisa seus scripts"
+  },
+  "advancedInfoTurnstileDesc": {
+    "message": "Extrai a chave de site e analisa os scripts do Turnstile"
   }
 }

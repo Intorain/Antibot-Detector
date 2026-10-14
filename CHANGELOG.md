@@ -5,6 +5,43 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [2.8.7] - 2026-10-14
+
+### Added
+
+- Advanced: tools for 14 more CAPTCHAs (Prosopo, Friendly Captcha, MTCaptcha, Yandex SmartCaptcha, Captcha.eu, QCloud, NetEase Yidun, Aliyun, Dingxiang, Shumei, Capy, Binance, Basilisk, AliExpress): Extract site key where they have one, Analyze scripts for all.
+- Rules editor: each pattern in a combination has a "Combinations only" button to turn it on or off.
+- Advanced: Extract site key for hCaptcha and Extract public key for FunCaptcha; Akamai Check cookies also lists bm_s, bm_so, bm_lso, AKA_A2 and waiting-room cookies.
+- Advanced: FunCaptcha and hCaptcha script results have Export Code, like the other protections.
+
+### Changed
+
+- Advanced: the tools information window is redesigned and larger; it lists all 25 supported protections by category, with their real logos.
+- Detection details: a matched value is plain text instead of a box that copied it on click.
+- Advanced: cookie results show each cookie's name as its own copyable row, above its value.
+- Advanced → History: capture details for every protection use the same layout as the cookie results, with copyable rows and Copy all data at the bottom.
+- Advanced → Analyze scripts: one results window for every protection, with each script's type and an Export code button; it lists only that protection's requests, not look-alike paths or images.
+- Advanced: the GeeTest, Imperva and Shape Security result windows use the same layout as the others; Cloudflare Check cookies looks for the real Cloudflare cookies.
+- Advanced: with no protection on the page, the screen says so, gives the minimum confidence and where to change it, or names a protection detected below that minimum; the supported list shows each protection's logo grouped by Anti-bot and Captcha.
+- The mouse pointer no longer turns into the system's spinning wait cursor while a tool or upload works; the button shows its own progress.
+- Advanced → reCAPTCHA: Extract site key reports only reCAPTCHA keys, including v3 keys and keys inside frames; Click says when nothing was found.
+
+### Fixed
+
+- Rules and History: the last card on a page is no longer cut off by the page bar at the bottom; its outline shows in full.
+- Detection: typing in the search box no longer makes the cards flash; they update in place.
+- Advanced → History: the empty "No captures yet" card no longer has a blue strip along its top.
+- Rules editor: "These patterns only count together" can be ticked on a new combination before adding patterns.
+- Advanced → DataDome → Analyze Scripts: now finds the challenge scripts and the CAPTCHA or interstitial page on blocked pages, not only tags.js.
+- Advanced: tools that reload the page (Analyze scripts, version checks, Akamai sensor) now show they are working until the result opens, and an empty result says no scripts were found.
+- Advanced → Turnstile → Export Code: the JavaScript and Node.js code no longer calls a helper that only exists inside the extension.
+- Advanced → Imperva: the ___utmvc cookie is found and reset, Analyze scripts finishes a few seconds after the page loads instead of up to a minute, and Node.js export code fetches the page.
+- Advanced → hCaptcha: Enterprise is detected from the challenge request too, and no longer reported for sites whose configuration only lists general features; Check version no longer shows a late timeout after its result.
+- Advanced → FunCaptcha: Start capture also records form-encoded challenge requests.
+- Advanced → GeeTest and Shape Security: Check version no longer reports a version on pages without the protection.
+- Advanced → Akamai: Start capture no longer deletes the _abck cookie when it only stops a running capture; Extract sensor reports when no data arrives.
+- Advanced: results from one tab no longer open in another tab's tools; tools that finish at once no longer stay busy.
+
 ## [2.8.6] - 2026-10-13
 
 ### Added
@@ -370,6 +407,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[2.8.7]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.6...v2.8.7
 [2.8.6]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.5...v2.8.6
 [2.8.5]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.4...v2.8.5
 [2.8.4]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.3...v2.8.4

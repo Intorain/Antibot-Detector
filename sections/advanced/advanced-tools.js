@@ -137,15 +137,21 @@ Advanced.prototype.renderAdvancedInterface = async function() {
 
 
   /**
-   * Protections the Advanced tools support, named after the registered
-   * modules (Advanced.AVAILABLE_MODULES), e.g. "reCAPTCHA", "DataDome".
-   * @returns {string[]}
+   * Supported protections by category, sorted by name, for the no-tools screen.
+   * @returns {Array<{ key: string, items: Array<{ name: string, logo: string }> }>}
    */
-Advanced.supportedProtectionNames = function() {
-    const names = Object.values(Advanced.AVAILABLE_MODULES || {})
-      .map(module => String(module.productName || '').trim())
-      .filter(Boolean);
-    return [...new Set(names)];
+Advanced.supportedProtectionGroups = function() {
+    const groups = { antibot: [], captcha: [] };
+    const seen = new Set();
+    Object.values(Advanced.AVAILABLE_MODULES || {}).forEach(module => {
+      const name = String(module.productName || '').trim();
+      if (!name || seen.has(name)) return;
+      seen.add(name);
+      (groups[module.category] || groups.captcha).push({ name, logo: module.logo || 'custom.png' });
+    });
+    return Object.entries(groups)
+      .filter(([, items]) => items.length)
+      .map(([key, items]) => ({ key, items: items.sort((a, b) => a.name.localeCompare(b.name)) }));
   };
 
 
@@ -160,9 +166,36 @@ Advanced.prototype.renderNoToolsState = function(tr) {
     const esc = (value) => (typeof FormatUtils !== 'undefined' && FormatUtils.escapeHtml)
       ? FormatUtils.escapeHtml(value)
       : String(value).replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`);
-    const chips = Advanced.supportedProtectionNames()
-      .map(name => `<li class="advanced-supported-chip">${esc(name)}</li>`)
-      .join('');
+    // Nothing detected, or a supported protection detected at or below the minimum confidence
+    const fmt = (key, fallback, ...args) => (typeof I18n !== 'undefined' && typeof I18n.format === 'function' && I18n.format(key, ...args))
+      || args.reduce((text, arg, i) => text.split(`{${i}}`).join(String(arg)), fallback);
+    const minimum = [this.minToolConfidence, Advanced.MIN_TOOL_CONFIDENCE].find(Number.isInteger) ?? 50;
+    const low = (this.toolsBelowThreshold || [])[0];
+    const emptyTitle = low
+      ? tr('advancedToolsLowConfidenceTitle', 'Protection detected with low confidence')
+      : tr('advancedToolsEmptyTitle', 'No protection detected');
+    const emptyText = low
+      ? fmt('advancedToolsLowConfidenceDescFmt', '{0} was detected with {1}% confidence. Tools appear only above {2}%. You can lower this minimum in Settings → Detection.', low.name, Math.round(low.confidence), minimum)
+      : fmt('advancedToolsEmptyDescFmt', 'No supported protection on this page is above {0}% confidence. You can change this minimum in Settings → Detection.', minimum);
+
+    // One logo per protection (its name on hover), grouped by category like the info window
+    const titles = { antibot: tr('categoryAntibot', 'Anti-bot'), captcha: tr('categoryCaptcha', 'Captcha') };
+    // Each category's colour from Settings, as in the other views
+    const categoryColour = key => {
+      const manager = this.detectorManager || (typeof window !== 'undefined' && window.popupInstance?.detectorManager) || null;
+      return manager?.getCategoryInfo?.(key)?.colour || (typeof FormatUtils !== 'undefined' && FormatUtils.DEFAULT_CATEGORY_COLORS?.[key]) || 'currentColor';
+    };
+    const groups = Advanced.supportedProtectionGroups().map(group => `
+                <div class="advanced-supported-group">
+                  <div class="advanced-supported-head">
+                    <span class="category-icon" aria-hidden="true" style="color: ${esc(categoryColour(group.key))}">${typeof FormatUtils !== 'undefined' && FormatUtils.categoryIconSvg ? FormatUtils.categoryIconSvg(group.key) : ''}</span>
+                    <span class="advanced-supported-title">${esc(titles[group.key] || group.key)}</span>
+                    <span class="advanced-supported-count">${group.items.length}</span>
+                  </div>
+                  <ul class="advanced-supported-logos">
+                    ${group.items.map(item => `<li class="advanced-supported-logo" title="${esc(item.name)}"><img src="detectors/icons/${esc(item.logo)}" alt="${esc(item.name)}" width="20" height="20" loading="lazy"></li>`).join('')}
+                  </ul>
+                </div>`).join('');
 
     return `
           <div class="advanced-no-tools" id="advancedNoTools">
@@ -170,11 +203,11 @@ Advanced.prototype.renderNoToolsState = function(tr) {
               <div class="state-card-icon">
                 <img src="icons/icon128.png" alt="" width="72" height="72" class="state-card-logo">
               </div>
-              <h3 class="state-card-title">${esc(tr('advancedToolsEmptyTitle', 'No tools available'))}</h3>
-              <p class="state-card-description">${esc(tr('advancedToolsEmptyDesc', 'No supported protection was found on this page. Tools appear here automatically when one is detected.'))}</p>
-              <ul class="advanced-supported-chips" aria-label="${esc(tr('advancedToolsSupportedLabel', 'Supported protections'))}">
-                ${chips}
-              </ul>
+              <h3 class="state-card-title">${esc(emptyTitle)}</h3>
+              <p class="state-card-description">${esc(emptyText)}</p>
+              <div class="advanced-supported" role="group" aria-label="${esc(tr('advancedToolsSupportedLabel', 'Supported protections'))}">
+                ${groups}
+              </div>
               <button type="button" class="advanced-no-tools-history" id="advancedNoToolsHistoryBtn" hidden></button>
             </div>
           </div>
@@ -339,7 +372,6 @@ Advanced.prototype.loadSelectedDetectionTools = async function(detectorId) {
       this.selectedDetection = detectorId;
       moduleInstance.setupEventListeners?.();
       document.querySelector('#changeDetectionBtn')?.focus({ preventScroll: true });
-      await moduleInstance.checkPendingAnalysisResults?.();
       return true;
     } catch (error) {
       Logger.error('UI', '[Advanced] Could not open tools:', error);
@@ -366,6 +398,10 @@ Advanced.prototype.clearDetectionToolsPanel = function() {
     this.selectedDetection = null;
     this.activeModule = null;
     this.currentModuleInstance = null;
+    // Modules may hold runtime listeners (Imperva's extraction result, pending analyses)
+    Object.values(this.loadedModules || {}).forEach(module => {
+      try { module?.dispose?.(); } catch (error) { Logger.error('UI', '[Advanced] Module dispose failed:', error); }
+    });
     this.loadedModules = {};
     const selectedButton = [...document.querySelectorAll('.advanced-launch-card')]
       .find(button => button.dataset.detectorId === selectedId);

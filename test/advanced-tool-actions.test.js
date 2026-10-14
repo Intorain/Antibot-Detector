@@ -10,9 +10,9 @@ const modules = [
   ['awswaf', 'AwsWafAdvanced', ['CheckCookies', 'AnalyzeScripts']],
   ['cloudflare', 'CloudflareAdvanced', ['CheckCookies', 'ExtractSiteKey', 'AnalyzeScripts']],
   ['datadome', 'DataDomeAdvanced', ['CheckCookies', 'AnalyzeScripts']],
-  ['funcaptcha', 'FunCaptchaAdvanced', ['AnalyzeScripts', 'StartCapture']],
+  ['funcaptcha', 'FunCaptchaAdvanced', ['ExtractSiteKey', 'AnalyzeScripts', 'StartCapture']],
   ['geetest', 'GeetestAdvanced', ['Version', 'Analyze']],
-  ['hcaptcha', 'HCaptchaAdvanced', ['CheckVersion', 'StartCapture', 'AnalyzeScripts']],
+  ['hcaptcha', 'HCaptchaAdvanced', ['ExtractSiteKey', 'CheckVersion', 'StartCapture', 'AnalyzeScripts']],
   ['imperva', 'ImpervaAdvanced', ['CheckCookies', 'StartCapture', 'AnalyzeScripts']],
   ['recaptcha', 'ReCaptchaAdvanced', ['Click', 'Extract', 'Callback', 'StartCapture']],
   ['shapesecurity', 'ShapeSecurityAdvanced', ['CheckVersion', 'CheckCookies', 'StartCapture', 'AnalyzeScripts']],
@@ -277,7 +277,7 @@ test('all method semantics disclose reloads, cookie resets and capture state wit
       count++;
     }
   }
-  assert.equal(count, 31);
+  assert.equal(count, 33);
 });
 
 test('action and code dialog styles use full rows and a separate non-overlapping code toolbar', () => {
@@ -324,4 +324,55 @@ test('Scrape with Scrapfly from a CAPTCHA module without a category still counts
   await nodes.get('#recaptchaScrapeWithScrapfly').click();
   assert.equal(opened[0].detections[0].name, 'reCAPTCHA');
   assert.equal(opened[0].detections[0].category, 'CAPTCHA');
+});
+
+test('a tool that started a background job stays busy, says so, and frees itself when its result or a notification appears', async () => {
+  const { context, instance, nodes } = fixture();
+  const observers = [];
+  context.MutationObserver = class { constructor(fn) { this.fn = fn; this.on = false; observers.push(this); } observe() { this.on = true; } disconnect() { this.on = false; } };
+  context.document.body = {};
+  // Matches the selectors the watcher uses: '.x' and '.notification-toast:not(.notification-info)'
+  const add = className => observers.filter(o => o.on).forEach(o => o.fn([{ addedNodes: [{ nodeType: 1, querySelector: () => null,
+    matches: selector => selector.split(', ').some(part => {
+      const [base, not] = part.split(':not(');
+      const classes = className.split(' ').map(name => '.' + name);
+      return classes.includes(base) && !(not && classes.includes(not.replace(')', '')));
+    }) }] }]));
+  const scripts = element(); scripts.dataset = { toolAction: 'scripts' }; nodes.set('#testAnalyzeScripts', scripts);
+  const cookies = element(); cookies.dataset = { toolAction: 'cookies' }; nodes.set('#testCheckCookies', cookies);
+  const version = element(); version.dataset = { toolAction: 'version' }; nodes.set('#testVersion', version);
+  const toastOnly = element(); toastOnly.dataset = { toolAction: 'scripts' }; nodes.set('#testAnalyzeContent', toastOnly);
+  instance.bindToolActions([
+    // Shows its "page will reload" toast, then returns before the result arrives
+    { id: 'testAnalyzeScripts', handler: async () => { add('notification-toast notification-info'); return { awaitingResult: true }; } },
+    // Did all its work inside the handler and only showed a toast: nothing to wait for
+    { id: 'testAnalyzeContent', handler: async () => { add('notification-toast'); } },
+    { id: 'testCheckCookies', handler: async () => { add('adv-kit-overlay'); } },
+    // Opens its window before returning: nothing to wait for
+    { id: 'testVersion', handler: async () => { add('tool-modal'); } }
+  ]);
+  await scripts.click();
+  assert.equal(scripts.disabled, true);
+  assert.equal(scripts.classList.contains('is-working'), true);
+  assert.equal(scripts.parts['.advanced-tool-hint'].textContent, 'Reloading the page and collecting results. This takes a few seconds…');
+  await scripts.click();
+  add('tool-modal');
+  assert.equal(scripts.disabled, false);
+  assert.equal(scripts.getAttribute('aria-busy'), null);
+  assert.equal(scripts.classList.contains('is-working'), false);
+  assert.equal(observers.some(o => o.on), false, 'stops watching once released');
+  // An info note that lands after the handler returned does not end the wait; an error does
+  await scripts.click();
+  assert.equal(scripts.disabled, true);
+  add('notification-toast notification-info');
+  assert.equal(scripts.disabled, true, 'its own "page will reload" note is not a result');
+  add('notification-toast notification-error');
+  assert.equal(scripts.disabled, false);
+  // Tools that answer at once never wait
+  await toastOnly.click();
+  assert.equal(toastOnly.disabled, false, 'a toast-only tool is not left "Reloading…"');
+  await cookies.click();
+  assert.equal(cookies.disabled, false);
+  await version.click();
+  assert.equal(version.disabled, false);
 });

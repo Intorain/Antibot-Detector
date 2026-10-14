@@ -24,6 +24,19 @@
   "advToolCaptureHint": { "message": "Записать данные с этой страницы" },
   "advToolStopCaptureHint": { "message": "Остановить запись данных с этой страницы" },
   "advToolWorking": { "message": "Обработка…" },
+  "advToolWaitingReload": { "message": "Перезагрузка страницы и сбор результатов. Это займёт несколько секунд…" },
+  "advToolNoResult": { "message": "Нет результата: защита не отправила данных. Перезагрузите страницу и попробуйте снова." },
+  "advSiteKeyTitleFmt": { "message": "Ключ сайта {0}" },
+  "advSiteKeyNotFound": { "message": "Ключ сайта на этой странице не найден. Откройте или вызовите CAPTCHA и попробуйте снова." },
+  "advSiteKeyFoundIn": { "message": "Найден в" },
+  "advSiteKeySourceWidget": { "message": "Виджет" },
+  "advSiteKeySourceRequest": { "message": "Запрос" },
+  "advSiteKeySourceScript": { "message": "Скрипт страницы" },
+  "advSiteKeySourceGlobal": { "message": "Переменная страницы" },
+  "advSiteKeyFrame": { "message": "Фрейм" },
+  "advSiteKeyScriptsOnPage": { "message": "Скрипты на этой странице" },
+  "advancedInfoCaptchaKeyDesc": { "message": "Извлекает ключ сайта и анализирует его скрипты" },
+  "advancedInfoCaptchaScriptsDesc": { "message": "Анализирует его скрипты" },
   "advToolActionFailedFmt": { "message": "Не удалось выполнить это действие: {0}", "description": "Advanced tool action failure. {0} = error details" },
   "statsChartPrevious": { "message": "Предыдущая страница графика" },
   "statsChartNext": { "message": "Следующая страница графика" },
@@ -1468,6 +1481,7 @@
   "btnExtractSiteKey": {
     "message": "Извлечь SiteKey"
   },
+  "btnExtractPublicKey": { "message": "Извлечь открытый ключ" },
   "btnObtainSelector": {
     "message": "Получить селектор"
   },
@@ -1661,11 +1675,11 @@
     "message": "Другие действия"
   },
   "advancedToolsEmptyTitle": {
-    "message": "Нет доступных инструментов"
+    "message": "Защита не обнаружена"
   },
-  "advancedToolsEmptyDesc": {
-    "message": "На этой странице не найдено поддерживаемой защиты. Инструменты появятся здесь автоматически, как только она будет обнаружена."
-  },
+  "advancedToolsEmptyDescFmt": { "message": "На этой странице нет поддерживаемой защиты с уверенностью выше {0}%. Этот минимум можно изменить в разделе Настройки → Обнаружение.", "description": "{0} = minimum confidence for Advanced tools (percent)" },
+  "advancedToolsLowConfidenceTitle": { "message": "Защита обнаружена с низкой уверенностью" },
+  "advancedToolsLowConfidenceDescFmt": { "message": "{0} обнаружен с уверенностью {1}%. Инструменты показываются только при уверенности выше {2}%. Этот минимум можно снизить в разделе Настройки → Обнаружение.", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
   "advancedToolsSupportedLabel": {
     "message": "Поддерживаемые системы защиты"
   },
@@ -2440,6 +2454,9 @@
   "advCommonUrlCopied": {
     "message": "URL скопирован"
   },
+  "advScriptTypeCollector": { "message": "Сборщик" },
+  "advScriptTypeCaptchaCheck": { "message": "Проверка CAPTCHA" },
+  "advScriptTypeInterstitial": { "message": "Промежуточная страница" },
   "advCommonCaptured": {
     "message": "Захвачено"
   },
@@ -2473,9 +2490,6 @@
   "advCommonFailedStartExtractionFmt": {
     "message": "Не удалось начать извлечение: {0}"
   },
-  "advCommonFailedOpenExportFmt": {
-    "message": "Не удалось открыть окно экспорта: {0}"
-  },
   "advCommonNoScriptsToExport": {
     "message": "Нет скриптов для экспорта"
   },
@@ -2505,9 +2519,6 @@
   },
   "advCommonFoundScriptsFmt": {
     "message": "Найдено подходящих скриптов: {0}"
-  },
-  "advCommonScriptAnalysis": {
-    "message": "Анализ скриптов"
   },
   "advCommonTotalScripts": {
     "message": "Всего скриптов:"
@@ -2550,9 +2561,6 @@
   },
   "advCodeDescBrowserParseFmt": {
     "message": "Код для консоли браузера, который перехватывает и разбирает скрипты {0}"
-  },
-  "advCodeDescBrowserFetchFmt": {
-    "message": "Код для консоли браузера, который загружает скрипты {0}"
   },
   "advCodeDescPythonBs": {
     "message": "Скрипт на Python с requests и BeautifulSoup"
@@ -2770,9 +2778,6 @@
   "advImpervaSensorUrl": {
     "message": "URL сенсора:"
   },
-  "advImpervaScriptsHeading": {
-    "message": "Скрипты Imperva"
-  },
   "advImpervaScriptTypeFmt": {
     "message": "Скрипт {0}"
   },
@@ -2827,18 +2832,6 @@
   "advRecaptchaExecuteFailedFmt": {
     "message": "Ошибка grecaptcha.execute(): {0}"
   },
-  "advRecaptchaNoSiteKey": {
-    "message": "Ключ сайта не найден"
-  },
-  "advRecaptchaExtractedSiteKey": {
-    "message": "Извлечённый ключ сайта"
-  },
-  "advRecaptchaSiteKeyCopied": {
-    "message": "Ключ сайта скопирован в буфер обмена!"
-  },
-  "advRecaptchaSiteKeyCopiedShort": {
-    "message": "Ключ сайта скопирован"
-  },
   "advRecaptchaCallbacksTitle": {
     "message": "Callback-функции reCAPTCHA"
   },
@@ -2875,20 +2868,8 @@
   "advRecaptchaAction": {
     "message": "Действие"
   },
-  "advRecaptchaVersionCopied": {
-    "message": "Версия скопирована"
-  },
-  "advRecaptchaActionCopied": {
-    "message": "Действие скопировано"
-  },
-  "advRecaptchaApiDomainCopied": {
-    "message": "Домен API скопирован"
-  },
   "advRecaptchaRequiredCookie": {
     "message": "Обязательный cookie"
-  },
-  "advRecaptchaCookieCopied": {
-    "message": "Cookie скопирован"
   },
   "advRecaptchaFeaturesDetected": {
     "message": "Обнаруженные особенности"
@@ -2898,9 +2879,6 @@
   },
   "advRecaptchaHasSession": {
     "message": "Есть сессия"
-  },
-  "advRecaptchaCapturedLabel": {
-    "message": "Захвачено:"
   },
   "advRecaptchaFailedClickFmt": {
     "message": "Не удалось нажать: {0}"
@@ -2962,9 +2940,6 @@
   "advShapeSeedScriptsLabel": {
     "message": "Скрипты с seed:"
   },
-  "advShapeScriptsHeading": {
-    "message": "Скрипты Shape Security"
-  },
   "advShapeInitJsScript": {
     "message": "Скрипт Init.js"
   },
@@ -2976,9 +2951,6 @@
   },
   "advShapeSeedScripts": {
     "message": "Скрипты с seed"
-  },
-  "advShapeNoActiveTab": {
-    "message": "Активная вкладка не найдена"
   },
   "advShapeErrorFmt": {
     "message": "Ошибка: {0}"
@@ -3040,9 +3012,6 @@
   "advHcaptchaNotAvailable": {
     "message": "Н/Д"
   },
-  "advHcaptchaScriptNumberFmt": {
-    "message": "Скрипт {0}"
-  },
   "advHcaptchaCheckingVersionReload": {
     "message": "Проверка версии hCaptcha… Страница будет перезагружена"
   },
@@ -3058,56 +3027,8 @@
   "advHcaptchaNoticeCaptured": {
     "message": "Данные hCaptcha успешно захвачены"
   },
-  "advAwswafNoScripts": {
-    "message": "Скрипты AWS WAF не найдены"
-  },
-  "advAwswafDeleteCookieHint": {
-    "message": "Удалите куки aws-waf-token и перезагрузите страницу, чтобы вызвать проверку"
-  },
   "advAwswafTypeChallenge": {
     "message": "Проверка"
-  },
-  "advAwswafClickToCopyUrl": {
-    "message": "Нажмите, чтобы скопировать URL"
-  },
-  "advAwswafFetchCodeTitle": {
-    "message": "Код загрузки скриптов AWS WAF"
-  },
-  "advAwswafScriptsLabel": {
-    "message": "Скрипты AWS WAF"
-  },
-  "advAwswafChallengeScript": {
-    "message": "Скрипт проверки"
-  },
-  "advAwswafApiScript": {
-    "message": "Скрипт API (jsapi.js)"
-  },
-  "advAwswafProblemEndpoint": {
-    "message": "Эндпоинт задачи"
-  },
-  "advAwswafApiKey": {
-    "message": "Ключ API"
-  },
-  "advAwswafApiKeyCopied": {
-    "message": "Ключ API скопирован"
-  },
-  "advAwswafToken": {
-    "message": "Токен AWS WAF"
-  },
-  "advAwswafTokenCopied": {
-    "message": "Токен скопирован"
-  },
-  "advAwswafDetectionIndicators": {
-    "message": "Признаки обнаружения"
-  },
-  "advAwswafStatus405": {
-    "message": "Статус 405"
-  },
-  "advAwswafDetected": {
-    "message": "Обнаружено"
-  },
-  "advAwswafChallengeEndpoint": {
-    "message": "Эндпоинт проверки"
   },
   "advAwswafDeletingCookieFmt": {
     "message": "Удаление куки {0}… Страница будет перезагружена"
@@ -3118,12 +3039,6 @@
   "advCloudflareSiteKeyCopied": {
     "message": "Site Key скопирован"
   },
-  "advCloudflareSitekeyLabel": {
-    "message": "Sitekey:"
-  },
-  "advCloudflareUrlLabel": {
-    "message": "URL:"
-  },
   "advCloudflareTypeChallenge": {
     "message": "Проверка"
   },
@@ -3132,9 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Управление ботами"
-  },
-  "advCloudflareCheckingVersion": {
-    "message": "Проверка версии Cloudflare… Страница будет перезагружена"
   },
   "advCloudflareNoSitekey": {
     "message": "Sitekey на странице не найден"
@@ -3153,12 +3065,6 @@
   },
   "advFuncaptchaBlobData": {
     "message": "Данные blob"
-  },
-  "advFuncaptchaBlobDataNotCaptured": {
-    "message": "Данные blob (не захвачены)"
-  },
-  "advFuncaptchaStatus": {
-    "message": "Статус"
   },
   "advFuncaptchaNotCaptured": {
     "message": "Не захвачено"
@@ -3193,14 +3099,8 @@
   "advGeetestSourceJsonConfig": {
     "message": "Конфигурация JSON"
   },
-  "advGeetestSourceLabel": {
-    "message": "Источник:"
-  },
   "advGeetestExtractedCaptchaId": {
     "message": "Извлечённый captchaId"
-  },
-  "advGeetestClickToCopyCaptchaId": {
-    "message": "Нажмите, чтобы скопировать captchaId"
   },
   "advGeetestProductLabel": {
     "message": "Продукт:"
@@ -4162,9 +4062,6 @@
   "advTurnstileSiteKeysTitle": {
     "message": "Ключи сайта Turnstile"
   },
-  "advTurnstileReloadingScripts": {
-    "message": "Перезагрузка страницы для сбора скриптов Turnstile"
-  },
   "settingsGroupAdvancedTools": {
     "message": "Расширенные инструменты"
   },
@@ -4945,5 +4842,23 @@
   },
   "combinationTranslateNeedsName": {
     "message": "Сначала напишите название."
+  },
+  "advancedInfoCloudflareDesc": {
+    "message": "Проверяет cookie проверки, находит ключи сайта Turnstile и анализирует его скрипты"
+  },
+  "advancedInfoDataDomeDesc": {
+    "message": "Проверяет cookie DataDome и анализирует его скрипты"
+  },
+  "advancedInfoFunCaptchaDesc": {
+    "message": "Находит открытый ключ, перехватывает данные браузера (BDA) и анализирует его скрипты"
+  },
+  "advancedInfoGeetestDesc": {
+    "message": "Определяет версию GeeTest (v3 или v4) и анализирует его скрипты"
+  },
+  "advancedInfoHcaptchaDesc": {
+    "message": "Находит ключ сайта, определяет версию hCaptcha и анализирует его скрипты"
+  },
+  "advancedInfoTurnstileDesc": {
+    "message": "Извлекает ключ сайта и анализирует скрипты Turnstile"
   }
 }
