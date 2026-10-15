@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "Challenge"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "Cookie {0} wird gelöscht … Die Seite wird neu geladen"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Bot-Management"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "Kein Sitekey auf der Seite gefunden"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "Sitekey konnte nicht extrahiert werden"
   },
   "advFuncaptchaPublicKey": {
     "message": "Öffentlicher Schlüssel"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "Leer lassen für Auto: die höchste Konfidenz der gefundenen Muster."
   },
-  "combinationOnlyTogether": {
-    "message": "Diese Muster zählen nur zusammen"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "Allein erkennen sie nichts. Gilt für diese Muster in jeder Kombination dieser Regel."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "Einige dieser Muster zählen auch allein. Anhaken, damit alle nur in Kombinationen zählen."
-  },
   "combinationModeAny": {
     "message": "Eines davon"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "Nur Kombinationen"
   },
+  "combinationStrictHint": { "message": "Ein Muster mit „Nur Kombinationen“ erkennt allein nichts; es zählt nur in Kombinationen." },
+  "combinationStrictMarkAll": { "message": "Alle markieren" },
+  "combinationStrictUnmarkAll": { "message": "Alle aufheben" },
+  "patternCombinationsOnlyHint": { "message": "Dieses Muster erkennt allein nichts; es zählt nur in Kombinationen, in jeder Kombination dieser Regel." },
   "detectionModalCombinations": {
     "message": "Zutreffende Kombinationen"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "Aufzeichnungen"
   },
+  "advHistoryCaptureTag": { "message": "Aufzeichnung" },
   "advFilterKindOther": {
     "message": "Andere Werkzeuge"
   },
@@ -4844,7 +4834,7 @@
     "message": "Schreibe zuerst den Namen."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "Prüft die Challenge-Cookies, findet Turnstile-Site-Keys und analysiert die Skripte"
+    "message": "Prüft die Challenge-Cookies und analysiert die Skripte"
   },
   "advancedInfoDataDomeDesc": {
     "message": "Prüft DataDome-Cookies und analysiert seine Skripte"

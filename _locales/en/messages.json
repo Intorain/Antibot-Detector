@@ -3162,9 +3162,9 @@
     "message": "Challenge",
     "description": "Badge: script type (AWS WAF challenge script)"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "Deleting {0} cookie... Page will reload",
-    "description": "Toast (AWS WAF and Turnstile). {0} = cookie name (aws-waf-token, cf_clearance)"
+    "description": "Toast before Analyze Scripts (AWS WAF, Cloudflare). {0} = cookie name (aws-waf-token, cf_clearance)"
   },
   "advCloudflareTypeLabel": {
     "message": "Type",
@@ -3184,12 +3184,6 @@
   "advCloudflareTypeBotManagement": {
     "message": "Bot Management",
     "description": "Cloudflare script type"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "No sitekey found on page"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "Failed to extract sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "Public Key",
@@ -3848,15 +3842,6 @@
   "combinationConfidenceAutoHint": {
     "message": "Leave empty for Auto: the highest confidence of the patterns found."
   },
-  "combinationOnlyTogether": {
-    "message": "These patterns only count together"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "On their own they detect nothing. Applies to these patterns in every combination of this rule."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "Some of these patterns also count on their own. Tick to make them all count only in combinations."
-  },
   "combinationModeAny": {
     "message": "One of these"
   },
@@ -3935,6 +3920,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "Combinations only"
   },
+  "combinationStrictHint": { "message": "A pattern marked “Combinations only” detects nothing on its own; it only counts inside combinations." },
+  "combinationStrictMarkAll": { "message": "Mark all" },
+  "combinationStrictUnmarkAll": { "message": "Unmark all" },
+  "patternCombinationsOnlyHint": { "message": "This pattern detects nothing on its own; it only counts inside combinations, in every combination of this rule." },
   "detectionModalCombinations": {
     "message": "Matched combinations"
   },
@@ -4403,6 +4392,7 @@
   "advFilterKindCapture": {
     "message": "Captures"
   },
+  "advHistoryCaptureTag": { "message": "Capture" },
   "advFilterKindOther": {
     "message": "Other tools"
   },
@@ -5101,7 +5091,7 @@
     "message": "Write the name first."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "Checks the challenge cookies, finds Turnstile site keys and analyzes its scripts"
+    "message": "Checks the challenge cookies and analyzes its scripts"
   },
   "advancedInfoDataDomeDesc": {
     "message": "Checks DataDome cookies and analyzes its scripts"

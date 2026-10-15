@@ -40,7 +40,14 @@ test('hCaptcha: version, site key and every Enterprise sign come from one parser
   assert.equal(plainChallenge.isEnterprise, false, 'the word inside another value is not the rqdata field');
   const api = target();
   hcaptchaInspectRequest({ url: 'https://js.hcaptcha.com/1/api.js?render=explicit&sentry=false&custom=true' }, api);
-  assert.deepEqual(plain(api.detectionMethods), ['api-param-sentry']);
+  assert.deepEqual(plain(api.detectionMethods), ['api-param-custom'], 'sentry=false is off; custom=true counts');
+  // hCaptcha's own demo: custom=False and reportapi on hCaptcha's own host are not Enterprise
+  const demo = target();
+  hcaptchaInspectRequest({ url: 'https://js.hcaptcha.com/1/api.js?reportapi=https%3A%2F%2Faccounts.hcaptcha.com&custom=False&pstissuer=https://pst-issuer.hcaptcha.com' }, demo);
+  assert.equal(demo.isEnterprise, false);
+  const ownEndpoint = target();
+  hcaptchaInspectRequest({ url: 'https://js.hcaptcha.com/1/api.js?endpoint=https%3A%2F%2Fcaptcha.shop.example&recaptchacompat=off' }, ownEndpoint);
+  assert.deepEqual(plain(ownEndpoint.detectionMethods), ['api-param-endpoint'], 'a custom endpoint is Enterprise; recaptchacompat is not');
   const none = target();
   hcaptchaInspectRequest({ url: 'https://js.hcaptcha.com/1/api.js?render=explicit&onload=cb' }, none);
   assert.equal(none.isEnterprise, false);
@@ -97,6 +104,7 @@ test('Imperva: Check Cookies counts ___utmvc', async () => {
   context.ImpervaAdvanced.tr = (key, fallback) => fallback;
   context.ImpervaAdvanced.fmt = (key, fallback) => fallback;
   vm.createContext(context);
+  vm.runInContext(read('utils/page-cookies.js'), context);
   vm.runInContext(read('sections/advanced/vendors/imperva/actions.js'), context);
   const module = new context.ImpervaAdvanced();
   module.tabInfo = { id: 1, url: 'https://shop.example/' };
@@ -151,6 +159,7 @@ test('Akamai: Start Capture checks for a running capture before deleting _abck',
     chrome: { cookies: { getAll: async () => [{ name: '_abck', value: 'v' }], remove: async query => calls.push(['remove', query.name]) } } };
   context.AkamaiAdvanced.tr = (key, fallback) => fallback;
   vm.createContext(context);
+  vm.runInContext(read('utils/page-cookies.js'), context);
   vm.runInContext(read('sections/advanced/vendors/akamai/lifecycle.js'), context);
   const module = new context.AkamaiAdvanced();
   module.tabInfo = { id: 1, url: 'https://shop.example/' };

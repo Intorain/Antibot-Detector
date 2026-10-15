@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "Desafio"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "Excluindo o cookie {0}… A página será recarregada"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Gerenciamento de bots"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "Nenhuma sitekey encontrada na página"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "Não foi possível extrair a sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "Chave pública"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "Deixe vazio para Auto: a maior confiança dos padrões encontrados."
   },
-  "combinationOnlyTogether": {
-    "message": "Estes padrões só contam juntos"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "Sozinhos, não detectam nada. Vale para estes padrões em todas as combinações desta regra."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "Alguns destes padrões também contam sozinhos. Marque para que todos contem só em combinações."
-  },
   "combinationModeAny": {
     "message": "Um destes"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "Só combinações"
   },
+  "combinationStrictHint": { "message": "Um padrão marcado como «Só combinações» não detecta nada sozinho; só conta dentro de combinações." },
+  "combinationStrictMarkAll": { "message": "Marcar todos" },
+  "combinationStrictUnmarkAll": { "message": "Desmarcar todos" },
+  "patternCombinationsOnlyHint": { "message": "Este padrão não detecta nada sozinho; só conta dentro de combinações, em todas as combinações desta regra." },
   "detectionModalCombinations": {
     "message": "Combinações correspondentes"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "Capturas"
   },
+  "advHistoryCaptureTag": { "message": "Captura" },
   "advFilterKindOther": {
     "message": "Outras ferramentas"
   },
@@ -4844,7 +4834,7 @@
     "message": "Escreva o nome primeiro."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "Verifica os cookies do desafio, encontra as chaves de site do Turnstile e analisa seus scripts"
+    "message": "Verifica os cookies do desafio e analisa seus scripts"
   },
   "advancedInfoDataDomeDesc": {
     "message": "Verifica os cookies do DataDome e analisa seus scripts"

@@ -5,6 +5,36 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [2.8.8] - 2026-10-15
+
+### Added
+
+- Detection: DeepSeek PoW and OpenAI Sentinel (ChatGPT) anti-bots, with their logos, each showing its proof-of-work challenge. The Turnstile check Sentinel asks for shows under Cloudflare Turnstile, marked as OpenAI's own.
+- Detection: a rule can now read the response of the URLs it names, such as a challenge asking for a proof of work. Evidence that comes after the scan, like a challenge sent when you post a message, is added to the page's result.
+
+### Changed
+
+- Rules editor: a combination's "Combinations only" row shows how many of its patterns are marked and offers Mark all / Unmark all, instead of a half-ticked checkbox.
+- Advanced → History: every card shows the tool that made it as a tag, Analyze Scripts and captures included, and the tool filter lists Analyze Scripts results under their own name.
+- Detection: Google BotGuard's own script (www.google.com/js/bg/…) is proof on its own, so it shows 100% instead of 75%.
+- Dark theme: protection logos in Rules and in Advanced's supported protections sit on dark tiles instead of white squares; the light theme is unchanged.
+- Cloudflare: a /cdn-cgi/challenge-platform/ challenge or bot-detection script on the page is proof (100%), its newer script path included; Turnstile's own frames are not.
+- Detection details: a matched request body shows the text that matched instead of the rule's pattern.
+
+### Removed
+
+- Advanced: Cloudflare Bot Management no longer offers Extract Site Key; the Turnstile site key stays under Advanced → Cloudflare Turnstile.
+
+### Fixed
+
+- Advanced: hCaptcha Check Version no longer reports Enterprise on standard site keys, such as hCaptcha's own demo page.
+- Advanced: Analyze Scripts on slow pages lists what loaded within 30 seconds instead of "Failed to start analysis", and no longer lists the page itself.
+- Advanced: Extract site key finds Friendly Captcha v2, older Yandex SmartCaptcha and Captcha.eu keys, and FunCaptcha keys from Arkose's iframe embed.
+- Advanced: script lists for Captcha.eu, Prosopo, MTCaptcha and Capy no longer include files from the vendor's own website.
+- Cloudflare: detection and Check Cookies now see cf_clearance, a partitioned cookie; Analyze Scripts clears it first so the bot-management scripts load again.
+- Advanced: the Check Cookies notification shows the same count as the cookie window.
+- Rules editor: a long method name, such as "Interceptores de JavaScript", no longer runs into its pattern count; it is cut with "…" and shown whole on hover.
+
 ## [2.8.7] - 2026-10-14
 
 ### Added
@@ -407,6 +437,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[2.8.8]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.7...v2.8.8
 [2.8.7]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.6...v2.8.7
 [2.8.6]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.5...v2.8.6
 [2.8.5]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.4...v2.8.5

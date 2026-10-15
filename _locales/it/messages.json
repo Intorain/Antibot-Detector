@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "Challenge"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "Eliminazione del cookie {0}… La pagina verrà ricaricata"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Gestione dei bot"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "Nessuna sitekey trovata nella pagina"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "Impossibile estrarre la sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "Chiave pubblica"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "Lascia vuoto per Auto: la confidenza più alta dei pattern trovati."
   },
-  "combinationOnlyTogether": {
-    "message": "Questi pattern contano solo insieme"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "Da soli non rilevano nulla. Vale per questi pattern in tutte le combinazioni di questa regola."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "Alcuni di questi pattern contano anche da soli. Spunta per farli contare tutti solo nelle combinazioni."
-  },
   "combinationModeAny": {
     "message": "Uno di questi"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "Solo combinazioni"
   },
+  "combinationStrictHint": { "message": "Un pattern segnato come «Solo combinazioni» non rileva nulla da solo; conta solo nelle combinazioni." },
+  "combinationStrictMarkAll": { "message": "Segna tutti" },
+  "combinationStrictUnmarkAll": { "message": "Togli tutti" },
+  "patternCombinationsOnlyHint": { "message": "Questo pattern non rileva nulla da solo; conta solo nelle combinazioni, in ogni combinazione di questa regola." },
   "detectionModalCombinations": {
     "message": "Combinazioni corrispondenti"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "Catture"
   },
+  "advHistoryCaptureTag": { "message": "Cattura" },
   "advFilterKindOther": {
     "message": "Altri strumenti"
   },
@@ -4844,7 +4834,7 @@
     "message": "Scrivi prima il nome."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "Controlla i cookie della sfida, trova le chiavi del sito Turnstile e analizza i suoi script"
+    "message": "Controlla i cookie della sfida e analizza i suoi script"
   },
   "advancedInfoDataDomeDesc": {
     "message": "Controlla i cookie di DataDome e ne analizza gli script"

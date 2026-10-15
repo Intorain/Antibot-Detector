@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "挑战"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "正在删除 {0} Cookie… 页面将重新加载"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "机器人管理"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "页面上未找到 sitekey"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "无法提取 sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "公钥"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "留空为自动：找到的模式中最高的置信度。"
   },
-  "combinationOnlyTogether": {
-    "message": "这些模式仅在一起时计数"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "单独时不检测任何内容。适用于此规则所有组合中的这些模式。"
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "其中一些模式也会单独计数。勾选后它们都只在组合中计数。"
-  },
   "combinationModeAny": {
     "message": "以下任一项"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "仅组合"
   },
+  "combinationStrictHint": { "message": "标记为“仅组合”的模式单独不会检测任何内容，只在组合中计数。" },
+  "combinationStrictMarkAll": { "message": "全部标记" },
+  "combinationStrictUnmarkAll": { "message": "全部取消" },
+  "patternCombinationsOnlyHint": { "message": "此模式单独不会检测任何内容，只在此规则的所有组合中计数。" },
   "detectionModalCombinations": {
     "message": "匹配的组合"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "捕获"
   },
+  "advHistoryCaptureTag": { "message": "捕获" },
   "advFilterKindOther": {
     "message": "其他工具"
   },
@@ -4844,7 +4834,7 @@
     "message": "请先填写名称。"
   },
   "advancedInfoCloudflareDesc": {
-    "message": "检查验证 Cookie，查找 Turnstile 站点密钥并分析其脚本"
+    "message": "检查验证 Cookie 并分析其脚本"
   },
   "advancedInfoDataDomeDesc": {
     "message": "检查 DataDome Cookie 并分析其脚本"

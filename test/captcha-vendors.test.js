@@ -41,7 +41,7 @@ test('every vendor matches its detector, logo, locale text and message type', ()
 
 test('every rule is safe to run in a page: anchored paths, no g/y flags, compound selectors, JSON-safe arguments, bounded time', () => {
   const regexes = [];
-  for (const vendor of Vendors.list) {
+  for (const vendor of [...Vendors.list, ...Object.values(Vendors.siteKeyOnly)]) {
     for (const rule of vendor.scripts) {
       assert.ok(rule.hosts || rule.domains, `${vendor.vendorId}: a host rule`);
       if (rule.path) { assert.match(rule.path.source, /^\^/, `${vendor.vendorId}: ${rule.path}`); regexes.push(rule.path); }
@@ -96,7 +96,8 @@ const urls = {
   },
   mtcaptcha: { 'https://service.mtcaptcha.com/mtcv1/client/mtcaptcha.min.js': 'client', 'https://service2.mtcaptcha.com/mtcv1/api/getchallenge.json?sk=MTPublic-abc123': 'api' },
   smartcaptcha: { 'https://smartcaptcha.yandexcloud.net/captcha.js': 'sdk', 'https://smartcaptcha.yandexcloud.net/check?sitekey=ysc1_x': 'check', 'https://smartcaptcha.yandexcloud.net/checkbox?sitekey=ysc1_x': 'frame' },
-  captchaeu: { 'https://www.captcha.eu/sdk.js': 'sdk', 'https://www.captcha.eu/challenge': 'challenge' },
+  captchaeu: { 'https://www.captcha.eu/sdk.js?v7aaaa1aa': 'sdk', 'https://www.captcha.eu/challenge?publicSecret=pub_1234567890abcdef': 'challenge',
+    'https://www.captcha.eu/challenge/quest?publicSecret=pub_1234567890abcdef': 'challenge', 'https://b.captcha.eu/bm?publicSecret=pub_1234567890abcdef': 'bot check' },
   qcloud: { 'https://turing.captcha.qcloud.com/TCaptcha.js': 'sdk', 'https://ssl.captcha.qq.com/TCaptcha.js': 'sdk', 'https://ca.turing.captcha.qcloud.com/TJNCaptcha-global.js': 'sdk',
     'https://turing.captcha.qcloud.com/cap_union_prehandle?aid=190012345': 'api', 'https://turing.captcha.qcloud.com/template/placeholder_v2.html': 'frame' },
   yidun: { 'https://cstaticdun.126.net/load.min.js': 'loader', 'https://cstaticdun.126.net/2.28.0/core-optimi.v2.28.0.min.js': 'core', 'https://c.dun.163.com/api/v3/get?id=abc': 'api' },
@@ -109,7 +110,10 @@ const urls = {
   aliexpress: { 'https://www.aliexpress.com//punish?x5secdata=abc': 'punish page', 'https://g.alicdn.com/bsop-static/sufei-punish/1.1.3/build/punishpage.min.js': 'punish script' }
 };
 const lookAlikes = ['https://js.prosopo.io.evil.example/js/procaptcha.bundle.js', 'https://evil.example/js.prosopo.io/js/x.js', 'https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js',
-  'https://g.alicdn.com/some/other/lib.js', 'https://www.binance.com/en/markets', 'https://captcha.eu.evil.example/sdk.js', 'ftp://js.prosopo.io/js/x.js', 'not a url'];
+  'https://g.alicdn.com/some/other/lib.js', 'https://www.binance.com/en/markets', 'https://captcha.eu.evil.example/sdk.js', 'ftp://js.prosopo.io/js/x.js', 'not a url',
+  // Vendors' own websites share the captcha's hosts or domains
+  'https://www.captcha.eu/wp-includes/js/jquery/jquery.min.js', 'https://www.captcha.eu/challenger-page/',
+  'https://prosopo.io/assets/scripts/formValidation.js', 'https://www.mtcaptcha.com/wp-includes/js/jquery/jquery.min.js', 'https://www.capy.me/static/js/app.js'];
 
 for (const vendor of Vendors.list) {
   test(`${vendor.vendorId}: Analyze Scripts lists its own requests and nothing else`, () => {
@@ -227,6 +231,55 @@ test('keys from several frames merge once; frames that failed are skipped; candi
   assert.ok(!merged.candidates.includes('https://cdn.example/app.js'));
 });
 
+test('keys only in a widget frame URL, as on the vendors\' live demos', () => {
+  // developer.friendlycaptcha.com/playground: a v2 widget made with createWidget(), no data-sitekey
+  const friendly = Vendors.probeArgs(Vendors.byVendorId.friendlycaptcha);
+  const frc = Probe.merge([{ result: run(Probe.probe, frame({ elements: [{ tag: 'div', attrs: { class: 'frc-captcha' } },
+    { tag: 'input', attrs: { name: 'frc-captcha-response' } },
+    { tag: 'iframe', attrs: { src: 'https://global.frcapi.com/api/v2/captcha/widget?origin=https%3A%2F%2Fshop.example&sess_c=2&sdk_v=0.1.32&lang=en&sitekey=FCMTROQPGU36Q253&theme=light' } }] }), friendly) }], friendly);
+  assert.deepEqual(plain(frc.keys.map(entry => entry.sitekey)), ['FCMTROQPGU36Q253']);
+  assert.equal(frc.facts.version, 'v2');
+  // smartcaptcha.yandexcloud.net/demo: an older 40-character key without the ysc1_ prefix
+  const smart = Vendors.probeArgs(Vendors.byVendorId.smartcaptcha);
+  const ysc = Probe.merge([{ result: run(Probe.probe, frame({ elements: [{ tag: 'div', attrs: { class: 'smart-captcha' } },
+    { tag: 'iframe', attrs: { src: 'https://smartcaptcha.yandexcloud.net/checkbox.en.e05501d67102945a.html?sitekey=FEXfAbHQsToo97VidNVk3j4dC74nGW1DgdxjtNB9&theme=light&hl=en' } }] }), smart) }], smart);
+  assert.deepEqual(plain(ysc.keys.map(entry => entry.sitekey)), ['FEXfAbHQsToo97VidNVk3j4dC74nGW1DgdxjtNB9']);
+});
+
+test('hCaptcha, FunCaptcha and reCAPTCHA Extract finds the key the way their live pages carry it', () => {
+  const keysFor = (vendorId, page) => {
+    const args = Vendors.probeArgs(Vendors.siteKeyOnly[vendorId]);
+    return plain(Probe.merge([{ result: run(Probe.probe, frame(page), args) }], args).keys.map(entry => entry.sitekey));
+  };
+  // accounts.hcaptcha.com/demo: the widget div, and the frame's #...&sitekey=
+  assert.deepEqual(keysFor('hcaptcha', { elements: [{ tag: 'div', attrs: { class: 'h-captcha', 'data-sitekey': 'a5f74b19-9e45-40e0-b45d-47ff91b7a6c2' } },
+    { tag: 'iframe', attrs: { src: 'https://newassets.hcaptcha.com/captcha/v1/abc/static/hcaptcha.html#frame=checkbox&id=0x1&host=accounts.hcaptcha.com&sitekey=a5f74b19-9e45-40e0-b45d-47ff91b7a6c2' } }] }),
+  ['a5f74b19-9e45-40e0-b45d-47ff91b7a6c2']);
+  // signup.live.com: the iframe embed URL inside the page's data
+  assert.deepEqual(keysFor('funcaptcha', { elements: [{ tag: 'script',
+    text: 'var ServerData = {"urlArkoseEnforcement":"https://iframe.arkoselabs.com/B7D8911C-5CC8-A9A3-35B0-554ACEE604DA/index.html?mkt=en"};' }] }),
+  ['B7D8911C-5CC8-A9A3-35B0-554ACEE604DA']);
+  assert.deepEqual(keysFor('funcaptcha', { elements: [{ tag: 'iframe', attrs: { src: 'https://iframe.arkoselabs.com/B7D8911C-5CC8-A9A3-35B0-554ACEE604DA/index.html' } }] }),
+    ['B7D8911C-5CC8-A9A3-35B0-554ACEE604DA']);
+  // google.com/recaptcha/api2/demo: the widget div and the anchor frame's k=
+  assert.deepEqual(keysFor('recaptcha', { elements: [{ tag: 'div', attrs: { class: 'g-recaptcha', 'data-sitekey': '6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-' } },
+    { tag: 'iframe', attrs: { src: 'https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-&co=aHR0cHM6&hl=en' } }] }),
+  ['6Le-wvkSAAAAAPBMRTvw0Q4Muexq9bi0DJwx_mJ-']);
+});
+
+test('Captcha.eu: the key comes from the SDK\'s own requests, and its website\'s files are not "scripts on this page"', () => {
+  const vendor = Vendors.byVendorId.captchaeu;
+  const args = Vendors.probeArgs(vendor);
+  const page = frame({ url: 'https://www.captcha.eu/', elements: [{ tag: 'script', attrs: { src: 'https://www.captcha.eu/sdk.js?v7aaaa1aa' } },
+    { tag: 'script', attrs: { src: 'https://www.captcha.eu/wp-includes/js/jquery/jquery.min.js' } }],
+  resources: ['https://b.captcha.eu/bm?publicSecret=pub_1234567890abcdef'] });
+  const merged = Probe.merge([{ result: run(Probe.probe, page, args) }], args);
+  assert.deepEqual(plain(merged.keys.map(entry => entry.sitekey)), ['pub_1234567890abcdef']);
+  assert.deepEqual(plain(merged.candidates), ['https://www.captcha.eu/sdk.js?v7aaaa1aa', 'https://b.captcha.eu/bm?publicSecret=pub_1234567890abcdef']);
+  assert.deepEqual(plain(run(Probe.probeGlobals, frame({ globals: { KROT: { publicSecret: 'pub_1234567890abcdef' } } }), args).found),
+    [{ sitekey: 'pub_1234567890abcdef', source: 'global' }]);
+});
+
 test('the worker routes every vendor\'s Analyze Scripts and reports only that vendor\'s requests', async () => {
   const event = () => { const listeners = new Set(); return { listeners, addListener: l => listeners.add(l), removeListener: l => listeners.delete(l),
     emit(...args) { for (const listener of Array.from(listeners)) listener(...args); } }; };
@@ -278,12 +331,19 @@ test('the no-tools screen groups supported protections by category, with logos a
   const Advanced = context.window.Advanced;
   const groups = Advanced.supportedProtectionGroups();
   assert.deepEqual(plain(groups.map(group => [group.key, group.items.length])), [['antibot', 6], ['captcha', 19]]);
-  for (const group of groups) for (const item of group.items) assert.ok(fs.existsSync(path.join(root, 'detectors/icons', item.logo)), item.logo);
+  for (const group of groups) for (const item of group.items) {
+    assert.ok(fs.existsSync(path.join(root, 'detectors/icons', item.logo)), item.logo);
+    // The dark theme's copy without the white square: node scripts/generate-dark-logos.js
+    assert.ok(fs.existsSync(path.join(root, 'assets/logos-dark', item.logo)), `assets/logos-dark/${item.logo}: run scripts/generate-dark-logos.js`);
+  }
   const html = Advanced.prototype.renderNoToolsState.call({ detectorManager: null }, (key, fallback) => fallback);
   assert.equal((html.match(/class="advanced-supported-logo[" ]/g) || []).length, 25);
   assert.equal((html.match(/class="advanced-supported-group"/g) || []).length, 2);
   assert.doesNotMatch(html, /advanced-supported-chip/);
-  assert.match(html, /title="Friendly Captcha"><img src="detectors\/icons\/custom\.png"/, 'no official logo: the Scrapfly default, as in Rules');
+  assert.match(html, /title="Friendly Captcha"><img class="advanced-supported-logo-dark" src="assets\/logos-dark\/custom\.png"[^>]*><img class="advanced-supported-logo-light" src="detectors\/icons\/custom\.png"/,
+    'no official logo: the Scrapfly default, as in Rules; the dark copy first, the original for the light theme');
+  const light = fs.readFileSync(path.join(root, 'modules/styles/theme-light.css'), 'utf8');
+  assert.match(light, /:root\[data-theme="light"\] \.advanced-supported-logo \.advanced-supported-logo-dark \{\s*display: none;/);
   // Nothing detected: the minimum and where to change it
   assert.match(html, /No protection detected/);
   assert.match(html, /above 50% confidence/);

@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "Проверка"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "Удаление куки {0}… Страница будет перезагружена"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "Управление ботами"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "Sitekey на странице не найден"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "Не удалось извлечь sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "Публичный ключ"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "Оставьте пустым для «Авто»: наибольшая уверенность найденных шаблонов."
   },
-  "combinationOnlyTogether": {
-    "message": "Эти шаблоны учитываются только вместе"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "Сами по себе они ничего не обнаруживают. Действует для этих шаблонов во всех комбинациях правила."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "Некоторые из этих шаблонов учитываются и сами по себе. Отметьте, чтобы все учитывались только в комбинациях."
-  },
   "combinationModeAny": {
     "message": "Одно из этих"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "Только комбинации"
   },
+  "combinationStrictHint": { "message": "Шаблон с пометкой «Только комбинации» сам по себе ничего не обнаруживает и учитывается только в комбинациях." },
+  "combinationStrictMarkAll": { "message": "Отметить все" },
+  "combinationStrictUnmarkAll": { "message": "Снять все" },
+  "patternCombinationsOnlyHint": { "message": "Этот шаблон сам по себе ничего не обнаруживает и учитывается только в комбинациях — во всех комбинациях этого правила." },
   "detectionModalCombinations": {
     "message": "Совпавшие комбинации"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "Захваты"
   },
+  "advHistoryCaptureTag": { "message": "Захват" },
   "advFilterKindOther": {
     "message": "Другие инструменты"
   },
@@ -4844,7 +4834,7 @@
     "message": "Сначала напишите название."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "Проверяет cookie проверки, находит ключи сайта Turnstile и анализирует его скрипты"
+    "message": "Проверяет cookie проверки и анализирует его скрипты"
   },
   "advancedInfoDataDomeDesc": {
     "message": "Проверяет cookie DataDome и анализирует его скрипты"

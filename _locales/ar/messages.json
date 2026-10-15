@@ -3030,7 +3030,7 @@
   "advAwswafTypeChallenge": {
     "message": "تحدٍّ"
   },
-  "advAwswafDeletingCookieFmt": {
+  "advCommonDeletingCookieFmt": {
     "message": "جارٍ حذف ملف تعريف الارتباط {0}… ستُعاد تحميل الصفحة"
   },
   "advCloudflareTypeLabel": {
@@ -3047,12 +3047,6 @@
   },
   "advCloudflareTypeBotManagement": {
     "message": "إدارة الروبوتات"
-  },
-  "advCloudflareNoSitekey": {
-    "message": "لم يتم العثور على sitekey في الصفحة"
-  },
-  "advCloudflareFailedExtractSitekey": {
-    "message": "تعذّر استخراج sitekey"
   },
   "advFuncaptchaPublicKey": {
     "message": "المفتاح العام"
@@ -3591,15 +3585,6 @@
   "combinationConfidenceAutoHint": {
     "message": "اتركه فارغًا للوضع التلقائي: أعلى ثقة بين الأنماط الموجودة."
   },
-  "combinationOnlyTogether": {
-    "message": "هذه الأنماط لا تُحتسب إلا معًا"
-  },
-  "combinationOnlyTogetherHint": {
-    "message": "لا تكشف شيئًا بمفردها. ينطبق على هذه الأنماط في كل تركيبات هذه القاعدة."
-  },
-  "combinationOnlyTogetherMixed": {
-    "message": "بعض هذه الأنماط يُحتسب بمفرده أيضًا. حدّد المربع لتُحتسب كلها في التركيبات فقط."
-  },
   "combinationModeAny": {
     "message": "واحد مما يلي"
   },
@@ -3678,6 +3663,10 @@
   "patternCombinationsOnlyBadge": {
     "message": "تركيبات فقط"
   },
+  "combinationStrictHint": { "message": "النمط المعلَّم بـ «تركيبات فقط» لا يكتشف شيئًا بمفرده؛ يُحتسب داخل التركيبات فقط." },
+  "combinationStrictMarkAll": { "message": "تعليم الكل" },
+  "combinationStrictUnmarkAll": { "message": "إلغاء تعليم الكل" },
+  "patternCombinationsOnlyHint": { "message": "هذا النمط لا يكتشف شيئًا بمفرده؛ يُحتسب داخل التركيبات فقط، في كل تركيبات هذه القاعدة." },
   "detectionModalCombinations": {
     "message": "التركيبات المتطابقة"
   },
@@ -4146,6 +4135,7 @@
   "advFilterKindCapture": {
     "message": "الالتقاطات"
   },
+  "advHistoryCaptureTag": { "message": "التقاط" },
   "advFilterKindOther": {
     "message": "أدوات أخرى"
   },
@@ -4844,7 +4834,7 @@
     "message": "اكتب الاسم أولًا."
   },
   "advancedInfoCloudflareDesc": {
-    "message": "يفحص ملفات تعريف الارتباط الخاصة بالتحدي ويعثر على مفاتيح مواقع Turnstile ويحلل سكربتاته"
+    "message": "يفحص ملفات تعريف الارتباط الخاصة بالتحدي ويحلل سكربتاته"
   },
   "advancedInfoDataDomeDesc": {
     "message": "يفحص ملفات تعريف ارتباط DataDome ويحلل نصوصه البرمجية"

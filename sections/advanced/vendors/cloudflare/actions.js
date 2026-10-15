@@ -6,11 +6,11 @@ CloudflareAdvanced.prototype.checkCookies = async function() {
             // Bot management, clearance, rate limiting, load balancer and challenge-in-progress cookies
             const expected = ['__cf_bm', 'cf_clearance', '_cfuvid', '__cflb', 'cf_chl_*'];
             const matches = (pattern, name) => pattern.endsWith('*') ? name.startsWith(pattern.slice(0, -1)) : name === pattern;
-            const cookies = (await chrome.cookies.getAll({ url: this.tabInfo.url }))
+            const cookies = (await PageCookies.getAll({ url: this.tabInfo.url }, this.tabInfo.id))
                 .filter(cookie => expected.some(pattern => matches(pattern, cookie.name)));
-            const found = expected.filter(pattern => cookies.some(cookie => matches(pattern, cookie.name))).length;
-            if (found > 0) {
-                NotificationHelper.success(AdvancedUtils.notifications.checkCookies.success(found, expected.length));
+            // Same count as the window, which lists every matching cookie
+            if (cookies.length > 0) {
+                NotificationHelper.success(AdvancedUtils.notifications.checkCookies.success(cookies.length, Math.max(expected.length, cookies.length)));
             } else {
                 NotificationHelper.info(AdvancedUtils.notifications.checkCookies.none('Cloudflare'));
             }
@@ -23,25 +23,7 @@ CloudflareAdvanced.prototype.checkCookies = async function() {
 
 
 
-CloudflareAdvanced.prototype.extractSiteKey = async function() {
-        // Cloudflare's CAPTCHA is Turnstile: same keys, same dialog as Advanced → Turnstile
-        try {
-            if (!this.tabInfo || !this.tabInfo.id) {
-                throw new Error('Tab information not available');
-            }
-            const keys = await TurnstileSiteKeys.extract(this.tabInfo.id);
-            if (keys.length === 0) {
-                NotificationHelper.error(this._txt('advCloudflareNoSitekey', 'No sitekey found on page'));
-                return;
-            }
-            CloudflareSiteKeyView.show(this, keys);
-        } catch (error) {
-            Logger.error('NETWORK', '[Cloudflare] Failed to extract the site key:', error);
-            NotificationHelper.error(this._txt('advCloudflareFailedExtractSitekey', 'Failed to extract sitekey'));
-        }
-    };
-
-
 CloudflareAdvanced.prototype.analyzeScripts = function() {
-        return this.startScriptAnalysis();
+        // Cloudflare injects its bot-management scripts only until cf_clearance is set
+        return this.startScriptAnalysis({ clearCookies: ['cf_clearance'] });
     };
