@@ -471,6 +471,19 @@
   outline-offset: 2px;
 }
 
+/* Detections and cache carry a fixed identity colour; confidence and difficulty stay toned by their value */
+.stat-inline.detections-count {
+  --tone: var(--purple-light);
+  --tone-bg: rgba(139, 92, 246, 0.14);
+  --tone-border: rgba(167, 139, 250, 0.26);
+}
+
+.stat-inline.cache-stat {
+  --tone: var(--teal-light);
+  --tone-bg: rgba(20, 184, 166, 0.14);
+  --tone-border: rgba(45, 212, 191, 0.26);
+}
+
 .stat-icon-inline {
   flex-shrink: 0;
   width: 20px;
@@ -1948,7 +1961,7 @@
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--text-primary);
+  color: var(--g-d4d4d4);
   overflow-wrap: anywhere;
 }
 
@@ -1996,7 +2009,7 @@
 }
 
 .match-combo.is-collapsible > .match-combo-head:hover .match-combo-chevron {
-  color: var(--text-primary);
+  color: var(--g-d4d4d4);
 }
 
 .match-combo-body {
@@ -2031,7 +2044,7 @@
   min-width: 0;
   font-size: 12px;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: var(--g-d4d4d4);
 }
 
 .match-combo-mark {

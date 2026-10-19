@@ -111,14 +111,11 @@ ReCaptchaAdvanced.prototype.displayCallbackModal = function(data) {
         const { clients = [], domCallbacks = [], scriptCallbacks = [] } = data || {};
 
         const clientCards = clients.map((client) => K.kitCard(
-            K.kitField(recaptchaText('advCommonSiteKey', 'Site Key'), client.sitekey)
-            + (client.callback
+            (client.callback
                 ? K.kitField(recaptchaText('advRecaptchaCallbackFunction', 'Callback Function'), client.callback)
                   + K.kitField(recaptchaText('advRecaptchaCallbackPath', 'Callback Path'), client.callbackPath)
                 : K.kitNote(recaptchaText('advRecaptchaNoCallback', 'No callback defined')))
-            + K.kitField(recaptchaText('advCommonPage', 'Page'), client.pageurl, { mono: false }),
-            K.kitChip(client.version || 'V2', client.version === 'V3' ? 'purple' : 'blue')
-            + K.kitChip(recaptchaText('advRecaptchaClientIdFmt', 'Client ID: {0}', client.id), 'neutral')
+            + K.kitField(recaptchaText('advCommonPage', 'Page'), client.pageurl, { mono: false })
         )).join('');
 
         const list = (items) => items.map(cb => K.kitField(recaptchaText('advRecaptchaCallbackFunction', 'Callback Function'), cb)).join('');

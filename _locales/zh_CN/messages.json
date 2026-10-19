@@ -1,99 +1,290 @@
 {
-  "detectionFailedTitle": { "message": "扫描失败" },
-  "detectionInterruptedTitle": { "message": "扫描已中断" },
-  "detectionUnscannedTitle": { "message": "尚无已完成的扫描" },
-  "detectionRetryScanDesc": { "message": "扫描未完成。请重新加载页面后重试。" },
-  "settingsReadFailedToast": { "message": "无法加载设置。当前值已保留。" },
-  "settingsWriteFailedToast": { "message": "无法保存设置。更改已保留，请重试。" },
-  "settingsDraftPendingToast": { "message": "更改待保存。请保存设置以应用。" },
-  "settingsImportSaveFailedToast": { "message": "无法保存导入的设置。当前设置和语言已保留。" },
-  "settingsAppliesImmediately": { "message": "立即生效。" },
-  "settingsDataPortableDesc": { "message": "导出或导入偏好设置。集成连接信息保留在此浏览器中。" },
-  "settingsImportReadFailedToast": { "message": "无法读取有效的设置文件。未进行任何更改。" },
-  "rulesUiSaveFailed": { "message": "无法保存此规则。更改已保留，请重试。" },
-  "advToolReloadScriptsHint": { "message": "重新加载页面以分析防护脚本" },
-  "advToolResetScriptsHint": { "message": "重置防护 Cookie 并重新加载页面以分析脚本" },
-  "advToolReloadVersionHint": { "message": "重新加载页面以检测防护版本" },
-  "advToolCaptureResetHint": { "message": "重置防护 Cookie 并开始记录" },
-  "advToolCookiesHint": { "message": "检查此防护使用的 Cookie" },
-  "advToolVersionHint": { "message": "查看可用的版本信息" },
-  "advToolSiteKeyHint": { "message": "查找此页面上的 CAPTCHA 站点密钥" },
-  "advToolSelectorHint": { "message": "查找 CAPTCHA 组件的选择器" },
-  "advToolCallbackHint": { "message": "检查 CAPTCHA 回调函数" },
-  "advToolSensorHint": { "message": "重置防护 Cookie 并重新加载页面以记录传感器数据" },
-  "advToolCaptureHint": { "message": "记录此页面的数据" },
-  "advToolStopCaptureHint": { "message": "停止记录此页面的数据" },
-  "advToolWorking": { "message": "处理中…" },
-  "advToolWaitingReload": { "message": "正在重新加载页面并收集结果，需要几秒钟…" },
-  "advToolNoResult": { "message": "没有结果：防护未发送任何数据。请重新加载页面后重试。" },
-  "advSiteKeyTitleFmt": { "message": "{0} 站点密钥" },
-  "advSiteKeyNotFound": { "message": "此页面未找到站点密钥。请打开或触发验证码后重试。" },
-  "advSiteKeyFoundIn": { "message": "发现位置" },
-  "advSiteKeySourceWidget": { "message": "组件" },
-  "advSiteKeySourceRequest": { "message": "请求" },
-  "advSiteKeySourceScript": { "message": "页面脚本" },
-  "advSiteKeySourceGlobal": { "message": "页面变量" },
-  "advSiteKeyFrame": { "message": "框架" },
-  "advSiteKeyScriptsOnPage": { "message": "此页面上的脚本" },
-  "advancedInfoCaptchaKeyDesc": { "message": "提取站点密钥并分析其脚本" },
-  "advancedInfoCaptchaScriptsDesc": { "message": "分析其脚本" },
-  "advToolActionFailedFmt": { "message": "无法完成此操作：{0}", "description": "Advanced tool action failure. {0} = error details" },
-  "statsChartPrevious": { "message": "图表上一页" },
-  "statsChartNext": { "message": "图表下一页" },
-  "statsChartPage": { "message": "第 {0} 页，共 {1} 页" },
-  "statsChartShowing": { "message": "显示第 {0}–{1} 项，共 {2} 项" },
-  "statsSectionsLabel": { "message": "统计分区" },
-  "statsSectionOverview": { "message": "概览" },
-  "statsSectionActivity": { "message": "活动" },
-  "statsSectionProtections": { "message": "防护措施" },
-  "statsSectionDomains": { "message": "域名" },
-  "statsSectionConfidence": { "message": "置信度" },
-  "statsExportCSV": { "message": "导出 CSV" },
-  "statsExportJSON": { "message": "导出 JSON" },
-  "statsExportPrivacy": { "message": "导出内容包含域名和检测摘要，不包含 Cookie、页面内容或 URL 参数。" },
-  "statsExportScopeFmt": { "message": "导出所选时间范围：{0} 条记录" },
-  "statsExportStartedFmt": { "message": "下载已开始：{0}" },
-  "statsExportFailed": { "message": "无法导出数据。请重试。" },
-  "statsLoadFailed": { "message": "无法加载历史记录。请重新加载此页面。" },
-  "statsRangeEmptyTitle": { "message": "此时间范围内没有记录" },
-  "statsRangeEmptyDesc": { "message": "请选择更长的日期范围，以查看已保存的历史记录。" },
-  "statsDetectionRate": { "message": "包含检测结果的记录" },
-  "statsActiveDays": { "message": "活跃天数" },
-  "statsAverageConfidence": { "message": "平均置信度" },
-  "statsDailyVisits": { "message": "每日历史记录" },
-  "statsActivityCalendar": { "message": "活动日历" },
-  "statsActivityCalendarHint": { "message": "每个方格代表本地日历中的一天。蓝色越深，表示保存的记录越多。" },
-  "statsHourlyActivity": { "message": "按小时统计活动" },
-  "statsWeekdayActivity": { "message": "按星期统计活动" },
-  "statsLocalTimeNote": { "message": "日期和小时使用您的本地时区。" },
-  "statsTimelineLimitFmt": { "message": "显示最近 {0} 天。汇总和导出包含所选时间范围内的全部记录。" },
-  "statsProtectionRanking": { "message": "防护措施排名" },
-  "statsCategoryTrend": { "message": "类别随时间的变化" },
-  "statsCategoryOverlap": { "message": "同时检测到的类别" },
-  "statsCategoryOverlapHint": { "message": "同时包含两个类别的历史记录数量。对角线单元格显示包含该类别的记录。" },
-  "statsProtectionDetails": { "message": "所有防护措施" },
-  "statsDomainRanking": { "message": "域名排名" },
-  "statsDomainMap": { "message": "访问与检测" },
-  "statsDomainMapHint": { "message": "每个点代表一个域名。点越大，表示不同的防护措施越多。" },
-  "statsDomainDetails": { "message": "所有域名" },
-  "statsDomainSearch": { "message": "搜索域名..." },
-  "statsDomainSortLabel": { "message": "域名排序" },
-  "statsSortVisits": { "message": "访问最多" },
-  "statsSortDetections": { "message": "检测最多" },
-  "statsSortConfidence": { "message": "置信度最高" },
-  "statsSortName": { "message": "域名名称" },
-  "statsConfidenceDistribution": { "message": "置信度分布" },
-  "statsConfidenceTrend": { "message": "置信度随时间的变化" },
-  "statsCategoryConfidence": { "message": "各类别的置信度" },
-  "statsConfidenceNote": { "message": "置信度描述已保存检测证据的强度，并不能证明存在指纹识别或正在进行的验证挑战。" },
-  "statsConfidenceKnownFmt": { "message": "{0} 项检测有置信度值；{1} 项没有有效评分。" },
-  "statsProtectionColumn": { "message": "防护措施" },
-  "statsCategoryColumn": { "message": "类别" },
-  "statsDomainColumn": { "message": "域名" },
-  "statsTableCountFmt": { "message": "{0} 行，共 {1} 行" },
-  "statsTableMore": { "message": "显示更多" },
-  "statsNoMatchingDomains": { "message": "没有与搜索条件匹配的域名。" },
-  "statsSelectionNote": { "message": "图表和导出使用所选日期范围。历史记录代表已保存的检测结果，而非每一次浏览器访问。" },
+  "detectionFailedTitle": {
+    "message": "扫描失败"
+  },
+  "detectionInterruptedTitle": {
+    "message": "扫描已中断"
+  },
+  "detectionUnscannedTitle": {
+    "message": "尚无已完成的扫描"
+  },
+  "detectionRetryScanDesc": {
+    "message": "扫描未完成。请重新加载页面后重试。"
+  },
+  "settingsReadFailedToast": {
+    "message": "无法加载设置。当前值已保留。"
+  },
+  "settingsWriteFailedToast": {
+    "message": "无法保存设置。更改已保留，请重试。"
+  },
+  "settingsDraftPendingToast": {
+    "message": "更改待保存。请保存设置以应用。"
+  },
+  "settingsImportSaveFailedToast": {
+    "message": "无法保存导入的设置。当前设置和语言已保留。"
+  },
+  "settingsAppliesImmediately": {
+    "message": "立即生效。"
+  },
+  "settingsDataPortableDesc": {
+    "message": "导出或导入偏好设置。集成连接信息保留在此浏览器中。"
+  },
+  "settingsImportReadFailedToast": {
+    "message": "无法读取有效的设置文件。未进行任何更改。"
+  },
+  "rulesUiSaveFailed": {
+    "message": "无法保存此规则。更改已保留，请重试。"
+  },
+  "advToolReloadScriptsHint": {
+    "message": "重新加载页面以分析防护脚本"
+  },
+  "advToolResetScriptsHint": {
+    "message": "重置防护 Cookie 并重新加载页面以分析脚本"
+  },
+  "advToolReloadVersionHint": {
+    "message": "重新加载页面以检测防护版本"
+  },
+  "advToolCaptureResetHint": {
+    "message": "重置防护 Cookie 并开始记录"
+  },
+  "advToolCookiesHint": {
+    "message": "检查此防护使用的 Cookie"
+  },
+  "advToolVersionHint": {
+    "message": "查看可用的版本信息"
+  },
+  "advToolSiteKeyHint": {
+    "message": "查找此页面上的 CAPTCHA 站点密钥"
+  },
+  "advToolSelectorHint": {
+    "message": "查找 CAPTCHA 组件的选择器"
+  },
+  "advToolCallbackHint": {
+    "message": "检查 CAPTCHA 回调函数"
+  },
+  "advToolSensorHint": {
+    "message": "重置防护 Cookie 并重新加载页面以记录传感器数据"
+  },
+  "advToolCaptureHint": {
+    "message": "记录此页面的数据"
+  },
+  "advToolStopCaptureHint": {
+    "message": "停止记录此页面的数据"
+  },
+  "advToolWorking": {
+    "message": "处理中…"
+  },
+  "advToolWaitingReload": {
+    "message": "正在重新加载页面并收集结果，需要几秒钟…"
+  },
+  "advToolNoResult": {
+    "message": "没有结果：防护未发送任何数据。请重新加载页面后重试。"
+  },
+  "advSiteKeyTitleFmt": {
+    "message": "{0} 站点密钥"
+  },
+  "advSiteKeyNotFound": {
+    "message": "此页面未找到站点密钥。请打开或触发验证码后重试。"
+  },
+  "advSiteKeyFoundIn": {
+    "message": "发现位置"
+  },
+  "advSiteKeySourceWidget": {
+    "message": "组件"
+  },
+  "advSiteKeySourceRequest": {
+    "message": "请求"
+  },
+  "advSiteKeySourceScript": {
+    "message": "页面脚本"
+  },
+  "advSiteKeySourceGlobal": {
+    "message": "页面变量"
+  },
+  "advSiteKeyFrame": {
+    "message": "框架"
+  },
+  "advSiteKeyScriptsOnPage": {
+    "message": "此页面上的脚本"
+  },
+  "advancedInfoCaptchaKeyDesc": {
+    "message": "提取站点密钥并分析其脚本"
+  },
+  "advancedInfoCaptchaScriptsDesc": {
+    "message": "分析其脚本"
+  },
+  "advToolActionFailedFmt": {
+    "message": "无法完成此操作：{0}",
+    "description": "Advanced tool action failure. {0} = error details"
+  },
+  "statsChartPrevious": {
+    "message": "图表上一页"
+  },
+  "statsChartNext": {
+    "message": "图表下一页"
+  },
+  "statsChartPage": {
+    "message": "第 {0} 页，共 {1} 页"
+  },
+  "statsChartShowing": {
+    "message": "显示第 {0}–{1} 项，共 {2} 项"
+  },
+  "statsSectionsLabel": {
+    "message": "统计分区"
+  },
+  "statsSectionOverview": {
+    "message": "概览"
+  },
+  "statsSectionActivity": {
+    "message": "活动"
+  },
+  "statsSectionProtections": {
+    "message": "防护措施"
+  },
+  "statsSectionDomains": {
+    "message": "域名"
+  },
+  "statsSectionConfidence": {
+    "message": "置信度"
+  },
+  "statsExportCSV": {
+    "message": "导出 CSV"
+  },
+  "statsExportJSON": {
+    "message": "导出 JSON"
+  },
+  "statsExportPrivacy": {
+    "message": "导出内容包含域名和检测摘要，不包含 Cookie、页面内容或 URL 参数。"
+  },
+  "statsExportScopeFmt": {
+    "message": "导出所选时间范围：{0} 条记录"
+  },
+  "statsExportStartedFmt": {
+    "message": "下载已开始：{0}"
+  },
+  "statsExportFailed": {
+    "message": "无法导出数据。请重试。"
+  },
+  "statsLoadFailed": {
+    "message": "无法加载历史记录。请重新加载此页面。"
+  },
+  "statsRangeEmptyTitle": {
+    "message": "此时间范围内没有记录"
+  },
+  "statsRangeEmptyDesc": {
+    "message": "请选择更长的日期范围，以查看已保存的历史记录。"
+  },
+  "statsDetectionRate": {
+    "message": "包含检测结果的记录"
+  },
+  "statsActiveDays": {
+    "message": "活跃天数"
+  },
+  "statsAverageConfidence": {
+    "message": "平均置信度"
+  },
+  "statsDailyVisits": {
+    "message": "每日历史记录"
+  },
+  "statsActivityCalendar": {
+    "message": "活动日历"
+  },
+  "statsActivityCalendarHint": {
+    "message": "每个方格代表本地日历中的一天。蓝色越深，表示保存的记录越多。"
+  },
+  "statsHourlyActivity": {
+    "message": "按小时统计活动"
+  },
+  "statsWeekdayActivity": {
+    "message": "按星期统计活动"
+  },
+  "statsLocalTimeNote": {
+    "message": "日期和小时使用您的本地时区。"
+  },
+  "statsTimelineLimitFmt": {
+    "message": "显示最近 {0} 天。汇总和导出包含所选时间范围内的全部记录。"
+  },
+  "statsProtectionRanking": {
+    "message": "防护措施排名"
+  },
+  "statsCategoryTrend": {
+    "message": "类别随时间的变化"
+  },
+  "statsCategoryOverlap": {
+    "message": "同时检测到的类别"
+  },
+  "statsCategoryOverlapHint": {
+    "message": "同时包含两个类别的历史记录数量。对角线单元格显示包含该类别的记录。"
+  },
+  "statsProtectionDetails": {
+    "message": "所有防护措施"
+  },
+  "statsDomainRanking": {
+    "message": "域名排名"
+  },
+  "statsDomainMap": {
+    "message": "访问与检测"
+  },
+  "statsDomainMapHint": {
+    "message": "每个点代表一个域名。点越大，表示不同的防护措施越多。"
+  },
+  "statsDomainDetails": {
+    "message": "所有域名"
+  },
+  "statsDomainSearch": {
+    "message": "搜索域名..."
+  },
+  "statsDomainSortLabel": {
+    "message": "域名排序"
+  },
+  "statsSortVisits": {
+    "message": "访问最多"
+  },
+  "statsSortDetections": {
+    "message": "检测最多"
+  },
+  "statsSortConfidence": {
+    "message": "置信度最高"
+  },
+  "statsSortName": {
+    "message": "域名名称"
+  },
+  "statsConfidenceDistribution": {
+    "message": "置信度分布"
+  },
+  "statsConfidenceTrend": {
+    "message": "置信度随时间的变化"
+  },
+  "statsCategoryConfidence": {
+    "message": "各类别的置信度"
+  },
+  "statsConfidenceNote": {
+    "message": "置信度描述已保存检测证据的强度，并不能证明存在指纹识别或正在进行的验证挑战。"
+  },
+  "statsConfidenceKnownFmt": {
+    "message": "{0} 项检测有置信度值；{1} 项没有有效评分。"
+  },
+  "statsProtectionColumn": {
+    "message": "防护措施"
+  },
+  "statsCategoryColumn": {
+    "message": "类别"
+  },
+  "statsDomainColumn": {
+    "message": "域名"
+  },
+  "statsTableCountFmt": {
+    "message": "{0} 行，共 {1} 行"
+  },
+  "statsTableMore": {
+    "message": "显示更多"
+  },
+  "statsNoMatchingDomains": {
+    "message": "没有与搜索条件匹配的域名。"
+  },
+  "statsSelectionNote": {
+    "message": "图表和导出使用所选日期范围。历史记录代表已保存的检测结果，而非每一次浏览器访问。"
+  },
   "extensionName": {
     "message": "Scrapfly:反机器人检测器"
   },
@@ -454,10 +645,10 @@
     "message": "查看结果"
   },
   "advancedStep3Desc": {
-    "message": "捕获的数据会暂时存储 (30 分钟),并具有完整的导出功能"
+    "message": "捕获的数据会暂时存储，并具有完整的导出功能"
   },
   "advancedFooterHint": {
-    "message": "采集数据保留30分钟。"
+    "message": "捕获会按设置中指定的时长保留。"
   },
   "settings": {
     "message": "设置"
@@ -1487,7 +1678,9 @@
   "btnExtractSiteKey": {
     "message": "提取 SiteKey"
   },
-  "btnExtractPublicKey": { "message": "提取公钥" },
+  "btnExtractPublicKey": {
+    "message": "提取公钥"
+  },
   "btnObtainSelector": {
     "message": "获取选择器"
   },
@@ -1683,9 +1876,17 @@
   "advancedToolsEmptyTitle": {
     "message": "未检测到防护"
   },
-  "advancedToolsEmptyDescFmt": { "message": "此页面上没有置信度高于 {0}% 的受支持防护。你可以在 设置 → 检测 中更改此最低值。", "description": "{0} = minimum confidence for Advanced tools (percent)" },
-  "advancedToolsLowConfidenceTitle": { "message": "检测到的防护置信度较低" },
-  "advancedToolsLowConfidenceDescFmt": { "message": "已检测到 {0}，置信度为 {1}%。只有高于 {2}% 时才会显示工具。你可以在 设置 → 检测 中调低此最低值。", "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)" },
+  "advancedToolsEmptyDescFmt": {
+    "message": "此页面上没有置信度高于 {0}% 的受支持防护。你可以在 设置 → 检测 中更改此最低值。",
+    "description": "{0} = minimum confidence for Advanced tools (percent)"
+  },
+  "advancedToolsLowConfidenceTitle": {
+    "message": "检测到的防护置信度较低"
+  },
+  "advancedToolsLowConfidenceDescFmt": {
+    "message": "已检测到 {0}，置信度为 {1}%。只有高于 {2}% 时才会显示工具。你可以在 设置 → 检测 中调低此最低值。",
+    "description": "{0} = protection name, {1} = its confidence, {2} = minimum confidence (percent)"
+  },
   "advancedToolsSupportedLabel": {
     "message": "支持的防护"
   },
@@ -2460,9 +2661,15 @@
   "advCommonUrlCopied": {
     "message": "已复制 URL"
   },
-  "advScriptTypeCollector": { "message": "收集器" },
-  "advScriptTypeCaptchaCheck": { "message": "CAPTCHA 校验" },
-  "advScriptTypeInterstitial": { "message": "插页" },
+  "advScriptTypeCollector": {
+    "message": "收集器"
+  },
+  "advScriptTypeCaptchaCheck": {
+    "message": "CAPTCHA 校验"
+  },
+  "advScriptTypeInterstitial": {
+    "message": "插页"
+  },
   "advCommonCaptured": {
     "message": "捕获时间"
   },
@@ -3669,10 +3876,18 @@
   "patternCombinationsOnlyBadge": {
     "message": "仅组合"
   },
-  "combinationStrictHint": { "message": "标记为“仅组合”的模式单独不会检测任何内容，只在组合中计数。" },
-  "combinationStrictMarkAll": { "message": "全部标记" },
-  "combinationStrictUnmarkAll": { "message": "全部取消" },
-  "patternCombinationsOnlyHint": { "message": "此模式单独不会检测任何内容，只在此规则的所有组合中计数。" },
+  "combinationStrictHint": {
+    "message": "标记为“仅组合”的模式单独不会检测任何内容，只在组合中计数。"
+  },
+  "combinationStrictMarkAll": {
+    "message": "全部标记"
+  },
+  "combinationStrictUnmarkAll": {
+    "message": "全部取消"
+  },
+  "patternCombinationsOnlyHint": {
+    "message": "此模式单独不会检测任何内容，只在此规则的所有组合中计数。"
+  },
   "detectionModalCombinations": {
     "message": "匹配的组合"
   },
@@ -3860,7 +4075,7 @@
     "message": "检测排序"
   },
   "settingsCategoryOrderHelp": {
-    "message": "检测列表和历史记录中检测的顺序。拖动卡片即可调整；同一类别内，置信度最高的排在前面。"
+    "message": "检测列表、历史记录和规则中类别的顺序。拖动卡片即可调整；同一类别内，检测结果按置信度从高到低排列。"
   },
   "settingsOrderHighestConfidenceFirst": {
     "message": "置信度最高的优先"
@@ -4141,7 +4356,9 @@
   "advFilterKindCapture": {
     "message": "捕获"
   },
-  "advHistoryCaptureTag": { "message": "捕获" },
+  "advHistoryCaptureTag": {
+    "message": "捕获"
+  },
   "advFilterKindOther": {
     "message": "其他工具"
   },
@@ -4856,5 +5073,480 @@
   },
   "advancedInfoTurnstileDesc": {
     "message": "提取站点密钥并分析 Turnstile 脚本"
+  },
+  "statsExport": {
+    "message": "导出"
+  },
+  "statsExportAllCategories": {
+    "message": "导出始终包含所有类别，与本页显示的内容无关。"
+  },
+  "statsScopeLabel": {
+    "message": "显示"
+  },
+  "statsScopeHiddenFmt": {
+    "message": "已隐藏的指纹识别检测：{0}（占全部的 {1}）"
+  },
+  "statsScopeShowFingerprint": {
+    "message": "显示指纹识别"
+  },
+  "statsScopeKeepOne": {
+    "message": "至少要保留一个已选类别。"
+  },
+  "statsScopeRulesNote": {
+    "message": "规则始终使用所有类别。"
+  },
+  "statsContextFmt": {
+    "message": "页面：{0} · 域名：{1} · {2} · {3}"
+  },
+  "statsRangeSinceFmt": {
+    "message": "自 {0} 起的全部历史记录"
+  },
+  "statsCompareCaptionFmt": {
+    "message": "与上一周期（{0}）相比"
+  },
+  "statsCompareNone": {
+    "message": "选择 7、30 或 90 天，即可与上一周期比较。"
+  },
+  "statsCompareIncompleteFmt": {
+    "message": "历史记录从 {0} 开始，因此没有完整的上一周期可供比较。"
+  },
+  "statsDeltaNew": {
+    "message": "新增"
+  },
+  "statsDeltaFlat": {
+    "message": "与上一周期相比没有变化"
+  },
+  "statsDeltaUpFmt": {
+    "message": "比上一周期增加 {0}"
+  },
+  "statsDeltaDownFmt": {
+    "message": "比上一周期减少 {0}"
+  },
+  "statsDeltaWasFmt": {
+    "message": "上一周期：{0}"
+  },
+  "statsLowDataFmt": {
+    "message": "此时间范围内的页面很少（{0}）：比较和排名可能有误导性。"
+  },
+  "statsLoading": {
+    "message": "正在加载统计数据..."
+  },
+  "statsEmptyShowAll": {
+    "message": "显示全部历史记录"
+  },
+  "statsHeadlinesLabel": {
+    "message": "要点"
+  },
+  "statsSectionEvidence": {
+    "message": "证据"
+  },
+  "statsSubnavLabel": {
+    "message": "证据视图"
+  },
+  "statsExportCanceled": {
+    "message": "已取消导出"
+  },
+  "statsAllClearTitle": {
+    "message": "此时间范围内未发现反机器人或验证码"
+  },
+  "statsAllClearDescFmt": {
+    "message": "这些页面只使用了指纹识别 API。页面：{0}。"
+  },
+  "statsScopeEmptyTitle": {
+    "message": "这些类别没有可显示的内容"
+  },
+  "statsScopeEmptyDesc": {
+    "message": "请选择其他类别或更长的时间范围。"
+  },
+  "statsHeadlineTop": {
+    "message": "最常见的防护"
+  },
+  "statsHeadlineTopSubFmt": {
+    "message": "占页面的 {0} · 页面：{1}"
+  },
+  "statsHeadlineHardest": {
+    "message": "最难的网站"
+  },
+  "statsHeadlineHardestSubFmt": {
+    "message": "防护：{0} · 难度：{1}"
+  },
+  "statsHeadlineNewest": {
+    "message": "最新的防护"
+  },
+  "statsHeadlineNewestSubFmt": {
+    "message": "首次出现在 {0} · {1}"
+  },
+  "statsHeadlineNothingNew": {
+    "message": "此时间范围内没有新增"
+  },
+  "statsHeadlineRiser": {
+    "message": "增长最多"
+  },
+  "statsHeadlineRiserSubFmt": {
+    "message": "页面 {0} → {1}，对比上一周期"
+  },
+  "statsHeadlineNeedsCompare": {
+    "message": "需要上一周期"
+  },
+  "statsKpiPages": {
+    "message": "已保存页面"
+  },
+  "statsKpiPagesSubFmt": {
+    "message": "活跃天数：{0}"
+  },
+  "statsKpiDomainsSubFmt": {
+    "message": "{0} 个有检测（{1}）"
+  },
+  "statsKpiLayered": {
+    "message": "多层防护网站"
+  },
+  "statsKpiLayeredSubFmt": {
+    "message": "{0} 个含验证码"
+  },
+  "statsKpiProtections": {
+    "message": "出现的防护"
+  },
+  "statsKpiProtectionsNewFmt": {
+    "message": "本期新增 {0}"
+  },
+  "statsKpiProtectionsRulesFmt": {
+    "message": "共 {0} 条规则"
+  },
+  "statsTipPages": {
+    "message": "此时间范围内保存到历史记录的页面。历史记录保存的是检测结果，而非每次浏览器访问。"
+  },
+  "statsTipLayered": {
+    "message": "检测到两种或更多不同防护的域名。"
+  },
+  "statsOverTimeProtections": {
+    "message": "各时间发现的防护"
+  },
+  "statsShareOfPagesUnit": {
+    "message": "% 页面"
+  },
+  "statsAllProtectionsLink": {
+    "message": "全部防护"
+  },
+  "statsPageTiers": {
+    "message": "页面的受保护程度"
+  },
+  "statsTiersHint": {
+    "message": "每个已保存页面只计一次，按其上发现的防护类型分类。"
+  },
+  "statsTierBoth": {
+    "message": "反机器人和验证码"
+  },
+  "statsTierAntibot": {
+    "message": "仅反机器人"
+  },
+  "statsTierCaptcha": {
+    "message": "仅验证码"
+  },
+  "statsTierNone": {
+    "message": "无反机器人或验证码"
+  },
+  "statsEstimatedDifficulty": {
+    "message": "估计难度"
+  },
+  "statsDifficultyHint": {
+    "message": "根据所显示类别中发现的防护得出的粗略估计，并非实测结果。"
+  },
+  "statsDifficultyNoneScoped": {
+    "message": "无防护"
+  },
+  "statsHardestSites": {
+    "message": "最难的网站"
+  },
+  "statsAllDomainsLink": {
+    "message": "全部域名"
+  },
+  "statsMoreStackFmt": {
+    "message": "另有 +{0}"
+  },
+  "statsWhatChanged": {
+    "message": "有何变化"
+  },
+  "statsChangedNew": {
+    "message": "新防护"
+  },
+  "statsChangedMoving": {
+    "message": "上升与下降"
+  },
+  "statsChangedGone": {
+    "message": "不再出现"
+  },
+  "statsChangedSwitched": {
+    "message": "更换了防护的网站"
+  },
+  "statsChangedNothing": {
+    "message": "此时间范围内没有变化。"
+  },
+  "statsChangedAllLink": {
+    "message": "全部变化"
+  },
+  "statsChangedNeedsCompare": {
+    "message": "选择 7、30 或 90 天，即可查看上升和下降的防护。"
+  },
+  "statsFingerprintCard": {
+    "message": "指纹识别"
+  },
+  "statsFingerprintSummaryFmt": {
+    "message": "指纹识别 API 在 {0} 的页面上运行 · 技术：{1}"
+  },
+  "statsFingerprintTopFmt": {
+    "message": "最常见：{0}"
+  },
+  "statsFingerprintNote": {
+    "message": "与反机器人和验证码防护分开显示，因为几乎每个页面都会使用这些 API。"
+  },
+  "statsPagesColumn": {
+    "message": "页面"
+  },
+  "statsChangeVsPrevColumn": {
+    "message": "变化"
+  },
+  "statsStrongColumn": {
+    "message": "强证据"
+  },
+  "statsProtectionSortLabel": {
+    "message": "排序防护"
+  },
+  "statsSortMostPages": {
+    "message": "页面最多"
+  },
+  "statsSortMostDomains": {
+    "message": "域名最多"
+  },
+  "statsSortBiggestChange": {
+    "message": "变化最大"
+  },
+  "statsCommonStacks": {
+    "message": "常见的防护组合"
+  },
+  "statsCommonStacksHint": {
+    "message": "在某个域名最近保存的页面上同时发现的反机器人和验证码防护。"
+  },
+  "statsDomainSearchAll": {
+    "message": "搜索域名或防护..."
+  },
+  "statsSortHardest": {
+    "message": "最难的优先"
+  },
+  "statsSortLastSeen": {
+    "message": "最近的优先"
+  },
+  "statsDifficultyColumn": {
+    "message": "难度"
+  },
+  "statsStackColumn": {
+    "message": "防护"
+  },
+  "statsLastSeenColumn": {
+    "message": "最近出现"
+  },
+  "statsFilterChanged": {
+    "message": "有变化"
+  },
+  "statsFilterClear": {
+    "message": "清除筛选"
+  },
+  "statsFilterDomainsLabel": {
+    "message": "筛选域名"
+  },
+  "statsChangeKindGained": {
+    "message": "新增"
+  },
+  "statsChangeKindDropped": {
+    "message": "移除"
+  },
+  "statsChangeKindReplaced": {
+    "message": "替换"
+  },
+  "statsChangePageColumn": {
+    "message": "页面"
+  },
+  "statsChangeSinceFmt": {
+    "message": "对比 {0}"
+  },
+  "statsChangeAddedSr": {
+    "message": "新增："
+  },
+  "statsChangeRemovedSr": {
+    "message": "移除："
+  },
+  "statsDomainChangesHintPage": {
+    "message": "比较同一页面的已保存副本。除非显示指纹识别，否则会忽略指纹识别检测。"
+  },
+  "statsStrongEvidence": {
+    "message": "强证据"
+  },
+  "statsStrongEvidenceTipFmt": {
+    "message": "{1} 次检测中有 {0} 次得分达到 80% 或更高。"
+  },
+  "statsUnconfirmed": {
+    "message": "被提及但未确认"
+  },
+  "statsUnconfirmedHint": {
+    "message": "经常发现、但很少有强证据的防护。它们可能只是文本中的提及或未使用的脚本，而不是正在生效的挑战。"
+  },
+  "statsUnconfirmedNone": {
+    "message": "所有常见防护都已得到强证据的确认。"
+  },
+  "statsUnconfirmedDriverFmt": {
+    "message": "主要通过{0}发现：{1}"
+  },
+  "statsUnconfirmedNoDriver": {
+    "message": "没有哪个信号特别突出。"
+  },
+  "statsTierStrong": {
+    "message": "强"
+  },
+  "statsTierModerate": {
+    "message": "中"
+  },
+  "statsTierWeak": {
+    "message": "弱"
+  },
+  "statsTierHint": {
+    "message": "强为 80% 及以上，中为 40-79%，弱为 40% 以下。100% 表示只有该防护才会产生的信号。"
+  },
+  "statsDecidedByCategory": {
+    "message": "各类别是如何判定的"
+  },
+  "statsLiftFmt": {
+    "message": "{0} 个百分点"
+  },
+  "statsDecidedAvgFmt": {
+    "message": "{0}：{1} · 平均 {2}"
+  },
+  "statsLiftStrongFmt": {
+    "message": "在{0}中，组合将置信度从 {1} 提高到 {2}。"
+  },
+  "statsLess": {
+    "message": "少"
+  },
+  "statsMore": {
+    "message": "多"
+  },
+  "statsBusiestDay": {
+    "message": "最活跃的一天"
+  },
+  "statsLongestStreak": {
+    "message": "最长连续天数"
+  },
+  "statsPeakHour": {
+    "message": "高峰时段"
+  },
+  "statsQuietDays": {
+    "message": "未保存任何内容的天数"
+  },
+  "statsTodayPartial": {
+    "message": "今天（仍在统计）"
+  },
+  "statsSevenDayAverage": {
+    "message": "折线：7 天平均值"
+  },
+  "statsRulesCoverage": {
+    "message": "覆盖率"
+  },
+  "statsRulesCoverageFmt": {
+    "message": "{1} 条已启用规则中有 {0} 条在此时间范围内命中"
+  },
+  "statsRulesAttention": {
+    "message": "需要关注"
+  },
+  "statsRulesAttentionNone": {
+    "message": "没有需要关注的内容。"
+  },
+  "statsRulesStatusColumn": {
+    "message": "状态"
+  },
+  "statsRuleStatusQuiet": {
+    "message": "不在此范围内"
+  },
+  "statsRuleStatusUnseen": {
+    "message": "不在历史记录中"
+  },
+  "statsRulesSourceEdited": {
+    "message": "已编辑"
+  },
+  "statsRulesOfficialQuietNote": {
+    "message": "针对你尚未遇到的厂商的官方规则会保持静默。这是正常的。"
+  },
+  "statsRulesWeakAbsenceFmt": {
+    "message": "目前历史记录还不多（页面：{0}），因此从未命中的规则说明不了什么。"
+  },
+  "statsRulesMissingOwnNote": {
+    "message": "仅列出自定义规则和已编辑的规则。官方规则的说明由 Scrapfly 维护。"
+  },
+  "statsToolsRetentionNote": {
+    "message": "Advanced 会将捕获内容保留 30 分钟，因此此标签页不受日期范围影响。"
+  },
+  "statsToolsSavedNow": {
+    "message": "当前已保存"
+  },
+  "statsToolsExpiringSoon": {
+    "message": "10 分钟内到期"
+  },
+  "statsToolsVendorsCount": {
+    "message": "厂商"
+  },
+  "statsToolsStaleFmt": {
+    "message": "等待清理的已过期捕获：{0}。打开 Advanced 即可将其删除。"
+  },
+  "statsToolsSavedCaptures": {
+    "message": "已保存的捕获"
+  },
+  "statsToolsColVendor": {
+    "message": "厂商"
+  },
+  "statsToolsColTool": {
+    "message": "工具"
+  },
+  "statsToolsColSaved": {
+    "message": "保存时间"
+  },
+  "statsToolsColExpires": {
+    "message": "到期时间"
+  },
+  "statsToolsNoLive": {
+    "message": "目前没有已保存的捕获。"
+  },
+  "statsChangedNoPrevious": {
+    "message": "还没有完整的上一时间段。"
+  },
+  "settingsCardCaptureRetention": {
+    "message": "捕获保留时长"
+  },
+  "settingsCaptureRetention": {
+    "message": "工具捕获保留"
+  },
+  "settingsCaptureRetentionHelp": {
+    "message": "高级工具的捕获（Cookie、脚本、令牌）会在此时间后删除。"
+  },
+  "settingsCaptureRetention15m": {
+    "message": "15 分钟"
+  },
+  "settingsCaptureRetention30m": {
+    "message": "30 分钟"
+  },
+  "settingsCaptureRetention1h": {
+    "message": "1 小时"
+  },
+  "settingsCaptureRetention3h": {
+    "message": "3 小时"
+  },
+  "settingsCaptureRetention12h": {
+    "message": "12 小时"
+  },
+  "settingsCaptureRetention24h": {
+    "message": "24 小时"
+  },
+  "advancedFooterHintFmt": {
+    "message": "捕获会保留 {0}。",
+    "description": "Footer in Advanced tools. {0} = retention duration label (e.g. 30 minutes)"
+  },
+  "settingsCaptureRetentionRange": {
+    "message": "从 1 分钟到 7 天。"
   }
 }

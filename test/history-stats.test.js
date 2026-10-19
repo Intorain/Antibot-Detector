@@ -6,6 +6,7 @@ const HistoryStats = require('../sections/stats/history-stats.js');
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = new Date(2026, 8, 29, 15, 0, 0).getTime();
 const det = (name, category, confidence = 90) => ({ name, category, confidence });
+const pick = (object, keys) => Object.fromEntries(keys.map((key) => [key, object[key]]));
 
 const items = [
   { url: 'https://a.com/x', hostname: 'a.com', timestamp: NOW, detections: [det('Cloudflare', 'Anti-Bot'), det('reCAPTCHA', 'CAPTCHA')] },
@@ -67,7 +68,9 @@ test('timestamps reject malformed values and overflow but accept legacy strings'
   }
   assert.strictEqual(HistoryStats.getTimestamp({ timestamp: String(NOW) }), NOW);
   assert.strictEqual(HistoryStats.getTimestamp({ timestamp: new Date(NOW).toISOString() }), NOW);
-  assert.strictEqual(HistoryStats.getTimestamp({ timestamp: 0 }), 0);
+  // Before 2000 is not a saved visit: zero, negatives and seconds written instead of milliseconds are unknown, not 1970
+  for (const timestamp of [0, -5, 1760000000, 946684799999]) assert.strictEqual(HistoryStats.getTimestamp({ timestamp }), null);
+  assert.strictEqual(HistoryStats.getTimestamp({ timestamp: 946684800000 }), 946684800000);
 });
 
 test('ranges include local midnight and now, exclude future and unknown dates', () => {
@@ -94,9 +97,13 @@ test('timelineDays derives bounded all-time local-calendar spans', () => {
   assert.strictEqual(HistoryStats.timelineDays([{ timestamp: NOW + DAY }, { timestamp: 1e20 }], 0, NOW), 1);
   const ancient = new Date(0);
   ancient.setFullYear(25, 0, 2);
-  const previous = new Date(ancient);
+  const old = new Date(ancient);
+  old.setDate(old.getDate() - 1);
+  assert.strictEqual(HistoryStats.timelineDays([{ timestamp: old.getTime() }], 0, ancient.getTime()), 1, 'dates before 2000 are not saved visits and do not stretch the span');
+  const base = new Date(2021, 0, 2, 12);
+  const previous = new Date(base);
   previous.setDate(previous.getDate() - 1);
-  assert.strictEqual(HistoryStats.timelineDays([{ timestamp: previous.getTime() }], 0, ancient.getTime()), 2);
+  assert.strictEqual(HistoryStats.timelineDays([{ timestamp: previous.getTime() }], 0, base.getTime()), 2);
 });
 
 test('confidence rejects coercion and out-of-range scores and counts unknowns', () => {
@@ -128,8 +135,14 @@ test('nested variants and duplicate matches count detections but deduplicate pag
   assert.strictEqual(s.totals.detectionRate, 2 / 3 * 100);
   assert.strictEqual(s.topDetectors.length, 1);
   assert.strictEqual(s.detectorMetrics.length, 3);
-  assert.deepStrictEqual(s.detectorMetrics[0], { name: 'Nested', id: '', category: 'captcha', pages: 2, domains: 1, avgConfidence: 67, matches: 0, avgMatchConfidence: null });
-  assert.deepStrictEqual(s.domainMetrics[0], { hostname: 'a.com', visits: 2, detections: 5, uniqueDetectors: 3, avgConfidence: 70 });
+  // The fields that existed before keep their exact values; what was added is asserted apart.
+  assert.deepStrictEqual(pick(s.detectorMetrics[0], ['name', 'id', 'category', 'pages', 'domains', 'avgConfidence', 'matches', 'avgMatchConfidence']),
+    { name: 'Nested', id: '', category: 'captcha', pages: 2, domains: 1, avgConfidence: 67, matches: 0, avgMatchConfidence: null });
+  assert.deepStrictEqual(pick(s.detectorMetrics[0], ['strong', 'moderate', 'weak']), { strong: 2, moderate: 0, weak: 1 });
+  assert.deepStrictEqual(pick(s.domainMetrics[0], ['hostname', 'visits', 'detections', 'uniqueDetectors', 'avgConfidence']),
+    { hostname: 'a.com', visits: 2, detections: 5, uniqueDetectors: 3, avgConfidence: 70 });
+  assert.deepStrictEqual(pick(s.domainMetrics[0], ['difficulty', 'hasCaptcha', 'stackTotal', 'firstTimestamp', 'lastTimestamp']),
+    { difficulty: 'High', hasCaptcha: true, stackTotal: 3, firstTimestamp: NOW - DAY, lastTimestamp: NOW });
   assert.strictEqual(s.categoryOverlap.captcha.antibot, 1);
   assert.strictEqual(s.categoryOverlap.antibot.captcha, 1);
   assert.strictEqual(s.categoryOverlap.captcha.captcha, 2);

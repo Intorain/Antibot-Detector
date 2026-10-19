@@ -5,11 +5,11 @@
   "enabled": true,
   "category": "ANTIBOT",
   "difficulty": "High",
-  "lastUpdated": "2026-10-07",
-  "version": "2.0.1",
+  "lastUpdated": "2026-10-17",
+  "version": "2.1.0",
   "minExtensionVersion": "2.8",
   "website": "https://ocule.io/",
-  "icon": "custom.png",
+  "icon": "ocule_official.png",
   "description": "Legacy Ocule bot protection. Ocule joined hCaptcha and its loader host no longer resolves, so only old cached pages still reference it.",
   "detection": {
     "url": [

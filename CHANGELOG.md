@@ -5,6 +5,56 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.0] - 2026-10-19
+
+### Added
+
+- An llms.txt at the repository root summarising what the extension is, how to install it and how to use each tab, for language models and quick reference.
+- Settings → Detection: set how long Advanced tool captures are kept — any value from 1 minute to 7 days (default 30 minutes); the Advanced footer shows the chosen time.
+- Statistics: anti-bot and CAPTCHA come first; fingerprinting stays hidden until you press Show fingerprinting, and the page says how much it hides.
+- Statistics: a comparison with the previous period, four headline cards and a What changed card (new, rising, no longer seen, switched).
+- Statistics → Overview: layered sites, how protected your pages are, estimated difficulty, and the hardest sites with their protection stacks.
+- Statistics → Protections: strong-evidence share and change for every protection, and the protection stacks found together on a domain.
+- Statistics → Domains: hardest-first list with search by domain or protection and filters for difficulty, CAPTCHA and changed.
+- Statistics → Evidence: strong-evidence share per category, confidence by category, and "Mentioned, not confirmed" for protections found often with weak evidence.
+
+### Changed
+
+- Detection, History, Rules and Advanced: Google BotGuard, CHEQ, Meetrics, Ocule, ThreatMetrix, AliExpress CAPTCHA, Captcha.eu, Friendly Captcha and QCloud Captcha show their official logos instead of the generic icon, in both themes.
+- Detection, History, Rules and Advanced: Hunt shows a neutral target icon, because no vendor or official logo exists for it.
+- Advanced → reCAPTCHA callbacks: each client card no longer shows the version badge, the internal client ID or the site key.
+- Detection and History: the text of matched combinations is soft grey instead of white.
+- Rules: the ten detectors that got a logo have new versions, so a rule already saved from 2.8.9 shows its logo too.
+- Rules: the list follows the category order chosen in Settings → Detection order, as the Detection list and History do.
+- Rules editor: Translations is a clear row with a chevron and a count badge, each translation is a box that shows the whole text, and Translate automatically is a smaller button.
+- Statistics: Confidence, Signals and Combinations are views of one Evidence tab; the tab bar is slimmer and stays in view while you scroll.
+- Statistics: one Export menu replaces the two buttons, and export file names use your local date and the range.
+- Statistics: protection changes compare saved copies of the same page, not the whole domain.
+- Statistics → Activity: the calendar fills its card, today is drawn as still counting, and daily pages show a 7-day average.
+- Statistics: charts show the whole range instead of pages of 30 days; light-theme colours read on white and the layout follows Arabic.
+- Statistics → Rules: rules that found nothing separate custom rules worth a look from official ones that are normally quiet.
+- Statistics → Tools: only captures that have not expired are listed, with when they expire.
+- Statistics: the Show chips use the Anti-bot, Captcha and Fingerprint icons instead of a coloured dot.
+- Statistics: protection chips carry their category's icon instead of a coloured dot, and the Captcha filter uses the Captcha icon.
+- Statistics → Domains: the "+N more" chip is a solid chip that lists the hidden protections on hover, not a dashed outline.
+- Statistics: category badges, chart legends and the chart tooltip use the Anti-bot, Captcha and Fingerprint icons instead of a coloured dot.
+- Statistics: each protection shows its own logo (in the Protections and Domains lists, the headline cards and What changed), with the category icon as a fallback.
+
+### Fixed
+
+- Statistics: layered sites now means protections found together on one saved page, not a domain that met several over time.
+- Statistics: long hostnames and narrow windows no longer push the page sideways or overlap other columns.
+- Statistics: entries with a missing or impossible date no longer stretch the range or the calendar.
+- Statistics → Domains: opening a domain from another tab clears old filters, and Space opens a row as Enter does.
+- Statistics: Escape also closes tooltips, and focus stays on the chip, search or sort you just used.
+- Statistics: with no earlier history the page says there is no previous period yet, instead of showing a change.
+- Statistics: the difficulty hint names the categories shown, plural counts read correctly in more languages, and Activity says when its list is cut.
+- Statistics → Activity: month colours in the calendar are readable in both themes.
+- Settings: the language menu uses the same surface colour as the rest of the settings, instead of a darker panel.
+- Settings: the Data tab icon tiles and the colour field adapt to the light theme instead of staying a dark box, and the accent tiles now share one surface colour.
+- Language: after the extension updates, newly added text appears in your chosen language instead of briefly falling back to English.
+- Detection summary: the Detections icon is purple and the Cache icon is teal, so the four stat cards read apart at a glance (Confidence and Difficulty keep their value colour).
+
 ## [2.8.9] - 2026-10-16
 
 ### Added
@@ -469,6 +519,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.0]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.9...v3.0.0
 [2.8.9]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.8...v2.8.9
 [2.8.8]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.7...v2.8.8
 [2.8.7]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.6...v2.8.7

@@ -5,11 +5,11 @@
   "enabled": true,
   "category": "CAPTCHA",
   "difficulty": "Medium",
-  "lastUpdated": "2026-10-07",
-  "version": "1.1.1",
+  "lastUpdated": "2026-10-17",
+  "version": "1.2.0",
   "minExtensionVersion": "2.8",
   "website": "https://www.aliexpress.com/",
-  "icon": "custom.png",
+  "icon": "aliexpress_official.png",
   "description": "AliExpress x5sec challenge routing evidence; does not confirm a visible CAPTCHA or successful verification",
   "detection": {
     "url": [
