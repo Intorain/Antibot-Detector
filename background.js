@@ -3,6 +3,7 @@ importScripts(
     // Core utilities
     './modules/core/logger.js',
     './modules/core/i18n.js',
+    './modules/core/rule-i18n.js',
     './modules/core/constants.js',
     './modules/core/hooks-config.js',
     './modules/core/bridge-protocol.js',
@@ -35,6 +36,8 @@ importScripts(
     './modules/detection/rules/update-manager.js',
     './background/worker-keepalive-manager.js',
     './modules/core/history-store.js',
+    './modules/core/history-policy.js',
+    './modules/core/history-export.js',
     './background/history-recorder.js',
     './modules/core/webhook-body.js',
     './modules/detection/public-summary.js',
@@ -48,8 +51,8 @@ importScripts(
     './background/advanced/collector-utils.js',
     './background/advanced/job-manager.js',
     './background/advanced/script-analysis.js',
-    './vendor/recaptcha/pbf.js',
-    './vendor/recaptcha/message.browser.js',
+    './background/advanced/vendors/recaptcha/lib/pbf.js',
+    './background/advanced/vendors/recaptcha/lib/message.browser.js',
     './background/advanced/vendors/recaptcha/interceptor.js',
     './background/advanced/vendors/akamai/interceptor.js',
     './background/advanced/vendors/imperva/interceptor.js',
@@ -80,6 +83,7 @@ importScripts(
     './background/handlers/message-router.js',
     './background/tab-events.js',
     './background/history-retention.js',
+    './background/history-backup.js',
     './background/detection-cache-retention.js',
     './background/init.js'
 );

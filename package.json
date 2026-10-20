@@ -1,6 +1,6 @@
 {
   "name": "scrapfly-extension",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "description": "Scrapfly MV3 extension — verification scripts (no build step, no runtime dependencies).",
   "scripts": {
@@ -8,14 +8,17 @@
     "check:locale": "node scripts/check-locale-keys.js",
     "check:syntax": "node scripts/check-syntax.js",
     "check:rule-i18n": "node scripts/check-rule-i18n.js",
+    "check:locale-quality": "node scripts/check-locale-quality.js",
     "test": "node --test test/*.test.js",
-    "verify": "npm run check:syntax && npm run check:structure && npm run check:locale && npm run check:rule-i18n && npm run test",
+    "verify": "npm run check:syntax && npm run check:structure && npm run check:locale && npm run check:locale-quality && npm run check:rule-i18n && npm run test",
     "e2e:updater": "node scripts/e2e-updater.js",
     "e2e:methods": "node scripts/e2e-methods.js",
     "e2e:settings-modal": "node scripts/e2e-settings-modal.js",
     "e2e:settings": "node scripts/e2e-settings.js",
     "e2e:editor": "node scripts/e2e-editor.js",
     "e2e:refactor": "node scripts/e2e-refactor.js",
+    "e2e:languages": "node scripts/e2e-languages.js",
+    "e2e:history": "node scripts/e2e-history.js",
     "e2e:live": "node scripts/e2e-live.js"
   }
 }
