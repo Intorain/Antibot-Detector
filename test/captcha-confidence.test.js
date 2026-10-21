@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -40,8 +41,8 @@ const isProof = (detector, rule) => PROOF.has(`${detector.id}/${rule.id}`);
 // CAPTCHA) and Turnstile (Cloudflare's own managed-challenge page requests the
 // same api.js and widget frame, so nothing here is the widget's alone)
 const CAPPED = { 'detect-aliexpress': 60, 'detect-turnstile': 95 };
-const context = vm.createContext({
-  Constants: { DEFAULT_MATCH_CONFIDENCE: 80, ANALYSIS_CACHE_TTL: 300000,
+const context = vm.createContext({ WorkerMessages: require('../modules/core/worker-messages.js'), 
+  Constants: { DEFAULT_MATCH_CONFIDENCE: 80, DEFAULT_DOM_CONFIDENCE: 85, ANALYSIS_CACHE_TTL: 300000,
     PATTERN_CACHE_MAX_SIZE: 500, MATCH_CACHE_TTL: 300000 },
   Logger: new Proxy({}, { get: (_, key) => key === 'debugMode' ? false :
     key === 'error' ? (...args) => { throw new Error(args.join(' ')); } : () => {} }),
@@ -50,7 +51,7 @@ const context = vm.createContext({
 });
 context.window = context;
 for (const file of [
-  'utils/pattern-cache.js', 'modules/core/bridge-protocol.js', 'modules/core/hooks-config.js',
+  'utils/pattern-cache.js', 'modules/core/bridge-protocol.js', 'modules/core/categories.js', 'modules/core/domain-list.js', 'modules/core/scan-scope.js', 'modules/core/hooks-config.js',
   'modules/detection/conditions/window-condition-grammar.js', 'modules/detection/conditions/window-condition-evaluator.js',
   'modules/detection/managers/confidence-manager.js', 'modules/detection/detection-combinations.js',
   ...['analysis', 'extractors', 'matching', 'hooks', 'manager']
@@ -67,7 +68,7 @@ for (const key of ['interruptedDetections', 'activeDetections', 'detectionStates
 context.UrlUtils = { normalizeFaviconForStorage: () => null, getHostnameFromUrl: url => new URL(url).hostname };
 context.setBadgeForDetections = async () => {};
 context.chrome = { runtime: { sendMessage: async () => {} }, tabs: { sendMessage: async () => {} } };
-context.Utils = { getHistorySettings: async () => ({}) };
+context.Utils = { getHistorySettings: async () => ({}), isUrlBlacklisted: async () => false };
 context.HistoryRecorder = { shouldSaveToHistory: async () => false };
 Engine.storeDetection = async (_, page, results) => {
   context.finalizedResults = results;

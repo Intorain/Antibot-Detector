@@ -172,11 +172,11 @@ Results and captures are kept for 30 minutes in **Advanced → History**, where 
 ### Settings
 
 - **General:** interface language (22 languages, following your browser by default), theme (Dark, Light or System), notifications, debug mode, scheduled detector updates, and the colors of the badge, categories and tags.
-- **Detection:** cache duration and scope, the order of categories in the results, the Advanced tools confidence limit, blacklisted domains, JS API events, webhooks and share links.
+- **Detection:** cache duration and scope, the order of categories in the results, the Advanced tools confidence limit, which sites are scanned (every site except the ones you skip, or only the sites you choose), JS API events, webhooks and share links.
 - **History:** what to record (pause History, skip private windows, ignored sites, minimum confidence, skip fingerprint-only pages), how many entries to keep (up to 10,000; 0 keeps the newest 1,000), deleting entries after a number of days or when the browser closes, skipping or updating repeated scans, notifications when a page's protections change, the default export format, a storage meter with its warning, and an automatic backup to your Downloads folder.
 
-  History is limited to about 6 MB; when it is full the oldest unpinned entries are removed, and Settings → History says how many.
-- **Data:** open the statistics page, and export or import your settings and your history.
+  History is limited to about 6 MB, or 12 or 25 MB if you choose a larger size in Settings → History; when it is full the oldest unpinned entries are removed, and Settings → History says how many. Pages with a hard protection, or one you name, can pin themselves (up to 50), fingerprint-only pages can be deleted after a number of days of their own, and up to 10 pinned pages can be watched: scanned again every day or week in a background tab, with the entry marked Changed when its protections change (each check is a real visit with your cookies).
+- **Data:** open the statistics page; see how much space each part of the extension uses and clear the detection cache, tool captures, logs or History; back up settings, your own rules and History in one file and restore it; export or import your settings and your history; apply the Privacy or Developer preset or reset every setting; copy a diagnostics summary for a bug report (no sites, addresses or keys).
 
 ## Integrations
 
@@ -210,6 +210,26 @@ Because these events reach the page itself, any website you visit can listen for
 
 When a scan finds protections, the extension can send the results to your own endpoint. Choose the HTTP method, add headers and write the body as a template with variables such as `<SITEURL>`, `<HOSTNAME>`, `<TITLE>`, `<DETECTIONS>`, `<DETECTION_COUNT>`, `<CATEGORIES>` and `<TIMESTAMP>`. Webhooks only go to HTTPS addresses on public hosts, are off by default, and include a **Test** button. Set them up in Settings → Detection → Webhook Integration.
 
+**Signing.** Set a signing secret (or press **Generate**, then **Copy** it to your server) and each request with a body is signed the way Scrapfly's own webhooks are: `X-Scrapfly-Webhook-Signature` holds the HMAC-SHA256 of the raw body as uppercase hex, keyed with the secret exactly as written (its UTF-8 bytes; a generated secret is not decoded from hex), and `X-Scrapfly-Webhook-Signature-Lowercase` the same value in lowercase. Check it against the raw body before parsing it, with a constant-time comparison. GET, HEAD and `multipart/form-data` requests are not signed, and the URL is never part of the signature. There is no timestamp header; the default template sends `<TIMESTAMP>` in the body, so your server can refuse stale requests. The secret stays in this browser: exports, backups and diagnostics leave it out, and Reset keeps it unless you also remove the connections.
+
+```js
+// Node.js, with the raw body as a Buffer (for example express.raw({ type: '*/*' }))
+const crypto = require('node:crypto');
+function isFromExtension(rawBody, signatureHeader, secret) {
+  const expected = Buffer.from(crypto.createHmac('sha256', secret).update(rawBody).digest('hex'));
+  const received = Buffer.from(String(signatureHeader || '').toLowerCase());
+  return received.length === expected.length && crypto.timingSafeEqual(received, expected);
+}
+// isFromExtension(req.body, req.get('X-Scrapfly-Webhook-Signature'), process.env.WEBHOOK_SECRET)
+```
+
+```python
+import hashlib, hmac
+def is_from_extension(raw_body: bytes, signature_header: str, secret: str) -> bool:
+    expected = hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, (signature_header or "").lower())
+```
+
 ### Share links
 
 **Upload detections** on the Detection tab publishes a summary of the page's results, copies the link and opens it in a new tab. The summary contains the page address without its query string or fragment, each protection's name, category and confidence, and which methods matched; never cookie or header values. Choose where it goes, and when it is deleted where the service allows it, in Settings → Detection → Share uploads: dpaste.com (the default), dpaste.org, paste.rs, Pastebin with your API key, a secret GitHub Gist with your token, or your own server.
@@ -240,6 +260,7 @@ Detection runs entirely in your browser. There are no accounts and no analytics,
 | `notifications` | Status messages from the capture tools |
 | `downloads` | Saving exported files |
 | `alarms` | Scheduled detector updates and the clean-up of old history and cached results |
+| `unlimitedStorage` | Lets History take more than the 10 MB browser quota when you choose 12 or 25 MB in Settings → History; History stays at 6 MB unless you choose more |
 
 </details>
 
@@ -255,7 +276,7 @@ content.js               Content script (isolated world)
 content-main-world.js    Page-world hooks, installed before the page's scripts
 modules/                 Detection engine, core services, UI helpers, styles
 popup.html, popup.js     The popup
-sections/                One folder per tab: detection, history, rules, advanced, settings, stats
+sections/                One folder per popup tab (detection, history, rules, advanced), plus settings (the Settings modal) and stats (the Statistics page)
 detectors/               Detector rules (JSON), index.json, icons and rule translations
 _locales/                Translations for the 22 languages
 utils/                   Shared helpers
@@ -282,6 +303,11 @@ npm run e2e:methods    # every detection method, from URL to JavaScript hooks
 npm run e2e:settings   # every per-pattern setting: scopes, regex, whole word, case
 npm run e2e:editor     # the rule editor saves settings and keeps every field
 npm run e2e:updater    # Rules → Update against a local stand-in for GitHub
+npm run e2e:data       # Settings → Data: storage and Clear, backup and restore, presets and reset, diagnostics
+npm run e2e:scope      # Settings → Detection → Sites to scan: skipped sites, chosen sites, the paused card
+npm run e2e:webhook    # Settings → Detection → Webhook: filters, cache, failures, Recent deliveries, Test, Clear, signing
+npm run e2e:hooks      # Settings → Detection → Sites without JS hooks: hooks on and off, switching, the popup note, the cache
+npm run e2e:translate  # Rules editor → Translate the rule: what is missing, one click, Save
 npm run e2e:languages  # every language through the real popup, settings and statistics pages
 npm run e2e:live       # detectors against the real sites in scripts/live-sites.json
 ```
@@ -410,7 +436,7 @@ For pull requests:
 
 - `npm run verify` must pass.
 - Record user-visible changes in [`CHANGELOG.md`](CHANGELOG.md) under `[Unreleased]`: one short line that describes what changes for the person using the extension.
-- New interface text goes into all 12 files in `_locales/`; `npm run check:locale` checks it.
+- New interface text goes into every folder of `_locales/`; `npm run check:locale` checks it.
 - There is no bundler, so a new script file has to be added, after the files it depends on, everywhere it is loaded: `background.js`, `popup.html` or the `content_scripts` list in `manifest.json`. `test/load-order.test.js` checks the order.
 
 ## License

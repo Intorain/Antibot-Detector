@@ -32,7 +32,7 @@ function fixture(initial = {}) {
     };
     context.self = context;
     vm.createContext(context);
-    for (const file of ['modules/advanced/vendor-registry.js', 'modules/advanced/result-model.js',
+    for (const file of ['modules/core/capture-retention.js', 'modules/advanced/vendor-registry.js', 'modules/advanced/result-model.js',
         'background/advanced/history-store.js', 'background/advanced/page-notice.js',
         'background/advanced/collector-utils.js', 'background/advanced/job-manager.js', 'background/advanced/script-analysis.js']) {
         vm.runInContext(read(file), context, { filename: file });
@@ -191,6 +191,7 @@ test('capture dispatch reuses pending starts and cancelled initialization cannot
         sendResponse({ status: 'started' });
     }); return true; };
     vm.runInContext(read('modules/core/message-types.js'), context);
+    vm.runInContext(read('modules/core/message-sender.js'), context);
     vm.runInContext(read('background/handlers/messages-advanced-capture.js'), context);
     const registry = {};
     context.registerAdvancedCaptureHandlers(registry, {});
@@ -296,6 +297,7 @@ test('a delayed stop acknowledgement finishes only the job it was dispatched for
     context.reCaptchaCaptureState = new Map();
     context.reCaptchaHandleMessage = (_, sendResponse) => { acknowledge = sendResponse; return true; };
     vm.runInContext(read('modules/core/message-types.js'), context);
+    vm.runInContext(read('modules/core/message-sender.js'), context);
     vm.runInContext(read('background/handlers/messages-advanced-capture.js'), context);
     const registry = {}, replies = [];
     context.registerAdvancedCaptureHandlers(registry, {});

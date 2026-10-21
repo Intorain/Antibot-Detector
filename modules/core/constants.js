@@ -26,11 +26,13 @@ const Constants = Object.freeze({
     DETECTION_TIMEOUT: 10000,              // 10 sec - detection timeout
     REQUEST_DETECTION_PENDING_TIMEOUT: 15000, // max time to keep a pre-collection pending marker
     SAFETY_TIMEOUT: 5000,                  // 5 sec - safety fallback
-    DETECTION_SKIP_THRESHOLD: 2000,        // skip detection for recent requests
+    DETECTION_SKIP_THRESHOLD: 2000,        // skip a page-load scan when the tab was scanned this recently
+    REQUEST_SKIP_THRESHOLD: 1500,          // skip a request-triggered scan when the tab was scanned this recently (a quick second navigation in a tab must still be scanned)
     HOOKS_DEADLINE_BUFFER_MS: 200,         // buffer added to hooks deadline
 
     // ─── Detector Defaults ─────────────────────────────────────────────────────
     DEFAULT_MATCH_CONFIDENCE: 80,          // confidence of a detector entry that declares none
+    DEFAULT_DOM_CONFIDENCE: 85,            // confidence of a DOM pattern that declares none
 
     // ─── Retry Configuration ───────────────────────────────────────────────────
     DETECTOR_LOAD_MAX_RETRIES: 20,         // max retries for detector loading

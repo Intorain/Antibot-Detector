@@ -102,7 +102,7 @@ DetectionUI.handleLoadingTimeout = function() {
           }
 
           chrome.runtime.sendMessage(
-            { type: 'GET_DETECTION_DATA', tabId: tabs[0].id },
+            { type: WorkerMessages.GET_DETECTION_DATA, tabId: tabs[0].id },
             async (response) => {
               const asks = this.loadingRepolls = (this.loadingRepolls || 0) + 1;
               const canWait = asks <= DetectionUI.LOADING_REPOLL_MAX;
@@ -287,6 +287,37 @@ DetectionUI.applyDisabledStateCopy = function() {
     }
 };
 
+/**
+ * A site where JS hooks are off is scanned without them, so fingerprinting is not checked: the results say so, and an
+ * empty result does not claim "No Fingerprinting". Best effort: a failed lookup leaves the page as it was.
+ */
+DetectionUI.syncHooksOffNote = async function() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const settings = await Utils.getSettings();
+      const off = !!tab && ScanScope.hooksOff(settings && settings.detection, UrlUtils.getHostnameFromUrl(tab.url || ''));
+      const tr = (key, fallback) => (typeof I18n !== 'undefined' ? I18n.tr(key, fallback) : fallback);
+
+      const note = document.querySelector('#hooksOffNote');
+      if (note) note.hidden = !off;
+
+      const badge = document.querySelector('#emptyState [data-badge="fingerprint"]');
+      if (badge) {
+        const key = off ? 'hooksOffBadge' : 'detectionBadgeNoFingerprint';
+        badge.setAttribute('data-i18n', key);
+        badge.textContent = tr(key, off ? 'Fingerprinting not checked' : '✓ No Fingerprinting');
+        badge.classList.toggle('state-card-badge--off', off);
+      }
+      const description = document.querySelector('#emptyState .state-card-description');
+      if (off && description && this.scanOutcome === 'complete') {
+        description.setAttribute('data-i18n', 'hooksOffEmptyDesc');
+        description.textContent = tr('hooksOffEmptyDesc', 'No matching anti-bot or CAPTCHA signals were found on this page. JS hooks are off here, so fingerprinting was not checked.');
+      }
+    } catch (error) {
+      Logger.debug('UI', '[Detection] Could not tell whether JS hooks are off on this site', error);
+    }
+};
+
 DetectionUI.showEmptyState = function(options = {}) {
     if (DetectionUI.showUnavailableState.call(this)) return;
 
@@ -338,6 +369,7 @@ DetectionUI.showEmptyState = function(options = {}) {
     if (blacklistWarning) blacklistWarning.style.display = 'none';
     if (detectionPagination) detectionPagination.style.display = 'none';
     if (interruptedState) interruptedState.style.display = 'none';
+    DetectionUI.syncHooksOffNote.call(this);
 };
 
 DetectionUI.showDisabledState = function(isBlacklisted = !!this.blacklistedDomain) {
@@ -446,6 +478,7 @@ DetectionUI.displayResults = async function(detections = [], options = {}) {
 
     // Update URL display
     this.updateUrlDisplay(options);
+    DetectionUI.syncHooksOffNote.call(this);
 
     // Update stats
     this.updateStats(detections);
@@ -689,7 +722,7 @@ DetectionUI.updateCacheInfo = function() {
     };
     // The tip carries fixed dates, so it never shows a stale countdown
     const showScope = (scope) => {
-      const key = scopeNames[scope] ? scope : 'path';
+      const key = scopeNames[scope] ? scope : 'domain';
       if (cacheScopeDisplay) cacheScopeDisplay.textContent = scopeNames[key];
       const rows = [];
       if (meta && meta.timestamp) rows.push({ label: tr('tipCachedAt', 'Saved'), value: FormatUtils.formatDateTime(meta.timestamp) });
@@ -699,11 +732,9 @@ DetectionUI.updateCacheInfo = function() {
     if (meta && meta.cacheScope) {
       showScope(meta.cacheScope);
     } else {
-      showScope('path');
-      // Fallback: read current setting from storage
-      Utils.getSettings().then((settings) => {
-        showScope(settings.cacheScope || settings.detection?.cacheScope || 'path');
-      }).catch(() => {});
+      showScope('domain');
+      // An entry saved before the scope was recorded: the scope in Settings is the one it was saved under
+      Utils.getCacheScope().then(showScope).catch(() => {});
     }
 };
 
@@ -1068,11 +1099,9 @@ DetectionUI.showsGroups = function() {
     return this?.sortBy !== byConfidence;
 };
 
-/** antibot / captcha / fingerprint (or the raw lowercase name) of a detection. */
+/** antibot / captcha / fingerprint / other of a detection. */
 DetectionUI.categoryKeyOf = function(detection) {
-    const raw = detection?.category || detection?.detector?.category || '';
-    if (typeof DetectionUtils !== 'undefined' && typeof DetectionUtils.categoryKey === 'function') return DetectionUtils.categoryKey(raw);
-    return String(raw).toLowerCase().replace(/[^a-z]/g, '');
+    return Categories.keyOf(detection);
 };
 
 DetectionUI.categoryColor = function(categoryKey) {
@@ -1282,18 +1311,10 @@ DetectionUI.observeResultsListSize = function() {
     this._resultsListObserver.observe(main);
 };
 
-// Localized category names, shared by the detection cards, History and Rules
-DetectionUI.CATEGORY_LABELS = {
-    antibot: ['categoryAntibot', 'Anti-bot'],
-    'anti-bot': ['categoryAntibot', 'Anti-bot'],
-    captcha: ['categoryCaptcha', 'Captcha'],
-    fingerprint: ['categoryFingerprint', 'Fingerprint'],
-    fingerprinting: ['categoryFingerprint', 'Fingerprint']
-};
-
+// Localized category names, shared by the detection cards, History and Rules (a custom category keeps its own text)
 DetectionUI.categoryLabel = function(category) {
     const raw = String(category || '');
-    const entry = DetectionUI.CATEGORY_LABELS[raw.toLowerCase()];
+    const entry = Categories.labelOf(raw);
     if (!entry) return raw.charAt(0).toUpperCase() + raw.slice(1);
     return typeof I18n !== 'undefined' ? I18n.tr(entry[0], entry[1]) : entry[1];
 };
@@ -1514,10 +1535,7 @@ DetectionUI.handleSearch = function(query) {
 DetectionUI.getDetectorIcon = function(detection) {
     const iconAlt = (typeof I18n !== 'undefined' && I18n.get('ruleFieldIcon')) || 'Icon';
     const escapeAlt = (text) => FormatUtils.escapeAttr(text || iconAlt);
-    const normalizedCategory = String(detection?.category || detection?.detector?.category || '')
-      .toLowerCase()
-      .replace(/[^a-z]/g, '');
-    const isFingerprintCategory = normalizedCategory === 'fingerprint' || normalizedCategory.includes('fingerprint');
+    const isFingerprintCategory = Categories.keyOf(detection) === 'fingerprint';
 
     const fingerprintIcons = FormatUtils.FINGERPRINT_ICONS;
 
@@ -1525,62 +1543,31 @@ DetectionUI.getDetectorIcon = function(detection) {
       `<div class="detector-icon detector-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${FormatUtils.escapeAttr(src)}" alt="${alt}" class="detector-icon fingerprint-icon-image fingerprint-icon-image--${sourceType}" /></div>`
     );
 
-    // Check for custom uploaded icon first
-    if (detection.detector?.customIcon) {
-      if (isFingerprintCategory) {
-        return wrapFingerprintImage(detection.detector.customIcon, escapeAlt(detection.detector.name), 'custom');
+    // The kind of icon is decided in one place (FormatUtils.detectorIcon); this tab draws it
+    const icon = FormatUtils.detectorIcon(detection.detector);
+    const name = detection.detector?.name;
+    switch (icon.kind) {
+      case 'custom':
+        return isFingerprintCategory
+          ? wrapFingerprintImage(icon.value, escapeAlt(name), 'custom')
+          : `<img src="${FormatUtils.escapeAttr(icon.value)}" alt="${escapeAlt(name)}" class="detector-icon" />`;
+      case 'glyph':
+        return `<div class="detector-icon detector-icon-svg fingerprint-icon fingerprint-icon-shell">${fingerprintIcons[icon.value]}</div>`;
+      case 'emoji':
+        // An emoji or text, escaped before it lands in innerHTML
+        return FormatUtils.escapeHtml(icon.value);
+      case 'file':
+        if (isFingerprintCategory) return wrapFingerprintImage(chrome.runtime.getURL(`detectors/icons/${icon.value}`), escapeAlt(name), 'builtin');
+        // Brand logos: the dark copy in the dark theme, the original in the light one
+        return FormatUtils.brandLogoHtml(icon.value, name || iconAlt, 'detector-icon');
+      default: {
+        // No icon, or the Scrapfly default
+        const scrapflyIcon = chrome.runtime.getURL('icons/icon128.png');
+        return isFingerprintCategory
+          ? wrapFingerprintImage(scrapflyIcon, escapeAlt(name), 'default')
+          : `<img src="${scrapflyIcon}" alt="${escapeAlt(name)}" class="detector-icon" />`;
       }
-      return `<img src="${FormatUtils.escapeAttr(detection.detector.customIcon)}" alt="${escapeAlt(detection.detector.name)}" class="detector-icon" />`;
     }
-
-    // Try to get real icon from detector data
-    if (detection.detector?.icon) {
-      if (typeof detection.detector.icon === 'string') {
-        const lowerIcon = detection.detector.icon.toLowerCase();
-        if (lowerIcon === 'default') {
-          const scrapflyIcon = chrome.runtime.getURL('icons/icon128.png');
-          if (isFingerprintCategory) {
-            return wrapFingerprintImage(scrapflyIcon, escapeAlt(detection.detector.name), 'default');
-          }
-          return `<img src="${scrapflyIcon}" alt="${escapeAlt(detection.detector.name)}" class="detector-icon" />`;
-        }
-        if (lowerIcon === 'custom' || lowerIcon === 'custom.png') {
-          const scrapflyIcon = chrome.runtime.getURL('icons/icon128.png');
-          if (isFingerprintCategory) {
-            return wrapFingerprintImage(scrapflyIcon, escapeAlt(detection.detector.name), 'default');
-          }
-          return `<img src="${scrapflyIcon}" alt="${escapeAlt(detection.detector.name)}" class="detector-icon" />`;
-        }
-
-        // Check for fingerprint SVG icons
-        if (fingerprintIcons[lowerIcon]) {
-          return `<div class="detector-icon detector-icon-svg fingerprint-icon fingerprint-icon-shell">${fingerprintIcons[lowerIcon]}</div>`;
-        }
-      }
-      // Check if it's an emoji (not a file name)
-      if (!detection.detector.icon.includes('.png') &&
-          !detection.detector.icon.includes('.jpg') &&
-          !detection.detector.icon.includes('.svg') &&
-          !detection.detector.icon.includes('http')) {
-        // It's an emoji or text — escape before it lands in innerHTML.
-        return FormatUtils.escapeHtml(detection.detector.icon);
-      }
-
-      // It's a file, build path to icon in detectors/icons folder
-      if (isFingerprintCategory) {
-        const iconPath = chrome.runtime.getURL(`detectors/icons/${detection.detector.icon}`);
-        return wrapFingerprintImage(iconPath, escapeAlt(detection.detector.name), 'builtin');
-      }
-      // Brand logos: the dark copy in the dark theme, the original in the light one
-      return FormatUtils.brandLogoHtml(detection.detector.icon, detection.detector.name || iconAlt, 'detector-icon');
-    }
-
-    // No icon specified, use default custom.png
-    const scrapflyIcon = chrome.runtime.getURL('icons/icon128.png');
-    if (isFingerprintCategory) {
-      return wrapFingerprintImage(scrapflyIcon, escapeAlt(detection.detector?.name), 'default');
-    }
-    return `<img src="${scrapflyIcon}" alt="${escapeAlt(detection.detector?.name)}" class="detector-icon" />`;
 };
 
 DetectionUI.clearBadgeForEmptyState = async function() {

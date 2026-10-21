@@ -85,6 +85,152 @@ SettingsUI.renderWebhookHeadersUI = function() {
     });
 };
 
+/** "Send only when": the saved filter, shown in its fields. */
+SettingsUI.populateWebhookFilter = function(webhook) {
+    const filter = WebhookFilter.settingsOf(webhook);
+    const confidence = document.querySelector('#webhookMinConfidence');
+    if (confidence) confidence.value = String(filter.minConfidence);
+    const colours = (this && this.settings && this.settings.categoryColors) || {};
+    document.querySelectorAll('[data-webhook-category]').forEach((box) => {
+      const key = box.dataset.webhookCategory;
+      box.checked = filter.categories.includes(key);
+      // The category's icon, in the colour chosen in Settings
+      const icon = box.parentElement && box.parentElement.querySelector('.category-icon');
+      if (icon) {
+        icon.innerHTML = FormatUtils.categoryIconSvg(key);
+        icon.style.color = colours[key] || FormatUtils.DEFAULT_CATEGORY_COLORS[key] || '';
+      }
+    });
+    const domains = document.querySelector('#webhookDomains');
+    if (domains) domains.value = filter.domains.join('\n');
+};
+
+/** The filter as the fields say it now (the saved one when the fields are not on the page). */
+SettingsUI.readWebhookFilter = function() {
+    const saved = this.settings.webhook || {};
+    const confidence = document.querySelector('#webhookMinConfidence');
+    const boxes = [...document.querySelectorAll('[data-webhook-category]')];
+    const value = parseInt(confidence && confidence.value, 10);
+    return {
+      webhookMinConfidence: confidence ? (Number.isFinite(value) ? Math.min(Math.max(value, 0), 100) : 0) : WebhookFilter.settingsOf(saved).minConfidence,
+      webhookCategories: boxes.length ? Categories.KEYS.filter(key => boxes.some(box => box.checked && box.dataset.webhookCategory === key)) : WebhookFilter.settingsOf(saved).categories,
+      webhookDomains: SettingsUI.readSiteList('#webhookDomains', WebhookFilter.settingsOf(saved).domains)
+    };
+};
+
+// ---- Signing secret: a password field, Generate (staged until Save) and Copy. The value is only ever set through
+// .value and read back from it; it is never logged, put in an attribute or sent anywhere but the signature.
+
+/** Show the saved secret in the field (text only; anything else counts as none). */
+SettingsUI.populateWebhookSecret = function(webhook) {
+    const field = document.querySelector('#webhookSecret');
+    if (field) field.value = webhook && typeof webhook.webhookSecret === 'string' ? webhook.webhookSecret : '';
+    SettingsUI.refreshWebhookSecretUI.call(this);
+};
+
+/** The secret as the field says it now, trimmed (the saved one when the field is not on the page). */
+SettingsUI.readWebhookSecret = function() {
+    const field = document.querySelector('#webhookSecret');
+    if (field) return WebhookBody.cleanSecret(field.value);
+    return WebhookBody.cleanSecret(this.settings && this.settings.webhook && this.settings.webhook.webhookSecret);
+};
+
+/** The error under the field when the secret could never verify, and Copy only when there is something to copy. */
+SettingsUI.refreshWebhookSecretUI = function() {
+    const field = document.querySelector('#webhookSecret');
+    if (!field) return;
+    const valid = WebhookBody.isValidSecret(field.value);
+    const error = document.querySelector('#webhookSecretError');
+    if (error) error.hidden = valid;
+    field.setAttribute('aria-invalid', valid ? 'false' : 'true');
+    const copy = document.querySelector('#webhookSecretCopyBtn');
+    if (copy) copy.disabled = !WebhookBody.cleanSecret(field.value);
+};
+
+/** Generate: a new random secret in the field, applied with Save like every other change here (Cancel keeps the old one). */
+SettingsUI.generateWebhookSecret = function() {
+    const field = document.querySelector('#webhookSecret');
+    if (!field) return;
+    field.value = WebhookBody.newSecret();
+    SettingsUI.refreshWebhookSecretUI.call(this);
+    NotificationHelper.info(SettingsUI._whTr('settingsDraftPendingToast', 'Change staged. Save settings to apply it.'));
+};
+
+/** Copy the secret as it will be used, for the server that checks the signature. */
+SettingsUI.copyWebhookSecret = async function() {
+    const secret = SettingsUI.readWebhookSecret.call(this);
+    if (!secret) return;
+    // No element option: that helper would show "Copied" inside the field's own value for a moment
+    await FormatUtils.copyToClipboard(secret);
+};
+
+/** One line of "Recent deliveries": when, the page, and what came of it. */
+SettingsUI.webhookLogLine = function(entry) {
+    const text = (key, fallback) => FormatUtils.t(key, fallback);
+    const outcome = { sent: text('webhookLogSent', 'Sent'), failed: text('webhookLogFailed', 'Failed'), skipped: text('webhookLogSkipped', 'Not sent') }[entry.outcome];
+    const why = entry.reason ? { site: text('webhookLogReasonSite', 'site not on the list'), category: text('webhookLogReasonCategory', 'category not selected'), confidence: text('webhookLogReasonConfidence', 'below the minimum confidence') }[entry.reason]
+      : entry.error ? { network: text('webhookLogErrorNetwork', 'no answer'), blocked: text('webhookLogErrorBlocked', 'address not allowed'), config: text('webhookLogErrorConfig', 'invalid method') }[entry.error] : '';
+    const parts = [`${outcome}${entry.status ? ` ${entry.status}` : ''}${why ? ` (${why})` : ''}`];
+    if (entry.ms !== undefined) parts.push(`${entry.ms} ms`);
+    if (entry.trigger === 'cache') parts.push(text('webhookLogTriggerCache', 'cached page'));
+    if (entry.trigger === 'test') parts.push(text('webhookLogTriggerTest', 'test'));
+    return { when: FormatUtils.formatDateTime(entry.t), page: entry.page, outcome: entry.outcome, text: parts.join(' · ') };
+};
+
+SettingsUI.renderWebhookLog = function(entries) {
+    const list = document.querySelector('#webhookLogList');
+    if (!list) return;
+    list.textContent = '';
+    const kept = (Array.isArray(entries) ? entries : []).map(WebhookLog.clean).filter(Boolean).reverse();
+    if (!kept.length) {
+      const empty = document.createElement('li');
+      empty.className = 'webhook-log-empty';
+      empty.textContent = FormatUtils.t('webhookLogEmpty', 'Nothing sent yet.');
+      list.append(empty);
+    }
+    for (const entry of kept) {
+      const line = SettingsUI.webhookLogLine(entry);
+      const item = document.createElement('li');
+      item.className = `webhook-log-item webhook-log-item--${line.outcome}`;
+      const when = document.createElement('span');
+      when.className = 'webhook-log-when';
+      when.textContent = line.when;
+      const page = document.createElement('span');
+      page.className = 'webhook-log-page';
+      page.textContent = line.page;
+      page.dir = 'ltr';
+      const text = document.createElement('span');
+      text.className = 'webhook-log-text';
+      text.textContent = line.text;
+      item.append(when, page, text);
+      list.append(item);
+    }
+    const clear = document.querySelector('#webhookLogClearBtn');
+    if (clear) clear.disabled = !(Array.isArray(entries) && entries.length);
+};
+
+SettingsUI.refreshWebhookLog = async function() {
+    try {
+      const stored = await chrome.storage.local.get('scrapfly_webhook_log');
+      SettingsUI.renderWebhookLog(stored.scrapfly_webhook_log);
+    } catch (_) { /* the list stays as it was */ }
+    // New lines (a page was sent while Settings is open) show up without reopening
+    if (!SettingsUI._webhookLogWatching && chrome.storage && chrome.storage.onChanged) {
+      SettingsUI._webhookLogWatching = true;
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.scrapfly_webhook_log) SettingsUI.renderWebhookLog(changes.scrapfly_webhook_log.newValue);
+      });
+    }
+};
+
+SettingsUI._setupWebhookLogListeners = function() {
+    const clear = document.querySelector('#webhookLogClearBtn');
+    if (clear && !clear.dataset.bound) {
+      clear.dataset.bound = '1';
+      clear.addEventListener('click', () => { chrome.runtime.sendMessage({ type: WorkerMessages.WEBHOOK_LOG_CLEAR }, () => { void chrome.runtime.lastError; }); });
+    }
+};
+
 SettingsUI.handleTestWebhook = async function() {
     const btn = document.querySelector('#testWebhookBtn');
     if (!btn) return;
@@ -98,28 +244,40 @@ SettingsUI.handleTestWebhook = async function() {
       ${this.escapeHtml(SettingsUI._whTr('webhookSending', 'Sending...'))}
     `;
 
+    let ctx;
     try {
       const webhookUrl = document.querySelector('#webhookUrl')?.value || '';
       const webhookMethod = (document.querySelector('#webhookMethod')?.value || 'POST').toUpperCase();
       const webhookContentType = this.getWebhookContentTypeValue() || 'application/json';
       const webhookPayload = document.querySelector('#webhookPayload')?.value || '';
+      const secretField = document.querySelector('#webhookSecret');
+      const webhookSecret = SettingsUI.readWebhookSecret.call(this);
 
       if (!webhookUrl) {
         NotificationHelper.error(SettingsUI._whTr('pleaseEnterWebhookUrl', 'Please enter a webhook URL'));
         return;
       }
+      // The same rule as Save: a secret that could never verify is not sent with
+      if (secretField && !WebhookBody.isValidSecret(secretField.value)) {
+        SettingsUI.refreshWebhookSecretUI.call(this);
+        NotificationHelper.error(SettingsUI._whTr('webhookSecretInvalid', 'Signing secret: use up to 512 ASCII characters (no accents or emoji)'));
+        return;
+      }
 
       // Sample page + detection; the request is built exactly as the
       // background sender builds it (SettingsRuntime + WebhookBody).
-      const ctx = WebhookBody.sampleContext();
+      ctx = WebhookBody.sampleContext();
       ctx.favicon = UrlUtils.getFaviconUrl(ctx.hostname, 64);
       ctx.timestamp = new Date().toISOString();
 
       const webhook = {
         webhookUrl, webhookMethod, webhookContentType, webhookPayload,
-        webhookHeaders: this.settings.webhook?.webhookHeaders || []
+        webhookHeaders: this.settings.webhook?.webhookHeaders || [],
+        webhookSecret
       };
+      const started = Date.now();
       const response = await SettingsRuntime.sendWebhook(webhook, ctx);
+      SettingsUI.recordWebhookTest({ t: started, page: ctx.hostname, outcome: response.ok ? 'sent' : 'failed', status: response.status, ms: Date.now() - started });
 
       const _tW = (typeof I18n !== 'undefined') ? I18n : null;
       if (response.ok) {
@@ -130,6 +288,7 @@ SettingsUI.handleTestWebhook = async function() {
         Logger.warn('NETWORK', 'Test webhook failed:', { status: response.status });
       }
     } catch (error) {
+      SettingsUI.recordWebhookTest({ t: Date.now(), page: ctx ? ctx.hostname : '', outcome: 'failed', error: WebhookLog.errorClassOf(error) });
       Logger.error('NETWORK', 'Test webhook request failed');
       const _tWE = (typeof I18n !== 'undefined') ? I18n : null;
       NotificationHelper.error((_tWE && _tWE.format('webhookTestFailedFmt', error.message)) || ('Webhook test failed: ' + error.message));
@@ -137,6 +296,11 @@ SettingsUI.handleTestWebhook = async function() {
       btn.disabled = false;
       btn.innerHTML = originalText;
     }
+};
+
+/** The Test button leaves a line in the record, written by the worker like every other. */
+SettingsUI.recordWebhookTest = function(entry) {
+    try { chrome.runtime.sendMessage({ type: WorkerMessages.WEBHOOK_LOG_ENTRY, entry: { ...entry, trigger: 'test' } }, () => { void chrome.runtime.lastError; }); } catch (_) { /* the record is a convenience */ }
 };
 
 SettingsUI._whTr = function(key, fallback) {
@@ -468,6 +632,13 @@ SettingsUI._setupWebhookListeners = function() {
     if (testWebhookBtn) {
       testWebhookBtn.addEventListener('click', () => this.handleTestWebhook());
     }
+
+    const secretField = document.querySelector('#webhookSecret');
+    if (secretField) secretField.addEventListener('input', () => SettingsUI.refreshWebhookSecretUI.call(this));
+    const generateSecretBtn = document.querySelector('#webhookSecretGenerateBtn');
+    if (generateSecretBtn) generateSecretBtn.addEventListener('click', () => SettingsUI.generateWebhookSecret.call(this));
+    const copySecretBtn = document.querySelector('#webhookSecretCopyBtn');
+    if (copySecretBtn) copySecretBtn.addEventListener('click', () => SettingsUI.copyWebhookSecret.call(this));
 };
 
 if (typeof self !== 'undefined') {

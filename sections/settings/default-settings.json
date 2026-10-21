@@ -38,7 +38,10 @@
       "categoryOrder": ["antibot", "captcha", "fingerprint"],
       "advancedToolsMinConfidence": 50,
       "captureRetentionMinutes": 30,
+      "scanMode": "blocklist",
       "blacklistedDomains": [],
+      "allowedDomains": [],
+      "hooksOffDomains": [],
       "hooksConfig": {}
     },
 
@@ -49,11 +52,15 @@
     "webhook": {
       "enableWebhook": false,
       "webhookOnCache": false,
+      "webhookMinConfidence": 0,
+      "webhookCategories": [],
+      "webhookDomains": [],
       "webhookMethod": "POST",
       "webhookUrl": "",
       "webhookContentType": "application/json",
       "webhookPayload": "{\"url\": \"<SITEURL>\", \"hostname\": \"<HOSTNAME>\", \"title\": \"<TITLE>\", \"favicon\": \"<FAVICON>\", \"detections\": <DETECTIONS>, \"timestamp\": \"<TIMESTAMP>\", \"count\": <DETECTION_COUNT>, \"categories\": \"<CATEGORIES>\"}",
-      "webhookHeaders": []
+      "webhookHeaders": [],
+      "webhookSecret": ""
     },
 
     "share": {
@@ -88,7 +95,13 @@
       "historyExcludedDomains": [],
       "historyChangeAlerts": "off",
       "historyBackup": "off",
-      "historyClearOnClose": false
+      "historyClearOnClose": false,
+      "historyFingerprintDays": 0,
+      "historyAutoPinHard": false,
+      "historyAutoPinVendors": [],
+      "historyAutoPinMinConfidence": 80,
+      "historyMaxMB": 6,
+      "historyWatch": "off"
     },
 
     "duplicatePrevention": {

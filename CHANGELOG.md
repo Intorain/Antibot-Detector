@@ -5,6 +5,50 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.2] - 2026-10-20
+
+### Added
+
+- History: filter chips under the search (Pinned, Changed, Anti-bot, Captcha, Fingerprint), and the search now also looks in your notes. When nothing matches, a message offers Clear filters. The export dialog can keep to changed pages only.
+- Settings → Detection → Sites to scan: scan every site except the ones you skip (as before), or only the sites you choose; the Detection tab of a site that is not chosen offers Scan this site.
+- Settings → Data → Storage: how much space the detection cache, tool captures, History, rules, pending rule updates, settings and logs use, with Clear for the cache, the captures, the pending updates, the logs and History.
+- Settings → Data → Backup and restore: settings, your own rules and History in one file, restored whole or in parts, merging or replacing. Older exports still import as before.
+- Settings → Data → Presets and reset: a Privacy and a Developer preset that list what they change, and Reset settings, which keeps your site lists, rules, History, language and theme.
+- Settings → Data → Diagnostics: Copy diagnostics puts versions (the extension, the rule set, the installed rules), settings, counts and the pending rule updates on the clipboard for a bug report, with no sites, addresses or keys.
+- Webhook: send only above a minimum confidence, for chosen categories or sites; sign each request with a secret (Scrapfly's own signature headers); Recent deliveries lists the last 20 attempts, with Clear.
+- Settings → Detection → Sites without JS hooks: turn the JS hooks off on a site that misbehaves with them; nothing of the page or its frames stays wrapped, and its results say fingerprinting is not checked.
+- Settings → History → Pin pages automatically: pages with a hard protection, or one you name, pin themselves (up to 50); a page you unpin stays unpinned.
+- Settings → History: delete fingerprinting-only pages after a number of days of their own.
+- Settings → History → Storage: choose a History size of 6, 12 or 25 MB (the extension now has the unlimited storage permission; History stays at 6 MB unless you choose more). A smaller size, or a lower entry limit, than History uses asks first, also when it comes from an imported settings file or a restored backup.
+- History watchlist: pin a page and choose Watch for changes, and the extension scans it again every day or week in a background tab, marking it Changed (with a notification) when its protections change. Settings → History → Watch pinned pages.
+- Rules editor: a bar notices the texts of a rule that are not translated into every language and one button translates them all, with Chrome's on-device translator.
+
+### Changed
+
+- Rules editor: Add combination puts the cursor in the new combination's name; the pattern list opens just below it.
+- Rules → Check against History: the answer comes first, with a bar for how many saved pages match, clearer wording, and the Check button above the list.
+
+### Fixed
+
+- A site you skip is no longer scanned, cached or saved to History when you come back to its tab.
+- A custom detector whose category says "WAF" or "bot" is listed with anti-bot everywhere (Detection, History and its export filter); some screens put it under Other.
+- CHEQ, Meetrics, Ocule and ThreatMetrix are named Anti-Bot in History exports and webhooks, like every other anti-bot detector.
+- Official detectors stay marked official, not custom, when the built-in detector index cannot be read.
+- The toolbar badge uses the colours Settings → Badge colors shows from the start; until the first Save it used slightly different shades.
+- A tag colour chosen in Settings now also colours the chips in the detection details, History and Rules, and an open popup follows without being reopened. The DOM tag is purple there, as in Settings.
+- Statistics → Tools names every Advanced vendor like the Advanced tab; the CAPTCHA vendors added in 3.0 showed their internal ids.
+- The cache tile says Domain, the real default scope, for results saved before the scope was recorded; it said Path.
+- The rule editor shows 80 for a pattern with no confidence of its own (85 for a DOM pattern), the values detection uses; it showed 100.
+- Statistics → Tools says how long captures are kept as set in Settings; it always said 30 minutes.
+- The icon picker shows the same fingerprint icons as the rule cards; twelve of them were drawn differently.
+- History details show a rule's uploaded icon, an emoji icon and the Scrapfly logo like the Detection tab does.
+- Page notices from Advanced tools are laid out right to left in Arabic.
+- Settings starts the cache duration from 7 days, not 12 hours, when a saved or imported file carries none.
+- Settings → Data → Detection History (CSV) names the protections, which it wrote as [object Object], and is the same file as History → Export.
+- The page buttons of the skipped sites list jumped several pages at a time once Settings had been opened more than once.
+- Webhook: Send on every page load now sends pages answered from the cache; it did nothing before.
+- The webhook receives everything found on a page; it used to miss detections found after the first moments of the scan.
+
 ## [3.0.1] - 2026-10-20
 
 ### Added
@@ -547,6 +591,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.2]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.9...v3.0.0
 [2.8.9]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.8...v2.8.9

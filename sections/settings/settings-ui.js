@@ -97,7 +97,9 @@ SettingsUI.switchTab = function(tabName) {
       }
     });
     // The storage meter and last backup are read when the tab is opened
-    if (tabName === 'history') SettingsUI.refreshHistoryStorage();
+    if (tabName === 'history') SettingsUI.refreshHistoryStorage.call(this);
+    if (tabName === 'history') SettingsUI.refreshHistoryWatch.call(this);
+    if (tabName === 'data') SettingsUI.refreshStorageOverview();
 };
 
 SettingsUI.loadSettings = async function() {
@@ -185,11 +187,13 @@ SettingsUI.setToggleControlledVisibility = function(toggleEl, targets = []) {
 SettingsUI.saveSettings = async function(options = {}) {
     try {
       if (!this.settingsBaseline) throw new Error('Load settings before saving');
-      const committed = await StorageManager.commitSettings({
-        baseline: this.settingsBaseline,
-        candidate: options.candidate || this.settings,
-        languageOverride: options.languageOverride
-      });
+      const committed = options.reset
+        ? await StorageManager.resetSettings(options.reset.defaults, options.reset.keep)
+        : await StorageManager.commitSettings({
+          baseline: this.settingsBaseline,
+          candidate: options.candidate || this.settings,
+          languageOverride: options.languageOverride
+        });
       // Do not advance the form/baseline until persistence succeeds.
       this.settings = committed.settings;
       this.settingsBaseline = JSON.parse(JSON.stringify(committed.settings));
@@ -202,11 +206,11 @@ SettingsUI.saveSettings = async function(options = {}) {
       };
       if (oldScope !== newScope) {
         UrlUtils.clearUrlHashCache();
-        notifyWorker('CACHE_SCOPE_CHANGED');
-        notifyWorker('DETECTION_CLEAR_CACHE');
+        notifyWorker(WorkerMessages.CACHE_SCOPE_CHANGED);
+        notifyWorker(WorkerMessages.DETECTION_CLEAR_CACHE);
       }
-      notifyWorker('SETTINGS_UPDATED');
-      notifyWorker('SYNC_CATEGORY_COLORS');
+      notifyWorker(WorkerMessages.SETTINGS_UPDATED);
+      notifyWorker(WorkerMessages.SYNC_CATEGORY_COLORS);
       if (options.notify !== false) NotificationHelper.success(((typeof I18n !== 'undefined') && I18n.get('settingsSavedToast')) || 'Settings saved');
       return true;
     } catch (error) {
@@ -264,55 +268,14 @@ SettingsUI.updateSettingsUI = function() {
       this.startLogCountUpdate();
     }
 
-    // Badge Colors (using BADGE constants as defaults)
-    if (this.settings.badgeColors) {
-      const colorBadgeLow = document.querySelector('#colorBadgeLow');
-      if (colorBadgeLow) colorBadgeLow.value = this.settings.badgeColors.low || BADGE.COLORS.LOW;
-
-      const colorBadgeMedium = document.querySelector('#colorBadgeMedium');
-      if (colorBadgeMedium) colorBadgeMedium.value = this.settings.badgeColors.medium || BADGE.COLORS.MEDIUM;
-
-      const colorBadgeHigh = document.querySelector('#colorBadgeHigh');
-      if (colorBadgeHigh) colorBadgeHigh.value = this.settings.badgeColors.high || BADGE.COLORS.HIGH;
-    }
-
-    // Category Colors
-    if (this.settings.categoryColors) {
-      const colorAntibot = document.querySelector('#colorAntibot');
-      if (colorAntibot) colorAntibot.value = this.settings.categoryColors.antibot || FormatUtils.DEFAULT_CATEGORY_COLORS.antibot;
-
-      const colorCaptcha = document.querySelector('#colorCaptcha');
-      if (colorCaptcha) colorCaptcha.value = this.settings.categoryColors.captcha || FormatUtils.DEFAULT_CATEGORY_COLORS.captcha;
-
-      const colorFingerprint = document.querySelector('#colorFingerprint');
-      if (colorFingerprint) colorFingerprint.value = this.settings.categoryColors.fingerprint || FormatUtils.DEFAULT_CATEGORY_COLORS.fingerprint;
-    }
-
-    // Tag Colors
-    if (this.settings.tagColors) {
-      const colorTagDOM = document.querySelector('#colorTagDOM');
-      if (colorTagDOM) colorTagDOM.value = this.settings.tagColors.dom || '#8D33FF';
-
-      const colorTagHeaders = document.querySelector('#colorTagHeaders');
-      if (colorTagHeaders) colorTagHeaders.value = this.settings.tagColors.headers || '#FF33A8';
-
-      const colorTagCookies = document.querySelector('#colorTagCookies');
-      if (colorTagCookies) colorTagCookies.value = this.settings.tagColors.cookies || '#FFC133';
-
-      const colorTagContent = document.querySelector('#colorTagContent');
-      if (colorTagContent) colorTagContent.value = this.settings.tagColors.content || '#33FFF3';
-
-      const colorTagURLs = document.querySelector('#colorTagURLs');
-      if (colorTagURLs) colorTagURLs.value = this.settings.tagColors.urls || '#00BCD4';
-
-      const colorTagJSHooks = document.querySelector('#colorTagJSHooks');
-      if (colorTagJSHooks) colorTagJSHooks.value = this.settings.tagColors.js_hooks || '#00E5FF';
-
-      const colorTagWindow = document.querySelector('#colorTagWindow');
-      if (colorTagWindow) colorTagWindow.value = this.settings.tagColors.window || '#4CAF50';
-
-      const colorTagPayload = document.querySelector('#colorTagPayload');
-      if (colorTagPayload) colorTagPayload.value = this.settings.tagColors.payload || '#9C27B0';
+    // Badge, category and tag colours, each starting from the shared default
+    for (const { group, inputs, defaults } of SettingsUI.colorGroups()) {
+      const saved = this.settings[group];
+      if (!saved) continue;
+      for (const [key, selector] of Object.entries(inputs)) {
+        const input = document.querySelector(selector);
+        if (input) input.value = saved[key] || defaults[key];
+      }
     }
 
     if (typeof SettingsUI.syncColorRowBadges === 'function') {
@@ -334,15 +297,20 @@ SettingsUI.updateSettingsUI = function() {
         minToolConfidence.value = this.settings.detection.advancedToolsMinConfidence ?? 50;
       }
 
+      const hooksOffBox = document.querySelector('#hooksOffDomains');
+      if (hooksOffBox) {
+        hooksOffBox.value = (Array.isArray(this.settings.detection.hooksOffDomains) ? this.settings.detection.hooksOffDomains : []).join('\n');
+      }
+
       const retentionDuration = document.querySelector('#captureRetentionDuration');
       const retentionUnit = document.querySelector('#captureRetentionUnit');
       if (retentionDuration && retentionUnit) {
-        const mins = Math.max(1, Math.min(10080, parseInt(this.settings.detection.captureRetentionMinutes, 10) || 30));
+        const mins = CaptureRetention.minutesOf(this.settings.detection.captureRetentionMinutes);
         let duration = mins, unit = 'minutes';
         if (mins % 1440 === 0) { duration = mins / 1440; unit = 'days'; }
         else if (mins % 60 === 0) { duration = mins / 60; unit = 'hours'; }
         retentionUnit.value = unit;
-        retentionDuration.max = String(unit === 'days' ? 7 : unit === 'hours' ? 168 : 10080);
+        retentionDuration.max = String(CaptureRetention.MAX_MINUTES / SettingsUI.retentionUnitMinutes(unit));
         retentionDuration.value = String(duration);
       }
 
@@ -363,7 +331,8 @@ SettingsUI.updateSettingsUI = function() {
       }
       SettingsUI.updateCacheDurationHint();
 
-        this.renderBlacklistUI();
+      SettingsUI.syncScanModeUI.call(this);
+      this.renderBlacklistUI();
       this.setupBlacklistEventListeners();
     }
 
@@ -383,6 +352,9 @@ SettingsUI.updateSettingsUI = function() {
     const enableWebhook = document.querySelector('#enableWebhook');
     const isWebhookEnabled = webhookSettings.enableWebhook ?? false;
     if (enableWebhook) enableWebhook.checked = isWebhookEnabled;
+
+    SettingsUI.populateWebhookFilter.call(this, webhookSettings);
+    SettingsUI.refreshWebhookLog.call(this);
 
     const webhookSettingsContainer = document.querySelector('#webhookSettings');
     const webhookOnCacheGroup = document.querySelector('#webhookOnCacheGroup');
@@ -442,6 +414,7 @@ SettingsUI.updateSettingsUI = function() {
     SettingsUI.setupWebhookPayloadUI.call(this);
 
     this.renderWebhookHeadersUI();
+    SettingsUI.populateWebhookSecret.call(this, webhookSettings);
 
     // ========== HISTORY TAB ==========
     if (this.settings.history) {
@@ -473,6 +446,17 @@ SettingsUI.updateSettingsUI = function() {
       check('historySkipFingerprintOnly', h.historySkipFingerprintOnly === true);
       check('historyClearOnClose', h.historyClearOnClose === true);
       choose('historyMinConfidence', h.historyMinConfidence ?? 0);
+      choose('historyFingerprintDays', h.historyFingerprintDays ?? 0);
+      choose('historyWatch', HistoryPolicy.watchModeOf(h));
+      SettingsUI.populateHistorySize.call(this, h.historyMaxMB);
+      check('historyAutoPinHard', h.historyAutoPinHard === true);
+      choose('historyAutoPinVendors', (Array.isArray(h.historyAutoPinVendors) ? h.historyAutoPinVendors : []).join('\n'));
+      choose('historyAutoPinMinConfidence', h.historyAutoPinMinConfidence ?? HistoryPolicy.AUTO_PIN_MIN_CONFIDENCE);
+      const pinNote = document.querySelector('#historyAutoPinNote');
+      if (pinNote) {
+        pinNote.setAttribute('data-i18n-args', String(HistoryPolicy.MAX_AUTO_PINS));
+        pinNote.textContent = FormatUtils.t('settingsHistoryAutoPinNote', 'Up to {0} pages are pinned this way. Unpin one and it is never pinned again by itself.', HistoryPolicy.MAX_AUTO_PINS);
+      }
       choose('historyChangeAlerts', ['pinned', 'all'].includes(h.historyChangeAlerts) ? h.historyChangeAlerts : 'off');
       choose('historyBackup', ['daily', 'weekly', 'monthly'].includes(h.historyBackup) ? h.historyBackup : 'off');
       choose('historyExcludedDomains', (Array.isArray(h.historyExcludedDomains) ? h.historyExcludedDomains : []).join('\n'));
@@ -552,36 +536,16 @@ SettingsUI.getSettingsFromUI = function() {
     const rawMaxLogs = parseInt(logCollectorMaxLogsInput?.value ?? this.settings.logCollectorMaxLogs ?? 5000);
     settings.logCollectorMaxLogs = Math.min(Math.max(rawMaxLogs, 100), 5000);
 
-    // Badge Colors (using BADGE constants as defaults)
-    settings.badgeColors = {
-      low: document.querySelector('#colorBadgeLow')?.value ?? this.settings.badgeColors?.low ?? BADGE.COLORS.LOW,
-      medium: document.querySelector('#colorBadgeMedium')?.value ?? this.settings.badgeColors?.medium ?? BADGE.COLORS.MEDIUM,
-      high: document.querySelector('#colorBadgeHigh')?.value ?? this.settings.badgeColors?.high ?? BADGE.COLORS.HIGH
-    };
-
-    // Category Colors
-    settings.categoryColors = {
-      antibot: document.querySelector('#colorAntibot')?.value ?? this.settings.categoryColors?.antibot ?? FormatUtils.DEFAULT_CATEGORY_COLORS.antibot,
-      captcha: document.querySelector('#colorCaptcha')?.value ?? this.settings.categoryColors?.captcha ?? FormatUtils.DEFAULT_CATEGORY_COLORS.captcha,
-      fingerprint: document.querySelector('#colorFingerprint')?.value ?? this.settings.categoryColors?.fingerprint ?? FormatUtils.DEFAULT_CATEGORY_COLORS.fingerprint
-    };
-
-    // Tag Colors
-    settings.tagColors = {
-      dom: document.querySelector('#colorTagDOM')?.value ?? this.settings.tagColors?.dom ?? '#8D33FF',
-      headers: document.querySelector('#colorTagHeaders')?.value ?? this.settings.tagColors?.headers ?? '#FF33A8',
-      cookies: document.querySelector('#colorTagCookies')?.value ?? this.settings.tagColors?.cookies ?? '#FFC133',
-      content: document.querySelector('#colorTagContent')?.value ?? this.settings.tagColors?.content ?? '#33FFF3',
-      urls: document.querySelector('#colorTagURLs')?.value ?? this.settings.tagColors?.urls ?? '#00BCD4',
-      js_hooks: document.querySelector('#colorTagJSHooks')?.value ?? this.settings.tagColors?.js_hooks ?? '#00E5FF',
-      window: document.querySelector('#colorTagWindow')?.value ?? this.settings.tagColors?.window ?? '#4CAF50',
-      payload: document.querySelector('#colorTagPayload')?.value ?? this.settings.tagColors?.payload ?? '#9C27B0'
-    };
+    // Badge, category and tag colours
+    for (const { group, inputs, defaults } of SettingsUI.colorGroups()) {
+      settings[group] = Object.fromEntries(Object.entries(inputs).map(([key, selector]) =>
+        [key, document.querySelector(selector)?.value ?? this.settings[group]?.[key] ?? defaults[key]]));
+    }
 
     // ========== DETECTION TAB ==========
     settings.detection = {
-      cacheDuration: parseInt(document.querySelector('#cacheDuration')?.value ?? this.settings.detection?.cacheDuration ?? 12),
-      cacheUnit: document.querySelector('#cacheUnit')?.value ?? this.settings.detection?.cacheUnit ?? 'hours',
+      cacheDuration: parseInt(document.querySelector('#cacheDuration')?.value ?? this.settings.detection?.cacheDuration ?? FormatUtils.DEFAULT_CACHE.duration),
+      cacheUnit: document.querySelector('#cacheUnit')?.value ?? this.settings.detection?.cacheUnit ?? FormatUtils.DEFAULT_CACHE.unit,
       cacheScope: document.querySelector('#cacheScope')?.value ?? this.settings.detection?.cacheScope ?? 'domain',
       // "Show first": a category order, or the highest confidence (the
       // category order is kept for ties and for switching back)
@@ -590,7 +554,11 @@ SettingsUI.getSettingsFromUI = function() {
       advancedToolsMinConfidence: parseInt(document.querySelector('#advancedToolsMinConfidence')?.value
         ?? this.settings.detection?.advancedToolsMinConfidence ?? 50),
       captureRetentionMinutes: SettingsUI.readCaptureRetentionMinutes(this.settings.detection?.captureRetentionMinutes),
-      blacklistedDomains: this.settings.detection?.blacklistedDomains || [], // This is managed separately by the blacklist UI
+      // Which sites are scanned: the mode is staged in the form, the two lists are managed by the list UI
+      scanMode: document.querySelector('#scanMode')?.value ?? this.settings.detection?.scanMode ?? 'blocklist',
+      blacklistedDomains: this.settings.detection?.blacklistedDomains || [],
+      allowedDomains: this.settings.detection?.allowedDomains || [],
+      hooksOffDomains: SettingsUI.readSiteList('#hooksOffDomains', this.settings.detection?.hooksOffDomains),
       hooksConfig: this.settings.detection?.hooksConfig || {}
     };
 
@@ -608,7 +576,9 @@ SettingsUI.getSettingsFromUI = function() {
       webhookUrl: document.querySelector('#webhookUrl')?.value ?? this.settings.webhook?.webhookUrl ?? '',
       webhookContentType: this.getWebhookContentTypeValue() ?? this.settings.webhook?.webhookContentType ?? 'application/json',
       webhookPayload: document.querySelector('#webhookPayload')?.value ?? this.settings.webhook?.webhookPayload ?? '',
-      webhookHeaders: this.settings.webhook?.webhookHeaders || []
+      webhookHeaders: this.settings.webhook?.webhookHeaders || [],
+      webhookSecret: SettingsUI.readWebhookSecret.call(this),
+      ...SettingsUI.readWebhookFilter.call(this)
     };
 
     // Share uploads (Detection → Upload detections)
@@ -627,8 +597,14 @@ SettingsUI.getSettingsFromUI = function() {
       historyEnabled: document.querySelector('#historyEnabled')?.checked ?? this.settings.history?.historyEnabled ?? true,
       historySkipIncognito: document.querySelector('#historySkipIncognito')?.checked ?? this.settings.history?.historySkipIncognito ?? true,
       historyMinConfidence: parseInt(document.querySelector('#historyMinConfidence')?.value ?? this.settings.history?.historyMinConfidence ?? 0, 10),
+      historyFingerprintDays: parseInt(document.querySelector('#historyFingerprintDays')?.value ?? this.settings.history?.historyFingerprintDays ?? 0, 10),
+      historyWatch: document.querySelector('#historyWatch')?.value ?? this.settings.history?.historyWatch ?? 'off',
+      historyMaxMB: parseInt(document.querySelector('#historyMaxMB')?.value ?? this.settings.history?.historyMaxMB ?? HistoryStore.SIZES_MB[0], 10),
+      historyAutoPinHard: document.querySelector('#historyAutoPinHard')?.checked ?? this.settings.history?.historyAutoPinHard ?? false,
+      historyAutoPinVendors: SettingsUI.readNameList('#historyAutoPinVendors', this.settings.history?.historyAutoPinVendors),
+      historyAutoPinMinConfidence: parseInt(document.querySelector('#historyAutoPinMinConfidence')?.value ?? this.settings.history?.historyAutoPinMinConfidence ?? HistoryPolicy.AUTO_PIN_MIN_CONFIDENCE, 10),
       historySkipFingerprintOnly: document.querySelector('#historySkipFingerprintOnly')?.checked ?? this.settings.history?.historySkipFingerprintOnly ?? false,
-      historyExcludedDomains: SettingsUI.readExcludedDomains(this.settings.history?.historyExcludedDomains),
+      historyExcludedDomains: SettingsUI.readSiteList('#historyExcludedDomains', this.settings.history?.historyExcludedDomains),
       historyChangeAlerts: document.querySelector('#historyChangeAlerts')?.value ?? this.settings.history?.historyChangeAlerts ?? 'off',
       historyBackup: document.querySelector('#historyBackup')?.value ?? this.settings.history?.historyBackup ?? 'off',
       historyClearOnClose: document.querySelector('#historyClearOnClose')?.checked ?? this.settings.history?.historyClearOnClose ?? false
@@ -688,6 +664,28 @@ SettingsUI.validateSettings = function(settings) {
       }
     }
 
+    if (settings.history && settings.history.historyAutoPinMinConfidence !== undefined) {
+      const confidence = settings.history.historyAutoPinMinConfidence;
+      if (!Number.isInteger(confidence) || confidence < 0 || confidence > 100) {
+        errors.push(text('settingsUiErrAutoPinConfidence', 'Pin confidence must be between 0 and 100'));
+      }
+    }
+
+    if (settings.history && settings.history.historyMaxMB !== undefined && !HistoryStore.SIZES_MB.includes(settings.history.historyMaxMB)) {
+      errors.push(text('settingsUiErrHistorySizeFmt', 'History size must be one of {0} MB', HistoryStore.SIZES_MB.join(', ')));
+    }
+
+    if (settings.history && settings.history.historyWatch !== undefined && !HistoryPolicy.WATCH_MODES.includes(settings.history.historyWatch)) {
+      errors.push(text('settingsUiErrHistoryWatch', 'The watchlist must be off, daily or weekly'));
+    }
+
+    if (settings.history && settings.history.historyFingerprintDays !== undefined) {
+      const days = settings.history.historyFingerprintDays;
+      if (!Number.isInteger(days) || days < 0 || days > 3650) {
+        errors.push(text('settingsUiErrFingerprintDays', 'Fingerprinting-only pages must be kept between 0 and 3650 days'));
+      }
+    }
+
     if (settings.history && settings.history.historyAutoDeleteDays !== undefined) {
       const days = settings.history.historyAutoDeleteDays;
       if (!Number.isFinite(days) || days < 1 || days > 3650) {
@@ -704,6 +702,23 @@ SettingsUI.validateSettings = function(settings) {
 
     if (typeof SettingsUI.validateShareSettings === 'function') {
       errors.push(...SettingsUI.validateShareSettings(settings.share, text));
+    }
+
+    // A signing secret no server could check (accents, emoji, invisible characters, over 512): the message never repeats it
+    if (settings.webhook && settings.webhook.webhookSecret !== undefined && typeof WebhookBody !== 'undefined'
+      && !WebhookBody.isValidSecret(settings.webhook.webhookSecret)) {
+      errors.push(text('webhookSecretInvalid', 'Signing secret: use up to 512 ASCII characters (no accents or emoji)'));
+    }
+
+    if (settings.detection && settings.detection.scanMode !== undefined && !ScanScope.MODES.includes(settings.detection.scanMode)) {
+      errors.push(text('settingsUiErrScanMode', 'Sites to scan must be every site except the skipped ones, or only the chosen sites'));
+    }
+    for (const key of ScanScope.SITE_LIST_KEYS) {
+      const list = settings.detection && settings.detection[key];
+      if (list !== undefined && !(Array.isArray(list) && list.every(site => typeof site === 'string'))) {
+        errors.push(text('settingsUiErrSiteList', 'A list of sites must hold site names only'));
+        break;
+      }
     }
 
     if (settings.duplicatePrevention && settings.duplicatePrevention.duplicateDuration !== undefined) {
@@ -740,7 +755,7 @@ SettingsUI.setupEventListeners = function() {
         const dur = document.querySelector('#captureRetentionDuration');
         const unit = document.querySelector('#captureRetentionUnit');
         if (dur && unit) {
-          const max = unit.value === 'days' ? 7 : unit.value === 'hours' ? 168 : 10080;
+          const max = CaptureRetention.MAX_MINUTES / SettingsUI.retentionUnitMinutes(unit.value);
           dur.max = String(max);
           const v = parseInt(dur.value, 10);
           if (!Number.isFinite(v) || v < 1) dur.value = '1';
@@ -802,6 +817,23 @@ SettingsUI.setupEventListeners = function() {
       }
     });
 
+    // Which sites are scanned: staged like any other setting, saved with the form
+    const scanModeSelect = document.querySelector('#scanMode');
+    if (scanModeSelect && !scanModeSelect.dataset.scopeBound) {
+      scanModeSelect.dataset.scopeBound = '1';
+      scanModeSelect.addEventListener('change', () => {
+        if (!this.settings.detection) this.settings.detection = {};
+        this.settings.detection.scanMode = ScanScope.MODES.includes(scanModeSelect.value) ? scanModeSelect.value : 'blocklist';
+        this.blacklistPage = 1;
+        this.blacklistSearch = '';
+        const search = document.querySelector('#blacklistSearchInput');
+        if (search) search.value = '';
+        SettingsUI.syncScanModeUI.call(this);
+        this.renderBlacklistUI();
+        NotificationHelper.info(FormatUtils.t('settingsDraftPendingToast', 'Change staged. Save settings to apply it.'));
+      });
+    }
+
     const addCurrentDomainBtn = document.querySelector('#addCurrentDomainBtn');
     if (addCurrentDomainBtn) {
       addCurrentDomainBtn.addEventListener('click', async () => {
@@ -819,18 +851,22 @@ SettingsUI.setupEventListeners = function() {
           const domain = url.hostname;
 
           if (!this.settings.detection) {
-            this.settings.detection = { blacklistedDomains: [] };
+            this.settings.detection = { blacklistedDomains: [], allowedDomains: [] };
           }
-          if (!this.settings.detection.blacklistedDomains) {
-            this.settings.detection.blacklistedDomains = [];
+          // The skipped sites, or the chosen sites: whichever list is on screen
+          const listKey = SettingsUI.scanListKey.call(this);
+          if (!Array.isArray(this.settings.detection[listKey])) {
+            this.settings.detection[listKey] = [];
           }
 
-          if (this.settings.detection.blacklistedDomains.includes(domain)) {
-            NotificationHelper.info(_fmt2('domainAlreadyBlacklistedFmt', `${domain} is already blacklisted`, domain));
+          if (this.settings.detection[listKey].includes(domain)) {
+            NotificationHelper.info(listKey === 'allowedDomains'
+              ? _fmt2('domainAlreadyAllowedFmt', `${domain} is already on the list`, domain)
+              : _fmt2('domainAlreadyBlacklistedFmt', `${domain} is already blacklisted`, domain));
             return;
           }
 
-          this.settings.detection.blacklistedDomains.push(domain);
+          this.settings.detection[listKey].push(domain);
           this.renderBlacklistUI();
           NotificationHelper.info(_tr2('settingsDraftPendingToast', 'Change staged. Save settings to apply it.'));
         } catch (error) {
@@ -897,9 +933,15 @@ SettingsUI.setupEventListeners = function() {
       historyAutoDeleteToggle.addEventListener('change', () => SettingsUI.syncHistoryAutoDeleteRow());
     }
 
+    const historyMaxMB = document.querySelector('#historyMaxMB');
+    if (historyMaxMB) historyMaxMB.addEventListener('change', () => SettingsUI.chooseHistorySize.call(this));
+
+    const historyWatchNowBtn = document.querySelector('#historyWatchNowBtn');
+    if (historyWatchNowBtn) historyWatchNowBtn.addEventListener('click', () => SettingsUI.checkWatchNow.call(this, historyWatchNowBtn));
+
     const historyBackupNowBtn = document.querySelector('#historyBackupNowBtn');
     if (historyBackupNowBtn) {
-      historyBackupNowBtn.addEventListener('click', () => SettingsUI.backUpHistoryNow(historyBackupNowBtn));
+      historyBackupNowBtn.addEventListener('click', () => SettingsUI.backUpHistoryNow.call(this, historyBackupNowBtn));
     }
 
     const openHistoryStatsBtn = document.querySelector('#openHistoryStatsBtn');
@@ -952,11 +994,26 @@ SettingsUI.setupEventListeners = function() {
     if (typeof SettingsUI._setupDataListeners === 'function') {
       SettingsUI._setupDataListeners.call(this);
     }
+    if (typeof SettingsUI._setupStorageListeners === 'function') {
+      SettingsUI._setupStorageListeners.call(this);
+    }
+    if (typeof SettingsUI._setupDiagnosticsListeners === 'function') {
+      SettingsUI._setupDiagnosticsListeners.call(this);
+    }
+    if (typeof SettingsUI._setupPresetListeners === 'function') {
+      SettingsUI._setupPresetListeners.call(this);
+    }
+    if (typeof SettingsUI._setupBackupListeners === 'function') {
+      SettingsUI._setupBackupListeners.call(this);
+    }
     if (typeof SettingsUI._setupLogListeners === 'function') {
       SettingsUI._setupLogListeners.call(this);
     }
     if (typeof SettingsUI._setupWebhookListeners === 'function') {
       SettingsUI._setupWebhookListeners.call(this);
+    }
+    if (typeof SettingsUI._setupWebhookLogListeners === 'function') {
+      SettingsUI._setupWebhookLogListeners.call(this);
     }
     if (typeof SettingsUI._setupShareListeners === 'function') {
       SettingsUI._setupShareListeners.call(this);
@@ -971,20 +1028,37 @@ SettingsUI.setupEventListeners = function() {
 // ========== CACHE DURATION UNITS ==========
 // Ranges and conversions live in FormatUtils so the detection engine reads the
 // stored value exactly as this UI shows it.
+/** Settings → Badge, Category and Tag colors: the colour input of each saved key, and the shared default it starts from. */
+SettingsUI.colorGroups = function() {
+  return [
+    { group: 'badgeColors', defaults: { low: BADGE.COLORS.LOW, medium: BADGE.COLORS.MEDIUM, high: BADGE.COLORS.HIGH },
+      inputs: { low: '#colorBadgeLow', medium: '#colorBadgeMedium', high: '#colorBadgeHigh' } },
+    { group: 'categoryColors', defaults: FormatUtils.DEFAULT_CATEGORY_COLORS,
+      inputs: { antibot: '#colorAntibot', captcha: '#colorCaptcha', fingerprint: '#colorFingerprint' } },
+    { group: 'tagColors', defaults: FormatUtils.DEFAULT_TAG_COLORS,
+      inputs: { dom: '#colorTagDOM', headers: '#colorTagHeaders', cookies: '#colorTagCookies', content: '#colorTagContent',
+        urls: '#colorTagURLs', js_hooks: '#colorTagJSHooks', window: '#colorTagWindow', payload: '#colorTagPayload' } }
+  ];
+};
+
 SettingsUI.getCacheDurationDisplay = function(detection = {}) {
-    return FormatUtils.normalizeCacheDuration(detection.cacheDuration ?? 12, detection.cacheUnit || 'hours');
+    return FormatUtils.normalizeCacheDuration(detection.cacheDuration ?? FormatUtils.DEFAULT_CACHE.duration, detection.cacheUnit || FormatUtils.DEFAULT_CACHE.unit);
 };
 
 /** The capture retention from the number + unit controls, in minutes, clamped to 1 min … 7 days. */
+/** Minutes in one unit of the capture retention input (minutes, hours or days). */
+SettingsUI.retentionUnitMinutes = function(unit) {
+    return unit === 'days' ? 1440 : unit === 'hours' ? 60 : 1;
+};
+
 SettingsUI.readCaptureRetentionMinutes = function(fallback) {
-    const base = Number.isInteger(fallback) && fallback >= 1 ? fallback : 30;
+    const base = CaptureRetention.minutesOf(fallback);
     const durEl = document.querySelector('#captureRetentionDuration');
     const unitEl = document.querySelector('#captureRetentionUnit');
-    if (!durEl || !unitEl) return Math.max(1, Math.min(10080, base));
+    if (!durEl || !unitEl) return base;
     const duration = parseInt(durEl.value, 10);
-    if (!Number.isFinite(duration) || duration < 1) return Math.max(1, Math.min(10080, base));
-    const factor = unitEl.value === 'days' ? 1440 : unitEl.value === 'hours' ? 60 : 1;
-    return Math.max(1, Math.min(10080, duration * factor));
+    if (!Number.isFinite(duration) || duration < 1) return base;
+    return CaptureRetention.minutesOf(duration * SettingsUI.retentionUnitMinutes(unitEl.value));
 };
 
 SettingsUI.updateCacheDurationHint = function() {
@@ -1056,7 +1130,7 @@ SettingsUI.populateCategoryOrder = function(detectionSettings, colors = {}) {
   if (toggle) toggle.checked = sort.sortBy === DetectionUtils.SORT_BY_CONFIDENCE;
 
   // Icon tile per category, tinted with its colour
-  const icon = { antibot: FormatUtils.categoryIconSvg('antibot'), captcha: FormatUtils.categoryIconSvg('captcha'), fingerprint: FormatUtils.categoryIconSvg('fingerprint') };
+  const icon = Object.fromEntries(Categories.KEYS.map(key => [key, FormatUtils.categoryIconSvg(key)]));
   const handle = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
   const arrow = (d) => `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 
@@ -1152,13 +1226,127 @@ if (typeof self !== 'undefined') {
     self.SettingsUI = SettingsUI;
 }
 
-/** The "Sites History ignores" box as a clean list of hosts (what is already saved when the box is missing). */
-SettingsUI.readExcludedDomains = function(fallback) {
-  const box = document.querySelector('#historyExcludedDomains');
+/** A box with one site per line as a clean list of hosts (what is already saved when the box is not on the page). */
+SettingsUI.readSiteList = function(selector, fallback) {
+  const box = document.querySelector(selector);
   if (!box) return Array.isArray(fallback) ? fallback : [];
-  return typeof HistoryPolicy !== 'undefined'
-    ? HistoryPolicy.normalizeDomains(box.value)
-    : box.value.split(/[\s,;]+/).map(d => d.trim().toLowerCase()).filter(Boolean);
+  return DomainList.normalize(box.value);
+};
+
+/** How much History may take now: the saved size (6 MB if the extension has no unlimited storage). */
+SettingsUI.historyBudget = function() {
+  const saved = this && this.settings && this.settings.history && this.settings.history.historyMaxMB;
+  return HistoryStore.budgetFor(saved, HistoryStore.hasUnlimitedStorage());
+};
+
+/** The History size box: one choice per size, the saved one selected. Choosing a size is handled by chooseHistorySize. */
+SettingsUI.populateHistorySize = function(saved) {
+  const select = document.querySelector('#historyMaxMB');
+  if (!select) return;
+  select.replaceChildren(...HistoryStore.SIZES_MB.map((mb) => {
+    const option = document.createElement('option');
+    option.value = String(mb);
+    option.textContent = `${mb} MB`;
+    return option;
+  }));
+  const mb = HistoryStore.SIZES_MB.includes(Number(saved)) ? Number(saved) : HistoryStore.SIZES_MB[0];
+  select.value = String(mb);
+  select.dataset.applied = String(mb);
+};
+
+/**
+ * A size was chosen. Below what History already uses, the oldest unpinned pages go when it is saved, so that is
+ * confirmed first; declined, the box goes back to the size that applied.
+ */
+SettingsUI.chooseHistorySize = async function() {
+  const text = (key, fallback, ...args) => FormatUtils.t(key, fallback, ...args);
+  const select = document.querySelector('#historyMaxMB');
+  if (!select) return;
+  const wanted = parseInt(select.value, 10);
+  const back = () => { select.value = select.dataset.applied || String(HistoryStore.SIZES_MB[0]); };
+  try {
+    const limit = HistoryStore.budgetFor(wanted, HistoryStore.hasUnlimitedStorage());
+    const usage = await HistoryStore.usage(chrome.storage.local, limit);
+    if (usage.bytes > limit) {
+      const size = (bytes) => SettingsUI.formatStorageSize(bytes);
+      const confirmed = await NotificationHelper.confirm({
+        title: text('settingsHistorySizeLowerTitle', 'Lower the History size'),
+        message: text('settingsHistorySizeLowerMessage', 'History uses {0} and the new limit is {1}. The oldest pages that are not pinned will be removed to fit.', size(usage.bytes), size(limit)),
+        type: 'warning', tone: 'danger',
+        confirmText: text('settingsHistorySizeLowerConfirm', 'Lower the size'), cancelText: text('btnCancel', 'Cancel')
+      });
+      if (!confirmed) { back(); return; }
+    }
+    select.dataset.applied = String(wanted);
+  } catch (error) {
+    Logger.warn('UI', 'Could not change the History size', error);
+    back();
+  }
+};
+
+/**
+ * Settings that arrive in a file (an import, a backup) may lower the History size below what History uses, or its
+ * entry limit below the pages it holds, and the worker then removes the oldest unpinned pages at once. So the same
+ * question the size box asks is asked first (and its twin for the limit); declined (or unanswerable), the candidate
+ * keeps the value that applies now and everything else in the file still lands.
+ */
+SettingsUI.confirmHistorySizeFor = async function(candidate) {
+  if (typeof HistoryStore === 'undefined' || !candidate || !candidate.history) return candidate;
+  const mine = (this.settings && this.settings.history) || {};
+  const text = (key, fallback, ...args) => FormatUtils.t(key, fallback, ...args);
+  const ask = (options) => NotificationHelper.confirm({ type: 'warning', tone: 'danger', cancelText: text('btnCancel', 'Cancel'), ...options });
+  // The size in MB
+  const wanted = Number(candidate.history.historyMaxMB);
+  const current = Number(mine.historyMaxMB) || HistoryStore.SIZES_MB[0];
+  if (Number.isFinite(wanted) && wanted < current) {
+    try {
+      const limit = HistoryStore.budgetFor(wanted, HistoryStore.hasUnlimitedStorage());
+      const usage = await HistoryStore.usage(chrome.storage.local, limit);
+      if (usage.bytes > limit) {
+        const size = (bytes) => SettingsUI.formatStorageSize(bytes);
+        const confirmed = await ask({
+          title: text('settingsHistorySizeLowerTitle', 'Lower the History size'),
+          message: text('settingsHistorySizeLowerMessage', 'History uses {0} and the new limit is {1}. The oldest pages that are not pinned will be removed to fit.', size(usage.bytes), size(limit)),
+          confirmText: text('settingsHistorySizeLowerConfirm', 'Lower the size')
+        });
+        if (!confirmed) candidate.history.historyMaxMB = current;
+      }
+    } catch (error) {
+      Logger.warn('UI', 'Could not check the History size the file asks for', error);
+      candidate.history.historyMaxMB = current;
+    }
+  }
+  // The number of entries (0 means no limit of its own: the worker then keeps 1000 unpinned pages)
+  const SAFETY = 1000;
+  const wantedLimit = parseInt(candidate.history.historyLimit, 10);
+  const currentLimit = parseInt(mine.historyLimit, 10);
+  const effectiveNow = currentLimit > 0 ? currentLimit : SAFETY;
+  if (Number.isFinite(wantedLimit) && wantedLimit > 0 && wantedLimit < effectiveNow) {
+    try {
+      const usage = await HistoryStore.usage(chrome.storage.local);
+      const unpinned = Math.max(0, (usage.entries || 0) - (usage.pinned || 0));
+      if (unpinned > wantedLimit) {
+        const confirmed = await ask({
+          title: text('settingsHistoryLimitLowerTitle', 'Lower the History limit'),
+          message: text('settingsHistoryLimitLowerMessage', 'History holds {0} pages and the new limit is {1}. The oldest pages that are not pinned will be removed to fit.', String(unpinned), String(wantedLimit)),
+          confirmText: text('settingsHistoryLimitLowerConfirm', 'Lower the limit')
+        });
+        if (!confirmed) candidate.history.historyLimit = Number.isFinite(currentLimit) ? currentLimit : 0;
+      }
+    } catch (error) {
+      Logger.warn('UI', 'Could not check the History limit the file asks for', error);
+      candidate.history.historyLimit = Number.isFinite(currentLimit) ? currentLimit : 0;
+    }
+  }
+  return candidate;
+};
+
+/** A box with one name per line (a protection's name) as a clean list (what is already saved when the box is not on the page). */
+SettingsUI.readNameList = function(selector, fallback) {
+  const box = document.querySelector(selector);
+  if (!box) return Array.isArray(fallback) ? fallback : [];
+  const seen = new Set();
+  return box.value.split(/\r?\n/).map(line => line.replace(/\s+/g, ' ').trim()).filter(name => name && !seen.has(name.toLowerCase()) && seen.add(name.toLowerCase())).slice(0, 100);
 };
 
 /** Bytes as MB with one decimal ("2.1 MB"), KB below that. */
@@ -1186,7 +1374,7 @@ SettingsUI.refreshHistoryStorage = async function() {
   const label = document.querySelector('#historyMeterText');
   if (!meter || !label) return;
   try {
-    const usage = await HistoryStore.usage(chrome.storage.local);
+    const usage = await HistoryStore.usage(chrome.storage.local, SettingsUI.historyBudget.call(this));
     const ratio = usage.budget > 0 ? Math.min(usage.bytes / usage.budget, 1) : 0;
     const percent = Math.round(ratio * 100);
     meter.setAttribute('aria-valuenow', String(percent));
@@ -1221,6 +1409,57 @@ SettingsUI.refreshHistoryStorage = async function() {
   }
 };
 
+/** The watchlist's last check and how many pages are watched, read when the History tab opens and after "Check now". */
+SettingsUI.refreshHistoryWatch = async function() {
+  const text = (key, fallback, ...args) => FormatUtils.t(key, fallback, ...args);
+  const last = document.querySelector('#historyWatchLast');
+  if (!last) return;
+  try {
+    const stored = await chrome.storage.local.get(['scrapfly_history_watch', 'scrapfly_history']);
+    const watched = HistoryStore.parse(stored.scrapfly_history).items.filter(item => item && item.watch === true && item.pinned === true).length;
+    const state = stored.scrapfly_history_watch;
+    const count = text('settingsHistoryWatchCountFmt', '{0} of {1} pages watched', watched, HistoryPolicy.MAX_WATCHED);
+    let outcome;
+    if (!state) outcome = text('settingsHistoryWatchNever', 'No check yet.');
+    else if (state.error === 'no_window') outcome = text('settingsHistoryWatchNoWindow', 'The last check found no browser window to open pages in.');
+    else if (state.error === 'off') outcome = text('settingsHistoryWatchOff', 'The extension is switched off, so nothing is checked.');
+    else if (state.ok === false) outcome = text('settingsHistoryWatchFailed', 'The last check failed.');
+    else outcome = text('settingsHistoryWatchLastFmt', 'Last check: {0} · {1} checked, {2} changed', FormatUtils.formatDateTime(state.at), state.checked || 0, state.changed || 0);
+    last.textContent = `${count} · ${outcome}`;
+  } catch (_) {
+    last.textContent = '';
+  }
+};
+
+/** "Check now": the worker scans the watched pages in background tabs; the result is shown beside the button. */
+SettingsUI.checkWatchNow = async function(button) {
+  const text = (key, fallback, ...args) => FormatUtils.t(key, fallback, ...args);
+  if (button) button.disabled = true;
+  try {
+    const result = await chrome.runtime.sendMessage({ type: HistoryStore.Messages.WATCH_NOW });
+    if (result && result.status === 'unknown') {
+      NotificationHelper.error(text('workerOutdatedHint', "The extension's background part is out of date. Reload the extension on the extensions page and try again."));
+    } else if (result && result.error === 'no_window') {
+      NotificationHelper.error(text('settingsHistoryWatchNoWindow', 'The last check found no browser window to open pages in.'));
+    } else if (result && result.error === 'paused') {
+      NotificationHelper.error(text('settingsHistoryWatchPaused', 'History is paused, so nothing is checked.'));
+    } else if (result && result.error === 'off') {
+      NotificationHelper.error(text('settingsHistoryWatchOff', 'The extension is switched off, so nothing is checked.'));
+    } else if (result && result.status === 'ok') {
+      NotificationHelper.success(result.checked + result.skipped + result.failed === 0
+        ? text('settingsHistoryWatchNothing', 'No page is watched yet: pin a page in History and choose Watch for changes.')
+        : text('settingsHistoryWatchDoneFmt', 'Checked {0} pages, {1} changed', result.checked, result.changed));
+    } else {
+      NotificationHelper.error(text('settingsHistoryWatchFailed', 'The last check failed.'));
+    }
+  } catch (error) {
+    NotificationHelper.error(text('settingsHistoryWatchFailed', 'The last check failed.'));
+  } finally {
+    if (button) button.disabled = false;
+    SettingsUI.refreshHistoryWatch.call(this);
+  }
+};
+
 /** "Back up now": the worker writes History to Downloads; the result is shown beside the button. */
 SettingsUI.backUpHistoryNow = async function(button) {
   const text = (key, fallback, ...args) => FormatUtils.t(key, fallback, ...args);
@@ -1244,6 +1483,6 @@ SettingsUI.backUpHistoryNow = async function(button) {
     NotificationHelper.error(`${text('settingsHistoryBackupFailed', 'History backup failed')}${reason}`);
   } finally {
     if (button) button.disabled = false;
-    SettingsUI.refreshHistoryStorage();
+    SettingsUI.refreshHistoryStorage.call(this);
   }
 };

@@ -4,14 +4,15 @@
     const allowed = {
         root: ['notificationsEnabled', 'debugMode', 'debugVerbose', 'logCollectorEnabled', 'logCollectorMaxLogs', 'defaultTab'],
         badgeColors: ['low', 'medium', 'high'],
-        categoryColors: ['antibot', 'captcha', 'fingerprint'],
+        categoryColors: [...root.Categories.KEYS],
         tagColors: ['dom', 'headers', 'cookies', 'content', 'urls', 'js_hooks', 'window', 'payload'],
-        detection: ['cacheDuration', 'cacheUnit', 'cacheScope', 'sortBy', 'categoryOrder', 'advancedToolsMinConfidence', 'captureRetentionMinutes', 'blacklistedDomains', 'hooksConfig'],
+        detection: ['cacheDuration', 'cacheUnit', 'cacheScope', 'sortBy', 'categoryOrder', 'advancedToolsMinConfidence', 'captureRetentionMinutes', 'scanMode', ...root.ScanScope.SITE_LIST_KEYS, 'hooksConfig'],
         jsApi: ['enableJsApi'],
         share: ['provider', 'dpasteComDays', 'dpasteOrgExpires', 'pastebinExpire', 'customExpiryDays'],
         history: ['historyLimit', 'historyAutoDelete', 'historyAutoDeleteDays', 'exportFormat', 'includeTimestamps', 'historyBypassCache',
             'historyEnabled', 'historySkipIncognito', 'historyMinConfidence', 'historySkipFingerprintOnly',
-            'historyExcludedDomains', 'historyChangeAlerts', 'historyBackup', 'historyClearOnClose'],
+            'historyExcludedDomains', 'historyChangeAlerts', 'historyBackup', 'historyClearOnClose',
+            'historyFingerprintDays', 'historyAutoPinHard', 'historyAutoPinVendors', 'historyAutoPinMinConfidence', 'historyMaxMB', 'historyWatch'],
         duplicatePrevention: ['preventDuplicates', 'duplicateScope', 'duplicateDuration', 'duplicateUnit', 'duplicateAction'],
         updates: ['autoUpdate', 'checkIntervalHours']
     };

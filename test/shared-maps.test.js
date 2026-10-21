@@ -12,12 +12,63 @@ const vm = require('node:vm');
 const FormatUtils = global.FormatUtils;
 const read = (file) => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
-test('default category colours match the packaged category index', () => {
+const packagedIndex = () => {
   const context = vm.createContext({ window: {} });
+  vm.runInContext(read('modules/core/categories.js'), context);
+  vm.runInContext(read('utils/format-utils.js') + '\nthis.FormatUtils = FormatUtils;', context);
   vm.runInContext(read('modules/detection/managers/category-manager.js'), context);
-  const index = context.window.CategoryManager.getPackagedFallbackIndex();
+  return context.window.CategoryManager.getPackagedFallbackIndex();
+};
+
+test('default category colours match the packaged category index', () => {
+  const index = packagedIndex();
   for (const key of ['antibot', 'captcha', 'fingerprint']) {
     assert.strictEqual(FormatUtils.DEFAULT_CATEGORY_COLORS[key].toLowerCase(), String(index[key].colour).toLowerCase(), key);
+  }
+});
+
+// The copy the worker falls back to when detectors/index.json cannot be read (it also decides which detectors count as
+// official then) must say what the file says; it had lost 24 detectors.
+test('the built-in fallback index is detectors/index.json', () => {
+  const file = JSON.parse(read('detectors/index.json'));
+  const fallback = JSON.parse(JSON.stringify(packagedIndex()));
+  assert.deepStrictEqual(fallback, file, 'update CategoryManager.getPackagedFallbackIndex to the new detectors/index.json');
+});
+
+const extensionScripts = () => {
+  const out = [];
+  const skip = new Set(['node_modules', 'test', 'scripts', '.git', '.claude', 'detectors', '_locales', 'assets', 'icons', 'store']);
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) { if (!skip.has(entry.name)) walk(path.join(dir, entry.name)); continue; }
+      if (entry.name.endsWith('.js')) out.push(path.relative(path.join(__dirname, '..'), path.join(dir, entry.name)).split(path.sep).join('/'));
+    }
+  };
+  walk(path.join(__dirname, '..'));
+  return out;
+};
+
+test('the fingerprint glyphs are drawn from one map: the Rules cards and the icon picker had copies, and the picker\'s differed', () => {
+  const holders = extensionScripts().filter(file => /_fingerprint\.png':\s*'<svg/.test(read(file)));
+  assert.deepStrictEqual(holders, ['utils/format-utils.js']);
+  for (const file of ['sections/rules/rules-formatters.js', 'sections/rules/modals/icon-picker-modal.js']) {
+    assert.ok(/FormatUtils\.FINGERPRINT_ICONS/.test(read(file)), `${file} reads the shared map`);
+  }
+});
+
+test('a detector\'s icon is classified once for every view', () => {
+  const glyph = Object.keys(FormatUtils.FINGERPRINT_ICONS)[0];
+  const cases = [
+    [{ customIcon: 'data:image/png;base64,AAAA', icon: 'akamai_official.png' }, 'custom', 'data:image/png;base64,AAAA'],
+    [{ icon: 'default' }, 'default', ''], [{ icon: 'Custom' }, 'default', ''], [{ icon: 'custom.png' }, 'default', ''],
+    [{}, 'default', ''], [undefined, 'default', ''], [null, 'default', ''], ['a string', 'default', ''], [{ icon: 5 }, 'default', ''],
+    [{ icon: glyph.toUpperCase() }, 'glyph', glyph],
+    [{ icon: 'akamai_official.png' }, 'file', 'akamai_official.png'], [{ icon: 'LOGO.PNG' }, 'file', 'LOGO.PNG'],
+    [{ icon: 'logo.jpeg' }, 'file', 'logo.jpeg'], [{ icon: 'https://x.test/a' }, 'file', 'https://x.test/a'],
+    [{ icon: '🛡️' }, 'emoji', '🛡️'], [{ icon: 'WAF' }, 'emoji', 'WAF']
+  ];
+  for (const [detector, kind, value] of cases) {
+    assert.deepStrictEqual({ ...FormatUtils.detectorIcon(detector) }, { kind, value }, JSON.stringify(detector));
   }
 });
 

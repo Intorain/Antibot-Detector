@@ -23,10 +23,11 @@
 
   const STORAGE_KEY = 'scrapfly_history';
 
-  // History's share of the 10 MB quota (the stored JSON string is escaped
-  // again by the browser, about 15% more); the detection cache, detectors and
-  // settings use the rest. About 1,000 typical slim entries fit.
-  const MAX_BYTES = 6 * 1024 * 1024;
+  // The sizes History may take, in MB. 6 MB is History's share of the 10 MB quota (the stored JSON string is escaped
+  // again by the browser, about 15% more); the detection cache, detectors and settings use the rest. About 1,000
+  // typical slim entries fit. A larger size needs the unlimitedStorage permission (manifest.json): without it, the 10 MB quota applies.
+  const SIZES_MB = Object.freeze([6, 12, 25]);
+  const MAX_BYTES = SIZES_MB[0] * 1024 * 1024;
   const MAX_VALUE_LENGTH = 300;
   // Found rows kept per detection for the combination checklist (ids are ~22 characters)
   const MAX_COMBO_FOUND = 32;
@@ -35,6 +36,44 @@
   // The combination engine (loaded in the worker and the popup; required in Node tests)
   const combinationsEngine = () => root.DetectionCombinations
     || (typeof module !== 'undefined' && typeof require === 'function' ? require('../detection/detection-combinations.js') : null);
+
+  // The History policy: the watchlist's size limit (loaded in the worker; required in Node tests)
+  const policy = () => root.HistoryPolicy
+    || (typeof module !== 'undefined' && typeof require === 'function' ? require('./history-policy.js') : null);
+
+  // The check that a message comes from an extension page (loaded in the worker; required in Node tests)
+  const messageSender = () => root.MessageSender
+    || (typeof module !== 'undefined' && typeof require === 'function' ? require('./message-sender.js') : null);
+
+  /**
+   * The size limit in bytes for the size the person chose: one of SIZES_MB, and 6 MB whatever was chosen when the
+   * extension does not have unlimited storage (see hasUnlimitedStorage).
+   */
+  /** Does the manifest ask for unlimited storage, so that the 10 MB quota does not apply? */
+  function hasUnlimitedStorage(manifest = root.chrome && root.chrome.runtime && root.chrome.runtime.getManifest && root.chrome.runtime.getManifest()) {
+    return !!manifest && Array.isArray(manifest.permissions) && manifest.permissions.includes('unlimitedStorage');
+  }
+
+  function budgetFor(mb, hasUnlimited) {
+    const size = SIZES_MB.includes(Number(mb)) ? Number(mb) : SIZES_MB[0];
+    return (hasUnlimited === true ? size : SIZES_MB[0]) * 1024 * 1024;
+  }
+
+  // Optional async function the worker registers to say how much History may take now (the person's size and the permission)
+  let budgetProvider = null;
+  function setBudget(provider) {
+    budgetProvider = typeof provider === 'function' ? provider : null;
+  }
+  /** The limit for a write: never below 6 MB, 6 MB when there is no provider or it fails. */
+  async function currentBudget() {
+    if (!budgetProvider) return MAX_BYTES;
+    try {
+      const bytes = Number(await budgetProvider());
+      return Number.isFinite(bytes) && bytes > MAX_BYTES ? bytes : MAX_BYTES;
+    } catch (_) {
+      return MAX_BYTES;
+    }
+  }
 
   // Optional async function the worker registers to free space elsewhere
   // (the detection cache, which rebuilds itself) before history entries go.
@@ -49,6 +88,7 @@
     REPLACE_ITEMS: 'HISTORY_REPLACE_ITEMS', // { items: [...], mode: 'merge' | 'replace', limit }
     CLEAR: 'HISTORY_CLEAR',
     UPDATE_ITEM: 'HISTORY_UPDATE_ITEM',     // { id, patch: { pinned?: boolean, note?: string } }
+    WATCH_NOW: 'HISTORY_WATCH_NOW',         // check the watched pages now (answered by background/history-watch.js)
     PING: 'HISTORY_PING'                    // answered { status: 'ok' } by a worker that has these History features
   });
 
@@ -206,12 +246,43 @@
     return list.filter(item => (item && item.pinned === true) || ++unpinned <= max);
   }
 
-  /** The pinned flag and note of a patch, cleaned (a note is one line of at most 300 characters). */
+  /** The pinned and watch flags and the note of a patch, cleaned (a note is one line of at most 300 characters). */
   function cleanAnnotation(patch) {
     const out = {};
     if (patch && typeof patch.pinned === 'boolean') out.pinned = patch.pinned;
+    if (patch && typeof patch.watch === 'boolean') out.watch = patch.watch;
     if (patch && typeof patch.note === 'string') out.note = patch.note.replace(/\s+/g, ' ').trim().slice(0, 300);
     return out;
+  }
+
+  /**
+   * An entry with a cleaned annotation applied. Unpinning a pinned entry marks it `unpinned`, so a later scan of the
+   * page never pins it again by itself; pinning it again (the person's own pin) removes the mark. Either way the entry
+   * is no longer one that pinned itself (`autoPinned`). Watching a page pins it; unpinning it stops the watching.
+   */
+  function annotate(item, patch) {
+    const updated = Object.assign({}, item, patch);
+    if (patch.pinned === true) {
+      delete updated.unpinned;
+      delete updated.autoPinned;
+    } else if (patch.pinned === false) {
+      if (item.pinned === true) updated.unpinned = true;
+      delete updated.pinned;
+      delete updated.autoPinned;
+      delete updated.watch; // only a pinned page is watched
+      delete updated.watchedAt;
+    }
+    // Watching a page pins it, as the person's own pin; the watchlist's bookkeeping goes when it stops
+    if (patch.watch === true) {
+      updated.pinned = true;
+      delete updated.unpinned;
+      delete updated.autoPinned;
+    } else if (patch.watch === false) {
+      delete updated.watch;
+      delete updated.watchedAt;
+    }
+    if (updated.note === '') delete updated.note;
+    return updated;
   }
 
   /**
@@ -225,15 +296,17 @@
 
   /**
    * How much of History's share of the storage quota is used.
+   * @param {object} [storage]
+   * @param {number} [maxBytes] the limit in force (budgetFor): the popup computes it, the worker's own writes use the provider
    * @returns {Promise<{bytes: number, budget: number, entries: number, pinned: number, trimmed: ({at: number, count: number, total: number}|null)}>}
    */
-  async function usage(storage = root.chrome && root.chrome.storage && root.chrome.storage.local) {
+  async function usage(storage = root.chrome && root.chrome.storage && root.chrome.storage.local, maxBytes = MAX_BYTES) {
     const stored = await storage.get([STORAGE_KEY]);
     const raw = stored[STORAGE_KEY];
     const { items, container } = parse(raw);
     return {
       bytes: raw === undefined ? 0 : (typeof raw === 'string' ? raw.length : JSON.stringify(raw).length),
-      budget: MAX_BYTES,
+      budget: maxBytes,
       entries: items.length,
       pinned: items.filter(item => item && item.pinned === true).length,
       trimmed: container && container.trimmed ? container.trimmed : null
@@ -246,10 +319,12 @@
    * Write items within the budget. If the browser still reports the quota
    * (the rest of storage grew), let the registered relief free space once,
    * then keep the newest half and try again.
-   * @returns {Promise<{items: Array<object>, dropped: number, bytes: number}>}
+   * @param {number} [maxBytes] the limit; the registered budget when not given
+   * @returns {Promise<{items: Array<object>, dropped: number, bytes: number, budget: number}>}
    */
-  async function write(storage, items, container = null) {
-    let { parts, items: kept, dropped } = budgetParts(items.map(slimEntry), MAX_BYTES, container);
+  async function write(storage, items, container = null, maxBytes) {
+    const budget = maxBytes > 0 ? maxBytes : await currentBudget();
+    let { parts, items: kept, dropped } = budgetParts(items.map(slimEntry), budget, container);
     let relieved = false;
     // What the size limit removed is kept beside the entries, so Settings can say so
     const withTrim = () => {
@@ -268,7 +343,7 @@
       const value = joinParts(parts, withTrim());
       try {
         await storage.set({ [STORAGE_KEY]: value });
-        return { items: kept, dropped, bytes: value.length };
+        return { items: kept, dropped, bytes: value.length, budget };
       } catch (error) {
         if (!isQuotaError(error)) throw error;
         if (!relieved && quotaRelief) {
@@ -309,7 +384,7 @@
       const result = out && !Array.isArray(out) ? out.result : undefined;
       if (!Array.isArray(next)) return { items, changed: false, result };
       const written = await write(storage, next, container);
-      return { items: written.items, changed: true, result, dropped: written.dropped, bytes: written.bytes };
+      return { items: written.items, changed: true, result, dropped: written.dropped, bytes: written.bytes, budget: written.budget };
     });
     queue = work.catch(() => undefined);
     return work;
@@ -343,17 +418,8 @@
       return true;
     };
     const store = () => storage || (root.chrome && root.chrome.storage && root.chrome.storage.local);
-    // Only extension pages (popup, settings, stats) may change history, never a
-    // content script inside a web page. Decide by the sender's URL: an extension
-    // page opened in a tab also carries sender.tab, so that alone is not enough.
-    const isExtensionPage = (sender) => {
-      if (!sender) return true; // direct in-worker call
-      const runtime = root.chrome && root.chrome.runtime;
-      const base = runtime && typeof runtime.getURL === 'function' ? runtime.getURL('') : '';
-      const url = String(sender.url || sender.origin || '');
-      if (base && url.startsWith(base)) return true;
-      return !sender.tab && !url; // no tab and no URL: another extension context
-    };
+    // Only extension pages (popup, settings, stats) may change history, never a content script inside a web page
+    const isExtensionPage = (sender) => messageSender().isExtensionPage(sender, root.chrome && root.chrome.runtime);
     const guard = (handler) => (args) => {
       if (!isExtensionPage(args.sender)) {
         args.sendResponse({ status: 'error', error: 'History changes are only accepted from extension pages' });
@@ -388,14 +454,19 @@
         return true;
       }
       return respond(sendResponse, mutate(items => {
+        // The watchlist is short: another page cannot join a full one
+        if (patch.watch === true) {
+          const limit = policy().MAX_WATCHED;
+          const target = items.find(item => item && item.id === request.id);
+          if (target && target.watch !== true && items.filter(item => item && item.watch === true).length >= limit) {
+            return { result: { updated: 0, limit } };
+          }
+        }
         let found = false;
         const next = items.map((item) => {
           if (!item || item.id !== request.id) return item;
           found = true;
-          const updated = Object.assign({}, item, patch);
-          if (updated.pinned === false) delete updated.pinned;
-          if (updated.note === '') delete updated.note;
-          return updated;
+          return annotate(item, patch);
         });
         return found ? { items: next, result: { updated: 1 } } : { result: { updated: 0 } };
       }, store()));
@@ -419,12 +490,13 @@
       if (raw === undefined) return { changed: false, before: 0, after: 0, dropped: 0 };
       const before = typeof raw === 'string' ? raw.length : JSON.stringify(raw).length;
       const { items, container } = parse(raw);
-      const { parts, dropped } = budgetParts(items.map(slimEntry), MAX_BYTES, container);
+      const budget = await currentBudget();
+      const { parts, dropped } = budgetParts(items.map(slimEntry), budget, container);
       // Already slim and compact: only lastUpdated would change
       if (typeof raw === 'string' && dropped === 0 && joinParts(parts, container).length >= before - 64) {
         return { changed: false, before, after: before, dropped: 0 };
       }
-      const written = await write(storage, items, container);
+      const written = await write(storage, items, container, budget);
       return { changed: true, before, after: written.bytes, dropped: written.dropped };
     });
     queue = work.catch(() => undefined);
@@ -432,8 +504,8 @@
   }
 
   const HistoryStore = {
-    STORAGE_KEY, MAX_BYTES, Messages, parse, serialize, read, mutate, applyImport, registerHandlers,
-    slimEntry, fitToBudget, isQuotaError, compact, setQuotaRelief, applyLimit, cleanAnnotation, usage
+    STORAGE_KEY, MAX_BYTES, SIZES_MB, budgetFor, hasUnlimitedStorage, Messages, parse, serialize, read, mutate, applyImport, registerHandlers,
+    slimEntry, fitToBudget, isQuotaError, compact, setQuotaRelief, setBudget, applyLimit, cleanAnnotation, annotate, usage
   };
 
   root.HistoryStore = HistoryStore;

@@ -225,7 +225,7 @@ class HistoryRecorder {
       const pageKey = this.normalizeDuplicateKey(entryUrl, entryHostname, 'path');
 
       // One serialized read-modify-write through the shared store
-      const { changed, bytes, dropped, result } = await HistoryStore.mutate((history) => {
+      const { changed, bytes, dropped, budget, result } = await HistoryStore.mutate((history) => {
         const now = Date.now();
         let duplicateAt = -1;
         if (duplicateKey) {
@@ -244,6 +244,20 @@ class HistoryRecorder {
         const diff = earlier && typeof HistoryPolicy !== 'undefined'
           ? HistoryPolicy.diffProtections(earlier.detections, detectionResults)
           : { added: [], removed: [], changed: false };
+
+        // Pages that pin themselves (Settings → History): a new entry, or an update of one the person never unpinned,
+        // while there is room (the pinned entries are exempt from the limit and from retention). An address the person
+        // unpinned is never pinned by itself again: the mark sits on its newest entry (the exact address, query included:
+        // one product page unpinned says nothing about its siblings), and a new entry of it carries the mark on
+        const addressKey = this.normalizeDuplicateKey(entryUrl, entryHostname, 'full_url');
+        const sameAddress = duplicateAt !== -1
+          ? history[duplicateAt]
+          : history.find(item => item && this.normalizeDuplicateKey(item.url, item.hostname, 'full_url') === addressKey);
+        const neverAgain = !!(sameAddress && sameAddress.unpinned === true);
+        const pinsItself = typeof HistoryPolicy !== 'undefined'
+          && !neverAgain
+          && HistoryPolicy.shouldAutoPin(detectionResults, settings)
+          && HistoryPolicy.countAutoPins(history) < HistoryPolicy.MAX_AUTO_PINS;
 
         const fresh = {
           url: entryUrl,
@@ -269,9 +283,10 @@ class HistoryRecorder {
           const kept = history[duplicateAt];
           const updated = Object.assign({}, kept, fresh, { id: kept.id, firstSeen: kept.firstSeen || kept.timestamp });
           if (!diff.changed) delete updated.changed;
+          if (pinsItself && kept.pinned !== true && kept.unpinned !== true) { updated.pinned = true; updated.autoPinned = true; }
           next = [updated, ...history.filter((_, i) => i !== duplicateAt)];
         } else {
-          next = [Object.assign({ id: `detection_${now}_${tabId}` }, fresh), ...history];
+          next = [Object.assign({ id: `detection_${now}_${tabId}` }, fresh, pinsItself ? { pinned: true, autoPinned: true } : {}, neverAgain ? { unpinned: true } : {}), ...history];
         }
 
         // Newest first, then the rolling window limit (pinned entries never count against it)
@@ -282,7 +297,7 @@ class HistoryRecorder {
         Logger.ui(`History: Saved detection to history for ${pageData.url}`);
         // Both run after the write and never fail the save
         await this.notifyChange(result && result.alert, chrome).catch(() => {});
-        await this.checkStorage(bytes, dropped, chrome).catch(() => {});
+        await this.checkStorage(bytes, dropped, chrome, budget).catch(() => {});
       }
       return changed;
     } catch (error) {
@@ -293,6 +308,44 @@ class HistoryRecorder {
       }
       return false;
     }
+  }
+
+  /**
+   * The result of a watchlist check, applied to the page that was watched: never a new entry.
+   * Unchanged: only the time of the check is kept. Changed: the entry takes the new scan (same id; its pin, note and
+   * watch stay), moves to the top, carries the Changed mark, and a notification says what changed (as for any page
+   * whose protections change, when Settings → History alerts for pinned pages or for all).
+   * @param {string} entryId
+   * @param {Array} detectionResults  the finished results of the check
+   * @returns {Promise<{found: boolean, changed: boolean, added?: string[], removed?: string[]}>}
+   */
+  static async applyWatchResult(entryId, detectionResults, chrome, now = Date.now()) {
+    const settings = await Utils.getHistorySettings();
+    const { result } = await HistoryStore.mutate((history) => {
+      const index = history.findIndex(item => item && item.id === entryId && item.pinned === true && item.watch === true);
+      if (index === -1) return { result: { found: false, changed: false } };
+      const entry = history[index];
+      const diff = HistoryPolicy.diffProtections(entry.detections, detectionResults);
+      if (!diff.changed) {
+        const next = history.slice();
+        next[index] = Object.assign({}, entry, { watchedAt: now });
+        return { items: next, result: { found: true, changed: false } };
+      }
+      const updated = Object.assign({}, entry, {
+        timestamp: now,
+        watchedAt: now,
+        detections: detectionResults,
+        detectionCount: detectionResults.length,
+        categories: [...new Set(detectionResults.map(d => d.category))],
+        changed: { at: now, added: diff.added, removed: diff.removed }
+      });
+      const alert = settings.historyChangeAlerts === 'all' || settings.historyChangeAlerts === 'pinned'
+        ? { hostname: entry.hostname, added: diff.added, removed: diff.removed }
+        : null;
+      return { items: [updated, ...history.filter((_, i) => i !== index)], result: { found: true, changed: true, added: diff.added, removed: diff.removed, alert } };
+    }, chrome.storage.local);
+    await this.notifyChange(result && result.alert, chrome).catch(() => {});
+    return { found: !!(result && result.found), changed: !!(result && result.changed), added: result && result.added, removed: result && result.removed };
   }
 
   /** A notification when a page you scanned before gained or lost a protection (Settings → History). */
@@ -319,11 +372,12 @@ class HistoryRecorder {
    * it may use is nearly full (or has just removed entries), and again only after it has been emptied below 70%.
    * @param {number} bytes size of the stored history after this save
    * @param {number} dropped entries the size limit removed in this save
+   * @param {number} [budget] the size limit this save was written under (6 MB when not given)
    */
-  static async checkStorage(bytes, dropped, chrome) {
+  static async checkStorage(bytes, dropped, chrome, budget) {
     if (!Number.isFinite(bytes) || typeof HistoryStore === 'undefined') return;
     const key = 'scrapfly_history_storage_notice';
-    const ratio = bytes / HistoryStore.MAX_BYTES;
+    const ratio = bytes / (budget > 0 ? budget : HistoryStore.MAX_BYTES);
     const state = (await chrome.storage.local.get(key))[key] || {};
     if (ratio < 0.7 && !dropped) {
       if (state.warned) await chrome.storage.local.set({ [key]: { warned: false } });

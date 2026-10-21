@@ -215,8 +215,8 @@ function registerAdvancedCaptureHandlers(registry, context) {
     };
 
     registry[messageTypes.ADVANCED_HISTORY] = ({ request, sender, sendResponse }) => {
-        // This channel handles extension UI data, never page/content-script requests.
-        if (sender?.tab) {
+        // This channel handles extension UI data, never page/content-script requests
+        if (!MessageSender.isExtensionPage(sender)) {
             sendResponse({ status: 'error', error: 'Advanced history is available only to extension pages' });
             return false;
         }

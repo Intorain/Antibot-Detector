@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -11,6 +12,7 @@ function harness() {
   const timers = new Map();
   const calls = { badge: [], popup: [], page: [], history: [], ended: [], started: [] };
   const context = {
+    WorkerMessages: require('../modules/core/worker-messages.js'),
     Map, Set, Date, Promise, AbortController, console,
     Constants: { FINALIZATION_CHECK_DELAY: 10, MIN_DETECTION_TIME: 0, BATCH_SETTLE_TIME: 0, SAFETY_TIMEOUT: 50,
       DETECTION_TIMEOUT: 20, COOKIE_VALUE_MAX_LENGTH: 128 },
@@ -58,7 +60,7 @@ function harness() {
   return { ctx: context, calls, timers, begin };
 }
 
-for (const boundary of ['late requests', 'cache write', 'badge settings', 'history settings']) {
+for (const boundary of ['late requests', 'site list', 'cache write', 'badge settings', 'history settings']) {
   test(`a superseded finalizer cannot repaint or delete its replacement after ${boundary}`, async () => {
     const h = harness();
     const gate = deferred();
@@ -68,6 +70,7 @@ for (const boundary of ['late requests', 'cache write', 'badge settings', 'histo
       h.ctx.networkUrlsStore.set(7, [{ url: 'https://example.test/sdk' }]);
       h.ctx.detectionEngine = { detectOnPage: () => wait([]) };
     }
+    if (boundary === 'site list') h.ctx.Utils.isUrlBlacklisted = () => wait(false);
     if (boundary === 'cache write') h.ctx.DetectionEngineManager.storeDetection = () => wait({});
     if (boundary === 'badge settings') h.ctx.CategoryManager.getBadgeColors = () => wait({});
     if (boundary === 'history settings') h.ctx.Utils.getHistorySettings = () => wait({});
@@ -91,6 +94,29 @@ for (const boundary of ['late requests', 'cache write', 'badge settings', 'histo
     assert.ok(!h.calls.ended.includes(replacement.keepaliveId));
   });
 }
+
+test('a page excluded while it was being scanned keeps nothing: no cache, History, webhook or page event', async () => {
+  const h = harness();
+  let writes = 0;
+  let sent = 0;
+  const asked = [];
+  h.ctx.DetectionEngineManager.storeDetection = async () => { writes++; return {}; };
+  h.ctx.Settings.sendWebhookIfEnabled = async () => { sent++; };
+  h.ctx.Utils.isUrlBlacklisted = async (url) => { asked.push(url); return true; };
+  const colors = [];
+  h.ctx.chrome.action.setBadgeBackgroundColor = async value => colors.push(value.color);
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.ok(asked.includes('https://example.test/'));
+  assert.equal(writes, 0);
+  assert.equal(sent, 0);
+  assert.equal(h.calls.history.length, 0);
+  assert.equal(h.calls.popup.length, 0);
+  assert.equal(h.calls.page.length, 0);
+  assert.ok(colors.includes(h.ctx.BADGE.COLORS.BLACKLISTED), 'the badge says the site is paused');
+  assert.equal(h.ctx.detectionStates.has(7), false);
+  assert.equal(h.ctx.activeDetections.has(7), false);
+});
 
 test('finalization is idempotent while persisting and cleans only its own successful session', async () => {
   const h = harness();
@@ -197,8 +223,9 @@ test('startup initialization and an early event reuse one detector load', async 
   h.ctx.UpdateManager = { setupAlarmListener() {}, scheduleCheck() {} };
   h.ctx.HistoryRetention = { init() {} };
   h.ctx.HistoryBackup = { init() {} };
+  h.ctx.HistoryWatch = { init() {} };
   h.ctx.DetectionCacheRetention = { init() {} };
-  h.ctx.HistoryStore = { setQuotaRelief() {} };
+  h.ctx.HistoryStore = { setQuotaRelief() {}, setBudget() {} };
   h.ctx.I18n = { syncOverrideFromStorage() {} };
   vm.runInContext(read('background/init.js'), h.ctx, { filename: 'background/init.js' });
   const lazy = h.ctx.ensureDetectorManagerInitialized();
@@ -272,4 +299,89 @@ test('late completion cannot emit progress or restart finalization after a faile
   assert.equal(progress, 0);
   assert.equal(state.completedMethods.size, 0);
   assert.equal(state.timers.size, 0);
+});
+
+test('the webhook gets the finished results of a scan run just now, late requests included, once the cache is written', async () => {
+  const h = harness();
+  const order = [], sent = [];
+  h.ctx.DetectionEngineManager.storeDetection = async (url, page, results) => { order.push('cache'); return { ...page, detectionResults: results }; };
+  h.ctx.Settings.sendWebhookIfEnabled = async (page, results, options) => { order.push('webhook'); sent.push(JSON.parse(JSON.stringify({ page, ids: results.map(result => result.detector.id), options }))); };
+  h.ctx.networkUrlsStore.set(7, [{ url: 'https://example.test/late.js' }]);
+  h.ctx.detectionEngine = { detectOnPage: async () => [{ detector: { id: 'detect-late' }, confidence: 80, matches: [], detectionMethods: ['urls'] }] };
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.deepEqual(order, ['cache', 'webhook']);
+  assert.equal(sent.length, 1);
+  assert.deepEqual(sent[0].ids.sort(), ['detect-demo', 'detect-late']);
+  assert.deepEqual(sent[0].options, { trigger: 'scan' });
+  assert.equal(sent[0].page.hostname, 'example.test');
+  assert.equal(sent[0].page.url, 'https://example.test/');
+});
+
+test('a rescan that found nothing new and kept the cached detections is not sent again', async () => {
+  const h = harness();
+  const sent = [];
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  h.ctx.DetectionEngineManager.storeDetection = async () => ({ preservedExisting: true, detectionResults: [{ detector: { id: 'detect-cached' }, confidence: 90, matches: [] }] });
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.deepEqual(sent, []);
+});
+
+test('a scan with no detections sends nothing', async () => {
+  const h = harness();
+  const sent = [];
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  const state = h.begin();
+  state.mainData = [];
+  await h.ctx.finalizeDetection(7, state);
+  assert.deepEqual(sent, []);
+});
+
+test('a webhook step that throws never fails the scan', async () => {
+  const h = harness();
+  h.ctx.Settings.sendWebhookIfEnabled = async () => { throw new Error('synthetic webhook failure'); };
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.notEqual(state.failed, true);
+  assert.equal(h.ctx.detectionStates.has(7), false, 'the scan finished');
+  assert.equal(h.calls.popup.length, 1, 'the popup was told');
+});
+
+test('a scan replaced before the webhook step sends nothing', async () => {
+  const h = harness();
+  const gate = deferred(), arrived = deferred(), sent = [];
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  h.ctx.Utils.getHistorySettings = async () => { arrived.resolve(); await gate.promise; return {}; };
+  const old = h.begin();
+  const finishing = h.ctx.finalizeDetection(7, old);
+  await arrived.promise;
+  h.begin();
+  gate.resolve();
+  await finishing;
+  assert.deepEqual(sent, []);
+});
+
+test('a scan of a watchlist tab hands its finished results to the check, and leaves no History entry and no webhook delivery', async () => {
+  const h = harness();
+  const finished = [], sent = [];
+  h.ctx.HistoryWatch = { isWatchTab: id => id === 7, scanFinished: (...args) => finished.push(JSON.parse(JSON.stringify(args))) };
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.equal(finished.length, 1);
+  assert.deepEqual([finished[0][0], finished[0][1], finished[0][2].map(result => result.detector.id)], [7, 'https://example.test/', ['detect-demo']]);
+  assert.equal(h.calls.history.length, 0, 'the check updates the page it watches instead');
+  assert.deepEqual(sent, []);
+  assert.equal(h.ctx.detectionStates.has(7), false, 'the scan itself finished normally');
+});
+
+test('every other tab is recorded and sent as before, with the watchlist loaded', async () => {
+  const h = harness();
+  const finished = [], sent = [];
+  h.ctx.HistoryWatch = { isWatchTab: () => false, scanFinished: (...args) => finished.push(args) };
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.deepEqual(finished, []);
+  assert.equal(h.calls.history.length, 1);
+  assert.equal(sent.length, 1);
 });

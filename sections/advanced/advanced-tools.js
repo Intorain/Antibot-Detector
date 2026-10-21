@@ -52,27 +52,13 @@ Advanced.prototype.renderAdvancedInterface = async function() {
           </button>`;
       }).join('');
 
-      // The footer shows the retention set in Settings → Detection (default 30 minutes)
-      let _retentionMinutes = 30;
+      // The footer shows the retention set in Settings → Detection
+      let _retentionMinutes = CaptureRetention.DEFAULT_MINUTES;
       try {
         const _s = typeof Utils !== 'undefined' && Utils.getSettings ? await Utils.getSettings() : null;
-        const _m = Number(_s && _s.detection && _s.detection.captureRetentionMinutes);
-        if (Number.isFinite(_m) && _m > 0) _retentionMinutes = _m;
+        _retentionMinutes = CaptureRetention.minutesOf(_s && _s.detection && _s.detection.captureRetentionMinutes);
       } catch (_) { /* keep the default */ }
-      // Common values read nicely; any other value falls back to "<n> <unit>"
-      const _retLabels = { 15: ['settingsCaptureRetention15m', '15 minutes'], 30: ['settingsCaptureRetention30m', '30 minutes'],
-        60: ['settingsCaptureRetention1h', '1 hour'], 180: ['settingsCaptureRetention3h', '3 hours'],
-        720: ['settingsCaptureRetention12h', '12 hours'], 1440: ['settingsCaptureRetention24h', '24 hours'] };
-      let _retLabel;
-      if (_retLabels[_retentionMinutes]) {
-        _retLabel = _atr(_retLabels[_retentionMinutes][0], _retLabels[_retentionMinutes][1]);
-      } else if (_retentionMinutes % 1440 === 0) {
-        _retLabel = `${_retentionMinutes / 1440} ${_atr('timeUnitDays', 'Days').toLowerCase()}`;
-      } else if (_retentionMinutes % 60 === 0) {
-        _retLabel = `${_retentionMinutes / 60} ${_atr('timeUnitHours', 'Hours').toLowerCase()}`;
-      } else {
-        _retLabel = `${_retentionMinutes} ${_atr('timeUnitMinutes', 'Minutes').toLowerCase()}`;
-      }
+      const _retLabel = CaptureRetention.label(_retentionMinutes, _atr);
       const _retentionHint = _atr('advancedFooterHintFmt', 'Captures are kept for {0}.').replace('{0}', _retLabel);
 
       const captchaToolsHtml = `
@@ -202,7 +188,7 @@ Advanced.prototype.renderNoToolsState = function(tr) {
       : fmt('advancedToolsEmptyDescFmt', 'No supported protection on this page is above {0}% confidence. You can change this minimum in Settings → Detection.', minimum);
 
     // One logo per protection (its name on hover), grouped by category like the info window
-    const titles = { antibot: tr('categoryAntibot', 'Anti-bot'), captcha: tr('categoryCaptcha', 'Captcha') };
+    const titleOf = key => (Categories.LABELS[key] ? tr(...Categories.LABELS[key]) : key);
     // Each category's colour from Settings, as in the other views
     const categoryColour = key => {
       const manager = this.detectorManager || (typeof window !== 'undefined' && window.popupInstance?.detectorManager) || null;
@@ -212,7 +198,7 @@ Advanced.prototype.renderNoToolsState = function(tr) {
                 <div class="advanced-supported-group">
                   <div class="advanced-supported-head">
                     <span class="category-icon" aria-hidden="true" style="color: ${esc(categoryColour(group.key))}">${typeof FormatUtils !== 'undefined' && FormatUtils.categoryIconSvg ? FormatUtils.categoryIconSvg(group.key) : ''}</span>
-                    <span class="advanced-supported-title">${esc(titles[group.key] || group.key)}</span>
+                    <span class="advanced-supported-title">${esc(titleOf(group.key))}</span>
                     <span class="advanced-supported-count">${group.items.length}</span>
                   </div>
                   <ul class="advanced-supported-logos">

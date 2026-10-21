@@ -1640,12 +1640,6 @@
   "advancedSearchPlaceholder": {
     "message": "Search by URL, module, site, or content..."
   },
-  "advancedPaginationPage": {
-    "message": "Page"
-  },
-  "advancedPaginationOf": {
-    "message": "of"
-  },
   "advancedInfoRecaptchaDesc": {
     "message": "Captures site keys, actions, and configuration parameters"
   },
@@ -3548,10 +3542,6 @@
   "advPanelCopiedToClipboard": {
     "message": "Copied to clipboard"
   },
-  "advPanelToolsLoadedFmt": {
-    "message": "{0} tools loaded",
-    "description": "{0} = detector / product name"
-  },
   "advPanelCookiesFoundFmt": {
     "message": "Found {0}/{1} cookies",
     "description": "{0} = cookies found, {1} = cookies checked"
@@ -3601,10 +3591,6 @@
   },
   "advPanelFailedClearHistory": {
     "message": "Failed to clear history"
-  },
-  "advPanelCapturesPaginationFmt": {
-    "message": "Showing {0}-{1} of {2} captures",
-    "description": "{0}-{1} = range shown, {2} = total captures"
   },
   "rulesUiNewDetectorName": {
     "message": "New detector",
@@ -4945,13 +4931,13 @@
     "message": "Check against History"
   },
   "ruleHistoryCheckHint": {
-    "message": "See on how many saved pages each pattern and combination matches. Unsaved edits count."
+    "message": "Shows on how many of your saved pages each pattern and combination matches. Unsaved edits are included."
   },
   "ruleHistoryCheckRun": {
     "message": "Check"
   },
   "ruleHistoryCheckSummaryFmt": {
-    "message": "{0} saved pages · this rule was found on {1}"
+    "message": "This rule matches {1} of {0} saved pages"
   },
   "ruleHistoryCheckRulePagesFmt": {
     "message": "{0} of {1} pages"
@@ -5736,9 +5722,6 @@
   "statsRulesMissingOwnNote": {
     "message": "Only custom and edited rules are listed. Descriptions of official rules are maintained by Scrapfly."
   },
-  "statsToolsRetentionNote": {
-    "message": "Advanced keeps captures for 30 minutes, so this tab ignores the date range."
-  },
   "statsToolsSavedNow": {
     "message": "Saved now"
   },
@@ -6049,6 +6032,10 @@
     "message": "Pinned pages only",
     "description": "Checkbox"
   },
+  "historyExportChangedOnly": {
+    "message": "Changed pages only",
+    "description": "Checkbox in the History export dialog: only pages marked Changed (their protections differ from the earlier scan)"
+  },
   "historyExportCountFmt": {
     "message": "{0} of {1} entries will be exported",
     "description": "{0} = matching entries, {1} = all entries"
@@ -6079,5 +6066,745 @@
   "workerOutdatedHint": {
     "message": "The extension's background part is out of date. Reload the extension on the extensions page and try again.",
     "description": "Shown when the popup talks to a background worker that still runs an older version of the extension (after an update without reloading it)"
+  },
+  "historyFiltersLabel": {
+    "message": "Filter history",
+    "description": "Accessible name of the row of filter chips under the History search"
+  },
+  "historyFilterPinned": {
+    "message": "Pinned",
+    "description": "Filter chip under the History search: show only pinned pages (an adjective, like the Changed chip)"
+  },
+  "historyNoResults": {
+    "message": "No entries match your search or filters.",
+    "description": "Shown in History when the search and the filter chips leave no entry"
+  },
+  "historyClearFilters": {
+    "message": "Clear filters",
+    "description": "Button under the no-matches message in History: turns every chip off and empties the search"
+  },
+  "statsToolsRetentionNoteFmt": {
+    "message": "Advanced keeps captures for {0}, so this tab ignores the date range.",
+    "description": "Note on the Tools tab of the statistics page. {0} is how long captures are kept, as set in Settings (for example 30 minutes, 1 hour, 3 days)"
+  },
+  "settingsStorageTitle": {
+    "message": "Storage",
+    "description": "Title of the card in Settings → Data that shows how much space each part of the extension uses"
+  },
+  "settingsStorageDesc": {
+    "message": "What the extension keeps in this browser. Settings and rules cannot be cleared from here.",
+    "description": "Description under the Storage card title in Settings → Data"
+  },
+  "storageCache": {
+    "message": "Detection cache",
+    "description": "Row of the Storage card: saved detection results that make a revisited page load without a new scan"
+  },
+  "storageCaptures": {
+    "message": "Tool captures",
+    "description": "Row of the Storage card: data saved by the Advanced tools (captures and tool results)"
+  },
+  "storageHistory": {
+    "message": "History",
+    "description": "Row of the Storage card: the History entries"
+  },
+  "storageRules": {
+    "message": "Rules and categories",
+    "description": "Row of the Storage card: detection rules (detectors), categories and their translations"
+  },
+  "storageUpdates": {
+    "message": "Pending rule updates",
+    "description": "Row of Settings → Data → Storage: rule updates left waiting by Rules → Update (for a newer extension, or failed)"
+  },
+  "storageClearUpdatesTitle": {
+    "message": "Clear the pending rule updates",
+    "description": "Title of the confirmation for the Clear button of that row"
+  },
+  "storageClearUpdatesMessage": {
+    "message": "Rule updates that are waiting for a newer extension, and ones that failed, are forgotten; the next Rules → Update finds them again. Rules and settings are not touched.",
+    "description": "Message of that confirmation"
+  },
+  "storageUpdatesCleared": {
+    "message": "Pending rule updates cleared",
+    "description": "Toast after the pending rule updates were cleared"
+  },
+  "storageSettings": {
+    "message": "Settings",
+    "description": "Row of the Storage card: the extension's settings and preferences"
+  },
+  "storageLogs": {
+    "message": "Logs",
+    "description": "Row of the Storage card: the debug logs the log collector keeps"
+  },
+  "storageOther": {
+    "message": "Other",
+    "description": "Row of the Storage card: everything else the extension stores"
+  },
+  "storageTotalFmt": {
+    "message": "{0} of {1} used",
+    "description": "Total line of the Storage card. {0} is the space used, {1} the space the browser allows (for example 1.2 MB of 10.0 MB used)"
+  },
+  "storageClearRowFmt": {
+    "message": "Clear {0}",
+    "description": "Accessible name of a Clear button in the Storage card. {0} is the row name, such as Detection cache"
+  },
+  "storageClearCacheTitle": {
+    "message": "Clear the detection cache",
+    "description": "Title of the confirmation that clears the detection cache"
+  },
+  "storageClearCacheMessage": {
+    "message": "Pages are scanned again the next time you open them. History, rules and settings are not touched.",
+    "description": "Message of the confirmation that clears the detection cache"
+  },
+  "storageClearCapturesTitle": {
+    "message": "Delete tool captures",
+    "description": "Title of the confirmation that deletes everything the Advanced tools saved"
+  },
+  "storageClearCapturesMessage": {
+    "message": "Everything the Advanced tools saved is deleted. History, rules and settings are not touched.",
+    "description": "Message of the confirmation that deletes the Advanced tools' captures"
+  },
+  "storageCacheCleared": {
+    "message": "Detection cache cleared",
+    "description": "Toast after the detection cache was cleared"
+  },
+  "storageCapturesCleared": {
+    "message": "Tool captures deleted",
+    "description": "Toast after the Advanced tools' captures were deleted"
+  },
+  "storageClearFailed": {
+    "message": "Could not clear it. Try again.",
+    "description": "Toast when clearing a part of the storage failed"
+  },
+  "settingsSupportTitle": {
+    "message": "Support",
+    "description": "Title of the group in Settings → Data with tools for getting help"
+  },
+  "settingsDiagnosticsTitle": {
+    "message": "Diagnostics",
+    "description": "Title of the card in Settings → Data that copies a summary for a bug report"
+  },
+  "settingsDiagnosticsDesc": {
+    "message": "Copy a summary for a bug report: versions, settings and counts. It has no sites, addresses or keys.",
+    "description": "Description of the Diagnostics card"
+  },
+  "settingsCopyDiagnostics": {
+    "message": "Copy diagnostics",
+    "description": "Button that copies the diagnostics summary to the clipboard"
+  },
+  "diagnosticsCopied": {
+    "message": "Diagnostics copied",
+    "description": "Toast after the diagnostics summary was copied to the clipboard"
+  },
+  "diagnosticsCopyFailed": {
+    "message": "Could not copy the diagnostics",
+    "description": "Toast when copying the diagnostics summary failed"
+  },
+  "settingsPresetsTitle": {
+    "message": "Presets and reset",
+    "description": "Title of the card in Settings → Data with ready-made groups of settings and the way back to the defaults"
+  },
+  "settingsPresetsDesc": {
+    "message": "Change several settings at once. Rules, History, site lists, language and theme are never changed.",
+    "description": "Description of the Presets and reset card"
+  },
+  "presetPrivacyName": {
+    "message": "Privacy",
+    "description": "Name of a preset in Settings → Data: a group of settings that keeps less on this device and sends nothing out"
+  },
+  "presetPrivacyDesc": {
+    "message": "Keeps less on this device and sends nothing out.",
+    "description": "Description of the Privacy preset"
+  },
+  "presetDeveloperName": {
+    "message": "Developer",
+    "description": "Name of a preset in Settings → Data: debug logs and the JS API for people who work on detection rules"
+  },
+  "presetDeveloperDesc": {
+    "message": "Debug logs and the JS API, for working on rules.",
+    "description": "Description of the Developer preset"
+  },
+  "presetApply": {
+    "message": "Apply",
+    "description": "Button that applies a preset"
+  },
+  "presetConfirmTitleFmt": {
+    "message": "Apply the {0} preset?",
+    "description": "Title of the confirmation before a preset is applied. {0} is the preset name (Privacy or Developer)"
+  },
+  "presetConfirmIntro": {
+    "message": "These settings will change:",
+    "description": "Line above the list of settings a preset changes"
+  },
+  "presetAlreadySet": {
+    "message": "These settings are already set.",
+    "description": "Shown when a preset would change nothing"
+  },
+  "presetApplied": {
+    "message": "Preset applied",
+    "description": "Toast after a preset was applied"
+  },
+  "presetHistoryOff": {
+    "message": "History is not recorded",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetBackupOff": {
+    "message": "Automatic History backups are off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetClearOnClose": {
+    "message": "History is cleared when the browser closes",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetWebhookOff": {
+    "message": "The webhook is off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetNotificationsOff": {
+    "message": "Notifications are off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetJsApiOff": {
+    "message": "The JS API is off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetDebugOff": {
+    "message": "Debug mode is off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetCollectorOff": {
+    "message": "The log collector is off",
+    "description": "A line in the list of what the Privacy preset changes"
+  },
+  "presetDebugOn": {
+    "message": "Debug mode is on",
+    "description": "A line in the list of what the Developer preset changes"
+  },
+  "presetVerboseOn": {
+    "message": "Verbose logging is on",
+    "description": "A line in the list of what the Developer preset changes"
+  },
+  "presetCollectorOn": {
+    "message": "The log collector is on",
+    "description": "A line in the list of what the Developer preset changes"
+  },
+  "presetCollectorMax": {
+    "message": "The log collector keeps up to 5000 lines",
+    "description": "A line in the list of what the Developer preset changes"
+  },
+  "presetJsApiOn": {
+    "message": "The JS API is on",
+    "description": "A line in the list of what the Developer preset changes"
+  },
+  "settingsResetTitle": {
+    "message": "Reset settings",
+    "description": "Title of the item and of the confirmation that return every setting to its default"
+  },
+  "settingsResetDesc": {
+    "message": "Every setting returns to its default, except how much History may hold. Rules, History, site lists, language and theme are kept.",
+    "description": "Description of the Reset settings item"
+  },
+  "settingsResetBtn": {
+    "message": "Reset…",
+    "description": "Button that opens the Reset settings confirmation"
+  },
+  "settingsResetMessage": {
+    "message": "Every setting returns to its default, except how much History may hold. Rules, History, site lists, language and theme are not changed. Webhook and sharing details are kept unless you choose to remove them.",
+    "description": "Message of the Reset settings confirmation"
+  },
+  "settingsResetConnections": {
+    "message": "Also remove the webhook and sharing connections",
+    "description": "Checkbox in the Reset settings confirmation: also clear the webhook address and headers and the sharing keys"
+  },
+  "settingsResetConfirm": {
+    "message": "Reset",
+    "description": "Confirm button of the Reset settings confirmation"
+  },
+  "settingsResetDone": {
+    "message": "Settings reset",
+    "description": "Toast after the settings were reset"
+  },
+  "settingsBackupTitle": {
+    "message": "Backup and restore",
+    "description": "Title of the group in Settings → Data that saves everything in one file and restores it"
+  },
+  "settingsBackupItemTitle": {
+    "message": "Everything",
+    "description": "Title of the item that backs up settings, rules and History together"
+  },
+  "settingsBackupItemDesc": {
+    "message": "Settings, your own rules and History in one file. Webhook and sharing details are not included.",
+    "description": "Description of the Everything backup item"
+  },
+  "backupMakeBtn": {
+    "message": "Back up",
+    "description": "Button that saves the backup file (settings, rules and History together)"
+  },
+  "backupRestoreBtn": {
+    "message": "Restore",
+    "description": "Button that chooses a backup file to restore from"
+  },
+  "backupDone": {
+    "message": "Backup saved",
+    "description": "Toast after the backup file was created"
+  },
+  "backupFailed": {
+    "message": "Could not create the backup",
+    "description": "Toast when creating the backup failed"
+  },
+  "restoreTitle": {
+    "message": "Restore a backup",
+    "description": "Title of the dialog that asks what to restore from a backup file"
+  },
+  "restoreHoldsFmt": {
+    "message": "Made with version {0} on {1}. It holds:",
+    "description": "First line of the restore dialog. {0} is the extension version that made the backup, {1} the date and time"
+  },
+  "restorePartSettings": {
+    "message": "Settings",
+    "description": "Checkbox in the restore dialog: restore the settings from the backup"
+  },
+  "restorePartRulesFmt": {
+    "message": "Your rules ({0})",
+    "description": "Checkbox in the restore dialog: restore the person's own detection rules. {0} is how many"
+  },
+  "restorePartHistoryFmt": {
+    "message": "History ({0} entries)",
+    "description": "Checkbox in the restore dialog: restore the History. {0} is how many entries"
+  },
+  "restoreModeLabel": {
+    "message": "Rules and History",
+    "description": "Label above the choice between merging and replacing in the restore dialog"
+  },
+  "restoreModeMerge": {
+    "message": "Merge with what you have",
+    "description": "Option in the restore dialog: add the backup's rules and History to the current ones"
+  },
+  "restoreModeReplace": {
+    "message": "Replace what you have",
+    "description": "Option in the restore dialog: delete the current rules (your own) and History first, then restore the backup's"
+  },
+  "restoreConfirm": {
+    "message": "Restore",
+    "description": "Confirm button of the restore dialog"
+  },
+  "restoreNothing": {
+    "message": "Nothing is selected.",
+    "description": "Toast when Restore was confirmed with no part selected"
+  },
+  "restoreDoneFmt": {
+    "message": "Restored: {0}",
+    "description": "Toast after a restore. {0} is the list of what was restored, such as Settings, Your rules (2), History (120 entries)"
+  },
+  "restorePartFailedFmt": {
+    "message": "{0} could not be restored.",
+    "description": "Toast when one part of a restore failed. {0} is the part, such as Settings or History"
+  },
+  "restoreInvalid": {
+    "message": "This file is not a backup of this extension. Nothing was changed.",
+    "description": "Toast when the chosen file is not a valid backup"
+  },
+  "restoreNewer": {
+    "message": "This backup was made by a newer version of the extension. Update the extension and try again.",
+    "description": "Toast when the backup file format is newer than this extension understands"
+  },
+  "scanModeTitle": {
+    "message": "Sites to scan",
+    "description": "Label of the choice in Settings → Detection between scanning every site except some, or only chosen sites"
+  },
+  "scanModeBlock": {
+    "message": "Every site except the ones I skip",
+    "description": "Option of the Sites to scan choice: detection runs everywhere except on the sites in the skipped list"
+  },
+  "scanModeAllow": {
+    "message": "Only the sites I choose",
+    "description": "Option of the Sites to scan choice: detection runs only on the sites in the chosen list"
+  },
+  "allowedDomainsTitle": {
+    "message": "Chosen Sites",
+    "description": "Title of the group in Settings → Detection that lists the only sites where detection runs"
+  },
+  "settingsCardAllowDomains": {
+    "message": "Scan Only These Sites",
+    "description": "Title of the card with the list of the only sites where detection runs"
+  },
+  "allowedDomainsDesc": {
+    "message": "Detection runs only on these sites and their subdomains. Everywhere else it is paused.",
+    "description": "Description of the list of the only sites where detection runs"
+  },
+  "settingsUiAllowlistEmpty": {
+    "message": "No sites chosen: nothing is scanned yet",
+    "description": "Shown instead of the list of chosen sites while it is empty"
+  },
+  "actionRemoveFromAllowlist": {
+    "message": "Remove from the list",
+    "description": "Tooltip of the button that removes a site from the list of chosen sites"
+  },
+  "domainAlreadyAllowedFmt": {
+    "message": "{0} is already on the list",
+    "description": "Toast when the current site is already in the list of chosen sites. {0} is the site"
+  },
+  "detectionNotOnList": {
+    "message": "Detection paused: this site is not on your list",
+    "description": "Title of the card in the Detection tab when the sites-to-scan list does not include the current site"
+  },
+  "detectionAllowSiteBtn": {
+    "message": "Scan this site",
+    "description": "Button in the Detection tab that adds the current site to the list of sites to scan and scans it"
+  },
+  "detectionAllowlistHint": {
+    "message": "Or go to Settings → Detection → Sites to scan to manage the list.",
+    "description": "Hint under the Scan this site button"
+  },
+  "siteAllowedFmt": {
+    "message": "Added \"{0}\" to the sites to scan",
+    "description": "Toast after the current site was added to the list of sites to scan. {0} is the site"
+  },
+  "settingsUiErrScanMode": {
+    "message": "Sites to scan must be every site except the skipped ones, or only the chosen sites",
+    "description": "Error shown when settings carry an unknown value for the Sites to scan choice"
+  },
+  "settingsUiErrSiteList": {
+    "message": "A list of sites must hold site names only",
+    "description": "Error shown when a list of skipped or chosen sites holds something that is not a site name"
+  },
+  "webhookFilterTitle": {
+    "message": "Send only when",
+    "description": "Title of the group in the webhook settings with the conditions a page must meet to be sent"
+  },
+  "webhookFilterDesc": {
+    "message": "A page is sent only if all of these hold. The payload still lists everything found on it.",
+    "description": "Description of the Send only when group of the webhook settings"
+  },
+  "webhookMinConfidenceLabel": {
+    "message": "Minimum confidence (%)",
+    "description": "Label of the field that sets the lowest confidence a page's strongest protection needs for the webhook to be sent, in percent"
+  },
+  "webhookCategoriesLabel": {
+    "message": "Categories",
+    "description": "Label of the checkboxes that choose which categories of protection make the webhook send"
+  },
+  "webhookCategoriesHint": {
+    "message": "Leave all unchecked to send for any category.",
+    "description": "Hint under the category checkboxes of the webhook settings"
+  },
+  "webhookDomainsLabel": {
+    "message": "Only these sites",
+    "description": "Label of the field that lists the only sites the webhook is sent for"
+  },
+  "webhookDomainsHint": {
+    "message": "One per line, with their subdomains. Empty means every site.",
+    "description": "Hint under the list of sites of the webhook settings"
+  },
+  "webhookLogTitle": {
+    "message": "Recent deliveries",
+    "description": "Title of the list of the webhook's most recent attempts"
+  },
+  "webhookLogDesc": {
+    "message": "The last 20 attempts: when, which page, what came back. Addresses and payloads are never kept.",
+    "description": "Description of the list of the webhook's most recent attempts"
+  },
+  "webhookLogEmpty": {
+    "message": "Nothing sent yet.",
+    "description": "Shown instead of the list of recent webhook deliveries while it is empty"
+  },
+  "webhookLogClear": {
+    "message": "Clear",
+    "description": "Link that empties the list of recent webhook deliveries"
+  },
+  "webhookLogSent": {
+    "message": "Sent",
+    "description": "Outcome in the list of recent webhook deliveries: the page was sent and the server accepted it"
+  },
+  "webhookLogFailed": {
+    "message": "Failed",
+    "description": "Outcome in the list of recent webhook deliveries: the server refused the request or did not answer"
+  },
+  "webhookLogSkipped": {
+    "message": "Not sent",
+    "description": "Outcome in the list of recent webhook deliveries: the page did not meet the conditions"
+  },
+  "webhookLogReasonSite": {
+    "message": "site not on the list",
+    "description": "Why a page was not sent: its site is not in the list of sites"
+  },
+  "webhookLogReasonCategory": {
+    "message": "category not selected",
+    "description": "Why a page was not sent: none of its protections is in a selected category"
+  },
+  "webhookLogReasonConfidence": {
+    "message": "below the minimum confidence",
+    "description": "Why a page was not sent: its strongest protection is below the minimum confidence"
+  },
+  "webhookLogErrorNetwork": {
+    "message": "no answer",
+    "description": "Why a webhook delivery failed: the server could not be reached"
+  },
+  "webhookLogErrorBlocked": {
+    "message": "address not allowed",
+    "description": "Why a webhook delivery failed: the address is not HTTPS or not a public host"
+  },
+  "webhookLogErrorConfig": {
+    "message": "invalid method",
+    "description": "Why a webhook delivery failed: the HTTP method is not allowed"
+  },
+  "webhookLogTriggerCache": {
+    "message": "cached page",
+    "description": "Marks a webhook delivery that was made for a page whose result came from the cache"
+  },
+  "webhookLogTriggerTest": {
+    "message": "test",
+    "description": "Marks a webhook delivery that was the Test button"
+  },
+  "webhookSecretLabel": {
+    "message": "Signing secret",
+    "description": "Label of the password field holding the secret that signs each webhook request"
+  },
+  "webhookSecretDescFmt": {
+    "message": "Adds an HMAC-SHA256 of the body in the {0} header. Leave empty for no signature; GET, HEAD and multipart requests are never signed.",
+    "description": "Under the signing secret field. {0} is the header name (X-Scrapfly-Webhook-Signature) and stays as it is; keep HMAC-SHA256, GET and HEAD as written"
+  },
+  "webhookSecretGenerate": {
+    "message": "Generate",
+    "description": "Button that fills the signing secret field with a new random secret, applied with Save"
+  },
+  "webhookSecretInvalid": {
+    "message": "Signing secret: use up to 512 ASCII characters (no accents or emoji)",
+    "description": "Shown under the signing secret field, and when Save or Test is refused because of it"
+  },
+  "hooksOffGroupTitle": {
+    "message": "Sites without JS hooks",
+    "description": "Settings → Detection: title of the card where the person lists the sites on which JS hooks are turned off"
+  },
+  "hooksOffLabel": {
+    "message": "Turn JS hooks off on these sites",
+    "description": "Label of the box with one site per line where JS hooks are turned off"
+  },
+  "hooksOffHint": {
+    "message": "JS hooks watch a page's browser API calls to find fingerprinting. Use this for a site that misbehaves with them: its other detections keep working, but fingerprinting is not checked. One site per line, subdomains included; reload the page to apply.",
+    "description": "Hint under the box of sites without JS hooks. JS hooks are the wrappers the extension puts on the page's browser APIs (canvas, audio, navigator) to see which of them a script calls"
+  },
+  "hooksOffNote": {
+    "message": "JS hooks are off on this site, so fingerprinting is not checked.",
+    "description": "Note above the detection results of a site where the person turned JS hooks off"
+  },
+  "hooksOffBadge": {
+    "message": "Fingerprinting not checked",
+    "description": "Badge on the Nothing Detected screen of a site without JS hooks, in place of ✓ No Fingerprinting"
+  },
+  "hooksOffEmptyDesc": {
+    "message": "No matching anti-bot or CAPTCHA signals were found on this page. JS hooks are off here, so fingerprinting was not checked.",
+    "description": "Description on the Nothing Detected screen of a site without JS hooks"
+  },
+  "settingsHistoryFingerprintDays": {
+    "message": "Delete fingerprinting-only pages after",
+    "description": "Settings → History: label of the number of days after which pages that only have fingerprinting detections are deleted (the unit, days, is a separate label)"
+  },
+  "settingsHistoryFingerprintDaysHint": {
+    "message": "0 keeps them like every other page, so only Auto-delete applies to them. Pinned pages are never deleted.",
+    "description": "Hint under the number of days for fingerprinting-only pages"
+  },
+  "settingsGroupHistoryAutoPin": {
+    "message": "Pin pages automatically",
+    "description": "Settings → History: title of the card where the person chooses which pages pin themselves (a pinned page is kept when History is cleaned up)"
+  },
+  "settingsHistoryAutoPinHard": {
+    "message": "Pages with a hard protection",
+    "description": "Switch: pin pages that have an anti-bot or CAPTCHA protection of High difficulty"
+  },
+  "settingsHistoryAutoPinHardDesc": {
+    "message": "An anti-bot or CAPTCHA of High difficulty. Fingerprinting never pins a page by its difficulty.",
+    "description": "Explains the switch for pages with a hard protection"
+  },
+  "settingsHistoryAutoPinVendors": {
+    "message": "Pages protected by",
+    "description": "Label of the box where the person lists protections (one name per line); a page with one of them is pinned"
+  },
+  "settingsHistoryAutoPinVendorsHint": {
+    "message": "One protection per line, named as the Detection tab names it.",
+    "description": "Hint under the box of protections that pin a page"
+  },
+  "settingsHistoryAutoPinMinConfidence": {
+    "message": "Only from a confidence of (%)",
+    "description": "Label of the number: a detection must reach this confidence, in percent, to pin a page"
+  },
+  "settingsHistoryAutoPinNote": {
+    "message": "Up to {0} pages are pinned this way. Unpin one and it is never pinned again by itself.",
+    "description": "Note under the automatic pinning settings; {0} is the largest number of pages that pin themselves"
+  },
+  "historyAutoPinnedTip": {
+    "message": "Pinned automatically: kept when History is cleaned up. Unpin it and it is never pinned again by itself.",
+    "description": "Hover text on the pin of a History entry that pinned itself"
+  },
+  "settingsUiErrAutoPinConfidence": {
+    "message": "Pin confidence must be between 0 and 100",
+    "description": "Error when the confidence for automatic pinning is not a whole number from 0 to 100"
+  },
+  "settingsUiErrFingerprintDays": {
+    "message": "Fingerprinting-only pages must be kept between 0 and 3650 days",
+    "description": "Error when the number of days for fingerprinting-only pages is not a whole number from 0 to 3650"
+  },
+  "settingsHistorySize": {
+    "message": "Size limit",
+    "description": "Settings → History → Storage: label of the choice of how much space History may take (6, 12 or 25 MB)"
+  },
+  "settingsHistorySizeHint": {
+    "message": "A larger size keeps more pages and uses more of your disk. Lowering the size removes the oldest pages that are not pinned.",
+    "description": "Hint under the History size choice"
+  },
+  "settingsHistorySizeLowerTitle": {
+    "message": "Lower the History size",
+    "description": "Title of the question asked before History gets a size smaller than what it uses now"
+  },
+  "settingsHistorySizeLowerMessage": {
+    "message": "History uses {0} and the new limit is {1}. The oldest pages that are not pinned will be removed to fit.",
+    "description": "Question before lowering the History size; {0} is how much History uses now, {1} the new limit, both as sizes like 8.2 MB"
+  },
+  "settingsHistorySizeLowerConfirm": {
+    "message": "Lower the size",
+    "description": "Confirm button of the question before lowering the History size"
+  },
+  "settingsHistoryLimitLowerTitle": {
+    "message": "Lower the History limit",
+    "description": "Title of the question asked when an imported settings file or a restored backup lowers the number of History entries below what History holds"
+  },
+  "settingsHistoryLimitLowerMessage": {
+    "message": "History holds {0} pages and the new limit is {1}. The oldest pages that are not pinned will be removed to fit.",
+    "description": "Message of that question. {0} is the number of pages History holds now, {1} the lower limit the file asks for (both plain numbers)"
+  },
+  "settingsHistoryLimitLowerConfirm": {
+    "message": "Lower the limit",
+    "description": "Confirm button of that question (Cancel keeps the limit that applies now; the rest of the file still lands)"
+  },
+  "storageTotalUnlimitedFmt": {
+    "message": "{0} used, no limit",
+    "description": "Settings → Data → Storage: total in use when the browser allows the extension unlimited storage; {0} is a size like 14.2 MB"
+  },
+  "settingsUiErrHistorySizeFmt": {
+    "message": "History size must be one of {0} MB",
+    "description": "Error when the History size is not one of the offered sizes; {0} is the list of sizes, like 6, 12, 25"
+  },
+  "ruleTranslateBarFmt": {
+    "message": "Texts not yet translated into every language: {0}",
+    "description": "Rules → editor: shown above the rule when some of its texts (the description, a pattern's description, a combination's name) lack a translation in some language; {0} is how many texts"
+  },
+  "ruleTranslateRule": {
+    "message": "Translate the rule",
+    "description": "Rules → editor: button that translates every text of the rule that is missing a translation, with Chrome's on-device translator"
+  },
+  "ruleTranslateRuleHint": {
+    "message": "Fills the missing translations of the description, the patterns and the combinations with Chrome's on-device translator. Check them before saving.",
+    "description": "Hover text of the Translate the rule button"
+  },
+  "ruleTranslateRuleWorkingFmt": {
+    "message": "Translating {0} texts…",
+    "description": "Shown while Translate the rule works; {0} is how many texts it translates"
+  },
+  "ruleTranslateRuleDoneFmt": {
+    "message": "Filled {0} translations. Check them before saving.",
+    "description": "Shown after Translate the rule; {0} is how many translations it filled"
+  },
+  "ruleTranslateRulePartialFmt": {
+    "message": "Filled {0}; {1} could not be translated here.",
+    "description": "Shown after Translate the rule when some translations failed; {0} is how many it filled, {1} how many it could not"
+  },
+  "ruleHistoryCheckPatterns": {
+    "message": "Patterns",
+    "description": "Rules → editor → Check against History: heading of the list of the rule's patterns with the pages each matches"
+  },
+  "ruleHistoryCheckCombinations": {
+    "message": "Combinations",
+    "description": "Rules → editor → Check against History: heading of the list of the rule's combinations with the pages each fires on"
+  },
+  "historyWatch": {
+    "message": "Watch for changes",
+    "description": "History \"…\" menu: watch this page (it is pinned and scanned again in the background; the watchlist is in Settings → History)"
+  },
+  "historyUnwatch": {
+    "message": "Stop watching",
+    "description": "History \"…\" menu: stop watching this page"
+  },
+  "historyWatchTip": {
+    "message": "Watching for changes",
+    "description": "Hover text of the eye on a History entry that is on the watchlist"
+  },
+  "historyWatchCheckedFmt": {
+    "message": "Last checked {0}",
+    "description": "Second line of the hover text of a watched entry; {0} is how long ago, like 3h ago"
+  },
+  "historyWatchNever": {
+    "message": "Not checked yet",
+    "description": "Second line of the hover text of a watched entry that the watchlist has not checked yet"
+  },
+  "historyWatchStartedNotice": {
+    "message": "Watching this page",
+    "description": "Toast after choosing Watch for changes"
+  },
+  "historyWatchStartedOffNotice": {
+    "message": "Watching this page. Turn on Watch pinned pages in Settings → History for it to be checked.",
+    "description": "Toast after choosing Watch for changes while the watchlist is off"
+  },
+  "historyWatchStoppedNotice": {
+    "message": "No longer watching this page",
+    "description": "Toast after choosing Stop watching"
+  },
+  "historyWatchLimitFmt": {
+    "message": "You can watch up to {0} pages. Stop watching one first.",
+    "description": "Error when the watchlist is full; {0} is the most pages it holds"
+  },
+  "settingsGroupHistoryWatch": {
+    "message": "Watch pinned pages",
+    "description": "Settings → History: title of the card of the watchlist (pinned pages that are scanned again in the background)"
+  },
+  "settingsHistoryWatchFrequency": {
+    "message": "Check them",
+    "description": "Label of the choice of how often the watched pages are checked (Off, Every day, Every week)"
+  },
+  "settingsHistoryWatchHint": {
+    "message": "Pages you pin and choose Watch for changes on are opened again in a background tab, one at a time (up to 10), and scanned. A page that gains or loses an anti-bot or CAPTCHA protection is marked Changed, with a notification when alerts are on. Each check is a real visit with your browser's cookies, so a signed-in page is visited as you, and a browser window must be open.",
+    "description": "Explains the watchlist: what it opens, how many pages, what it reports, and that the visit uses the browser cookies"
+  },
+  "settingsHistoryWatchNow": {
+    "message": "Check now",
+    "description": "Button that checks the watched pages now"
+  },
+  "settingsHistoryWatchCountFmt": {
+    "message": "{0} of {1} pages watched",
+    "description": "How many pages are on the watchlist; {1} is the most it holds"
+  },
+  "settingsHistoryWatchNever": {
+    "message": "No check yet.",
+    "description": "The watchlist has not checked anything yet"
+  },
+  "settingsHistoryWatchNoWindow": {
+    "message": "The last check found no browser window to open pages in.",
+    "description": "The watchlist needs an open browser window for its background tabs and found none"
+  },
+  "settingsHistoryWatchFailed": {
+    "message": "The last check failed.",
+    "description": "The last watchlist check failed"
+  },
+  "settingsHistoryWatchLastFmt": {
+    "message": "Last check: {0} · {1} checked, {2} changed",
+    "description": "The last watchlist check; {0} is a date and time, {1} how many pages were checked, {2} how many had changed"
+  },
+  "settingsHistoryWatchDoneFmt": {
+    "message": "Checked {0} pages, {1} changed",
+    "description": "Toast after Check now; {0} is how many pages were checked, {1} how many had changed"
+  },
+  "settingsHistoryWatchNothing": {
+    "message": "No page is watched yet: pin a page in History and choose Watch for changes.",
+    "description": "Toast after Check now when no page is on the watchlist"
+  },
+  "settingsHistoryWatchPaused": {
+    "message": "History is paused, so nothing is checked.",
+    "description": "Error after Check now while History is paused"
+  },
+  "settingsHistoryWatchOff": {
+    "message": "The last check found the extension switched off, so nothing was checked.",
+    "description": "The watchlist line in Settings for a check that found the extension switched off with its main toggle (a past event: it may be on again), and the error after Check now"
+  },
+  "settingsUiErrHistoryWatch": {
+    "message": "The watchlist must be off, daily or weekly",
+    "description": "Error when the watchlist setting is not one of the offered choices"
   }
 }

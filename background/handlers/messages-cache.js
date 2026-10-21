@@ -12,6 +12,12 @@ function registerCacheHandlers(registry, context) {
             try {
                 const { url } = request;
                 Logger.debug('CACHE', `Early check: ${url}`);
+                // A result saved before the site was skipped (or left out of the chosen sites) is not served to it
+                if (await Utils.isUrlBlacklisted(url)) {
+                    if (sender.tab?.id) tabsUsingCache.delete(sender.tab.id);
+                    sendResponse({ cacheHit: false });
+                    return;
+                }
                 const cachedData = await DetectionEngineManager.getStoredDetection(url);
 
                 if (cachedData) {
@@ -43,7 +49,7 @@ function registerCacheHandlers(registry, context) {
         })();
         return true; // Will respond asynchronously
     };
-    registry['CHECK_CACHE_EARLY'] = handle_check_cache_early;
+    registry[WorkerMessages.CHECK_CACHE_EARLY] = handle_check_cache_early;
 
     const handle_cache_hit_early_exit = function({ request, sender, sendResponse, context }) {
         void context;
@@ -61,7 +67,7 @@ function registerCacheHandlers(registry, context) {
                     const detections = Array.isArray(detectionData.detectionResults) ? detectionData.detectionResults : [];
 
                     if (detectionCount > 0) {
-                        const badgeColors = await CategoryManager.getBadgeColors(categoryManager);
+                        const badgeColors = await CategoryManager.getBadgeColors();
                         const count = detectionCount.toString();
                         const color = DetectionUtils.getBadgeColor(detections, badgeColors);
 
@@ -103,7 +109,7 @@ function registerCacheHandlers(registry, context) {
         })();
         return true; // Will respond asynchronously
     };
-    registry['CACHE_HIT_EARLY_EXIT'] = handle_cache_hit_early_exit;
+    registry[WorkerMessages.CACHE_HIT_EARLY_EXIT] = handle_cache_hit_early_exit;
 
     const handle_clear_detection_cache = function({ request, sender, sendResponse, context }) {
         void context;
@@ -147,7 +153,17 @@ function registerCacheHandlers(registry, context) {
         })();
         return true; // Async response
     };
-    registry['DETECTION_CLEAR_CACHE'] = handle_clear_detection_cache;
-    registry['HISTORY_CLEAR_CACHE'] = handle_clear_detection_cache;
+    registry[WorkerMessages.DETECTION_CLEAR_CACHE] = handle_clear_detection_cache;
+    registry[WorkerMessages.HISTORY_CLEAR_CACHE] = handle_clear_detection_cache;
+
+    // Settings → Data → Storage → Clear: every saved result; tabs that showed a cached one scan again next time
+    const handle_clear_all_detection_cache = function({ sendResponse }) {
+        (async () => {
+            await DetectionEngineManager.handleClearAllDetectionCache(sendResponse);
+            tabsUsingCache.clear();
+        })();
+        return true; // Async response
+    };
+    registry[WorkerMessages.DETECTION_CLEAR_ALL_CACHE] = handle_clear_all_detection_cache;
 
 }

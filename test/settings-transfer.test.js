@@ -9,6 +9,7 @@ const plain = value => JSON.parse(JSON.stringify(value));
 function uiHarness() {
   const notifications = [];
   const context = vm.createContext({
+    WorkerMessages: require('../modules/core/worker-messages.js'),
     SettingsUI: {},
     self: {},
     Logger: { error() {}, debug() {}, warn() {} },
@@ -16,12 +17,12 @@ function uiHarness() {
     document: { querySelector() { return null; } },
     chrome: { runtime: { sendMessage: async () => ({}) } }
   });
-  for (const file of ['modules/settings/settings-transfer.js', 'sections/settings/settings-ui.js', 'sections/settings/settings-ui-data.js', 'sections/settings/settings-ui-updates.js']) vm.runInContext(read(file), context);
+  for (const file of ['modules/core/categories.js', 'modules/core/domain-list.js', 'modules/core/scan-scope.js', 'modules/settings/settings-transfer.js', 'sections/settings/settings-ui.js', 'sections/settings/settings-ui-data.js', 'sections/settings/settings-ui-updates.js']) vm.runInContext(read(file), context);
   const ui = context.self.SettingsUI;
   // const SettingsUI is lexical, but self exposes the same registry.
   ui.LANGUAGE_OPTIONS = [{ value: 'en' }, { value: 'es' }];
   const form = {
-    settings: { debugMode: false, webhook: { enableWebhook: true, webhookUrl: 'https://hooks.example/SYNTHETIC_TOKEN' }, share: { githubToken: 'SYNTHETIC_TOKEN', provider: 'github_gist' } },
+    settings: { debugMode: false, webhook: { enableWebhook: true, webhookUrl: 'https://hooks.example/SYNTHETIC_TOKEN', webhookSecret: 'SYNTHETIC_TOKEN' }, share: { githubToken: 'SYNTHETIC_TOKEN', provider: 'github_gist' } },
     settingsBaseline: { debugMode: false },
     deepMerge: (...args) => ui.deepMerge(...args),
     validateSettings: () => ({ isValid: true, errors: [] }),
@@ -37,7 +38,7 @@ test('portable settings exclude all connection data, while diagnostics exclude u
   const source = {
     debugMode: true,
     unknownCredential: 'SYNTHETIC_TOKEN',
-    webhook: { webhookUrl: 'https://hooks.example/SYNTHETIC_TOKEN', webhookHeaders: [{ name: 'Authorization', value: 'SYNTHETIC_TOKEN' }], webhookPayload: 'SYNTHETIC_TOKEN' },
+    webhook: { webhookUrl: 'https://hooks.example/SYNTHETIC_TOKEN', webhookHeaders: [{ name: 'Authorization', value: 'SYNTHETIC_TOKEN' }], webhookPayload: 'SYNTHETIC_TOKEN', webhookSecret: 'SYNTHETIC_TOKEN' },
     share: { provider: 'custom', customUrl: 'https://upload.example/SYNTHETIC_TOKEN', customJsonTemplate: 'SYNTHETIC_TOKEN', customHeaders: 'SYNTHETIC_TOKEN', githubToken: 'SYNTHETIC_TOKEN', pastebinKey: 'SYNTHETIC_TOKEN', customExpiryDays: 7 },
     detection: { blacklistedDomains: ['private.example'], cacheDuration: 3 }
   };
@@ -86,14 +87,51 @@ test('successful import preserves local connections and only applies language af
   context.StorageManager = { commitSettings: async mutation => { saved = plain(mutation); return { settings: mutation.candidate, previous: form.settings }; } };
   ui._applyLanguageChoice = async (language, options) => { assert.ok(saved); assert.equal(language, 'es'); assert.equal(options.persist, false); };
   await ui.importSettingsFile.call(form, { target: { files: [{ text: async () => JSON.stringify({ settings: {
-    debugMode: true, webhook: { webhookUrl: 'https://untrusted.example/replacement' }, share: { githubToken: 'untrusted', provider: 'dpaste_com' }
+    debugMode: true, webhook: { webhookUrl: 'https://untrusted.example/replacement', webhookSecret: 'untrusted' }, share: { githubToken: 'untrusted', provider: 'dpaste_com' }
   }, languageOverride: 'es' }) }] } });
   assert.equal(saved.languageOverride, 'es');
   assert.equal(form.settings.webhook.webhookUrl, 'https://hooks.example/SYNTHETIC_TOKEN');
+  assert.equal(form.settings.webhook.webhookSecret, 'SYNTHETIC_TOKEN', 'an imported file never replaces the signing secret');
   assert.equal(form.settings.share.githubToken, 'SYNTHETIC_TOKEN');
   assert.equal(form.settings.share.provider, 'dpaste_com');
   assert.equal(form.settings.debugMode, true);
   assert.deepEqual(notifications.map(n => n[0]), ['success']);
+});
+
+test('a file that lowers the History size below what History uses asks first; declined, the size that applies stays and the rest still lands', async () => {
+  for (const [answer, usedMB, expected, questions] of [[false, 8, 25, 1], [true, 8, 6, 1], [false, 1, 6, 0]]) {
+    const { context, ui, form } = uiHarness();
+    let saved;
+    context.StorageManager = { commitSettings: async mutation => { saved = plain(mutation); return { settings: mutation.candidate, previous: form.settings }; } };
+    context.HistoryStore = { SIZES_MB: [6, 12, 25], hasUnlimitedStorage: () => true, budgetFor: (mb) => mb * 1024 * 1024, usage: async () => ({ bytes: usedMB * 1024 * 1024 }) };
+    context.FormatUtils = { t: (key, fallback) => fallback };
+    context.chrome.storage = { local: {} };
+    const asked = [];
+    context.NotificationHelper.confirm = async (options) => { asked.push(options.title); return answer; };
+    form.settings.history = { historyMaxMB: 25, historyLimit: 0 };
+    await ui.importSettingsFile.call(form, { target: { files: [{ text: async () => JSON.stringify({ settings: { debugMode: true, history: { historyMaxMB: 6 } } }) }] } });
+    assert.equal(asked.length, questions, `${usedMB} MB used, answer ${answer}`);
+    assert.equal(saved.candidate.history.historyMaxMB, expected);
+    assert.equal(saved.candidate.debugMode, true, 'the rest of the file lands either way');
+  }
+});
+
+test('a file that lowers the entry limit below the pages History holds asks too; declined, the limit that applies stays', async () => {
+  for (const [answer, fileLimit, unpinned, expected, questions] of [[false, 500, 1100, 0, 1], [true, 500, 1100, 500, 1], [false, 1500, 1100, 1500, 0], [false, 500, 300, 500, 0]]) {
+    const { context, ui, form } = uiHarness();
+    let saved;
+    context.StorageManager = { commitSettings: async mutation => { saved = plain(mutation); return { settings: mutation.candidate, previous: form.settings }; } };
+    context.HistoryStore = { SIZES_MB: [6, 12, 25], hasUnlimitedStorage: () => true, budgetFor: (mb) => mb * 1024 * 1024, usage: async () => ({ bytes: 1024, entries: unpinned + 100, pinned: 100 }) };
+    context.FormatUtils = { t: (key, fallback) => fallback };
+    context.chrome.storage = { local: {} };
+    const asked = [];
+    context.NotificationHelper.confirm = async (options) => { asked.push(options.title); return answer; };
+    form.settings.history = { historyMaxMB: 6, historyLimit: 0 };
+    await ui.importSettingsFile.call(form, { target: { files: [{ text: async () => JSON.stringify({ settings: { history: { historyLimit: fileLimit } } }) }] } });
+    assert.equal(asked.length, questions, `limit ${fileLimit}, ${unpinned} unpinned, answer ${answer}`);
+    if (questions) assert.equal(asked[0], 'Lower the History limit');
+    assert.equal(saved.candidate.history.historyLimit, expected);
+  }
 });
 
 test('Cancel discards staged exclusions, update preferences and header changes', () => {

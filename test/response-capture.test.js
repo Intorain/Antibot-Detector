@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -21,7 +22,7 @@ const cloudflare = readDetector('antibot', 'detect-cloudflare');
 const turnstile = readDetector('captcha', 'detect-turnstile');
 
 // The ISOLATED-side module that builds the capture spec, with the real constants
-const isolated = vm.createContext({});
+const isolated = vm.createContext({ WorkerMessages: require('../modules/core/worker-messages.js'), });
 isolated.globalThis = isolated;
 for (const file of ['modules/core/bridge-protocol.js', 'modules/core/constants.js', 'utils/pattern-cache.js', 'modules/detection/engine/detection-engine-hooks.js']) {
   vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), isolated, { filename: file });
@@ -149,12 +150,12 @@ test('XMLHttpRequest responses are read on loadend for matching URLs', async () 
 
 const Logger = new Proxy({}, { get: (_, key) => key === 'debugMode' ? false : key === 'hostOf' ? (url) => new URL(url).hostname
   : key === 'error' ? (...args) => { throw new Error(args.join(' ')); } : () => {} });
-const worker = vm.createContext({
+const worker = vm.createContext({ WorkerMessages: require('../modules/core/worker-messages.js'), 
   Logger, CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } },
   setTimeout, clearTimeout, URL
 });
 worker.window = worker;
-for (const file of ['modules/core/constants.js', 'utils/pattern-cache.js', 'modules/core/bridge-protocol.js', 'modules/core/hooks-config.js',
+for (const file of ['modules/core/constants.js', 'utils/pattern-cache.js', 'modules/core/bridge-protocol.js', 'modules/core/categories.js', 'modules/core/hooks-config.js',
   'modules/detection/conditions/window-condition-grammar.js', 'modules/detection/managers/confidence-manager.js', 'modules/detection/detection-combinations.js',
   ...['analysis', 'extractors', 'matching', 'hooks', 'manager'].map(name => `modules/detection/engine/detection-engine-${name}.js`),
   'background/detection-session-store.js', 'background/detection-lifecycle.js', 'background/handlers/messages-detection.js'
@@ -172,7 +173,7 @@ worker.tabsUsingCache = new Set();
 for (const key of ['interruptedDetections', 'activeDetections', 'detectionStates', 'payloadStore', 'finalizationDebounce', 'batchProcessingFlags',
   'networkUrlsStore', 'headersStore', 'requestHeadersStore', 'responseCookiesStore', 'responseStore']) worker[key] = new Map();
 worker.UrlUtils = { normalizeFaviconForStorage: () => null, getHostnameFromUrl: url => new URL(url).hostname };
-worker.Utils = { getHistorySettings: async () => ({}) };
+worker.Utils = { getHistorySettings: async () => ({}), isUrlBlacklisted: async () => false };
 worker.HistoryRecorder = { shouldSaveToHistory: async () => false };
 worker.isExtensionEnabled = async () => true;
 const registry = {};
@@ -236,6 +237,20 @@ test('after the scan, a response adds its detector to the cached result, the bad
   send({ url: PREPARE, method: 'POST', status: 200, body: compacted(prepareBody) });
   await sleep(450);
   assert.equal(out.stored, null, 'no rewrite when nothing is new');
+});
+
+test('a skipped site keeps nothing from its responses: no cache entry, no badge, no popup update', async () => {
+  const out = fresh({ cached: null });
+  worker.Utils.isUrlBlacklisted = async () => true;
+  try {
+    send({ url: PREPARE, method: 'POST', status: 200, body: compacted(prepareBody) });
+    await sleep(450);
+    assert.equal(out.stored, null, 'nothing stored for a skipped site');
+    assert.equal(out.badge, null, 'the badge is left alone (it says paused)');
+    assert.deepEqual(out.messages.filter(m => m.type === 'NEW_DETECTION_DATA'), [], 'no popup update');
+  } finally {
+    worker.Utils.isUrlBlacklisted = async () => false;
+  }
 });
 
 test('during a scan the scan reads the response; frames, other sites and bad messages are ignored', async () => {

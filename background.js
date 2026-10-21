@@ -1,6 +1,7 @@
 /** Service worker bootstrap: dependency graph, then synchronous listeners. */
 importScripts(
     // Core utilities
+    './modules/core/worker-messages.js',
     './modules/core/logger.js',
     './modules/core/i18n.js',
     './modules/core/rule-i18n.js',
@@ -10,6 +11,10 @@ importScripts(
     './modules/core/badge-constants.js',
     './modules/core/message-types.js',
     './modules/core/ttl-map.js',
+    './modules/core/categories.js',
+    './modules/core/capture-retention.js',
+    './modules/core/domain-list.js',
+    './modules/core/scan-scope.js',
     './utils/format-utils.js',
     './utils/url-utils.js',
     './utils/page-cookies.js',
@@ -35,13 +40,17 @@ importScripts(
     './modules/ui/notification-manager.js',
     './modules/detection/rules/update-manager.js',
     './background/worker-keepalive-manager.js',
+    './modules/core/message-sender.js',
     './modules/core/history-store.js',
     './modules/core/history-policy.js',
     './modules/core/history-export.js',
     './background/history-recorder.js',
     './modules/core/webhook-body.js',
     './modules/detection/public-summary.js',
+    './modules/core/webhook-filter.js',
+    './modules/core/webhook-log.js',
     './modules/settings/settings-runtime.js',
+    './modules/settings/webhook-runtime.js',
     // Interceptors
     './modules/advanced/captcha-vendors.js',
     './modules/advanced/vendor-registry.js',
@@ -84,6 +93,7 @@ importScripts(
     './background/tab-events.js',
     './background/history-retention.js',
     './background/history-backup.js',
+    './background/history-watch.js',
     './background/detection-cache-retention.js',
     './background/init.js'
 );

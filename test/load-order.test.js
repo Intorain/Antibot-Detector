@@ -49,6 +49,39 @@ test('worker responsibilities never load popup sections', () => {
   assertBefore(workerImports(), 'background/detection-session-store.js', 'background/detection-lifecycle.js');
 });
 
+test('every script that reads a shared global module loads after it, in the popup, the worker, the stats page and the content script', () => {
+  const stats = [...read('sections/stats/stats.html').matchAll(/<script\s+src="([^"]+)"/g)].map(m => path.posix.join('sections/stats', m[1]));
+  const manifest = JSON.parse(read('manifest.json'));
+  const contexts = {
+    popup: popupScripts(), worker: workerImports(), stats,
+    content: manifest.content_scripts.find(entry => entry.world !== 'MAIN').js
+  };
+  const MODULES = {
+    Categories: 'modules/core/categories.js', CaptureRetention: 'modules/core/capture-retention.js', DomainList: 'modules/core/domain-list.js', ScanScope: 'modules/core/scan-scope.js',
+    WebhookFilter: 'modules/core/webhook-filter.js', WebhookLog: 'modules/core/webhook-log.js', MessageSender: 'modules/core/message-sender.js',
+    WorkerMessages: 'modules/core/worker-messages.js', HistoryFilter: 'modules/core/history-filter.js', RuleTranslationPlan: 'modules/core/rule-translation-plan.js',
+    StorageOverview: 'modules/settings/storage-overview.js', BackupBundle: 'modules/settings/backup-bundle.js', DiagnosticsReport: 'modules/settings/diagnostics-report.js',
+    SettingsPresets: 'modules/settings/settings-presets.js', SettingsTransfer: 'modules/settings/settings-transfer.js'
+  };
+  const readers = Object.fromEntries(Object.keys(MODULES).map(name => [name, 0]));
+  for (const [global, module] of Object.entries(MODULES)) {
+    for (const graph of Object.values(contexts)) {
+      for (const file of graph.filter(entry => entry !== module && new RegExp(`\\b${global}\\.`).test(read(entry)))) {
+        readers[global]++;
+        assertBefore(graph, module, file);
+      }
+    }
+    // The page's own world shares its globals with the site, so nothing shared is loaded there
+    assert.ok(!manifest.content_scripts.find(entry => entry.world === 'MAIN').js.includes(module));
+  }
+  assert.ok(readers.Categories >= 20, 'the guard finds the scripts that use the category module');
+  assert.ok(readers.CaptureRetention >= 4, 'the guard finds the scripts that use the capture retention module');
+  assert.ok(readers.DomainList >= 2 && readers.ScanScope >= 3, 'the guard finds the scripts that use the site list modules');
+  assert.ok(readers.WebhookFilter >= 2 && readers.WebhookLog >= 2 && readers.MessageSender >= 3, 'the guard finds the scripts that use the webhook and sender modules');
+  assert.ok(readers.WorkerMessages >= 20, 'the guard finds the scripts that send or handle worker messages');
+  assert.ok(readers.HistoryFilter >= 1 && readers.StorageOverview >= 1 && readers.BackupBundle >= 1 && readers.DiagnosticsReport >= 1 && readers.SettingsPresets >= 1 && readers.SettingsTransfer >= 2, 'the guard finds the popup modules\' users');
+});
+
 test('rules and integration graphs load dependencies before their users', () => {
   for (const graph of [popupScripts(), workerImports()]) {
     assertBefore(graph, 'modules/detection/rules/detector-schema.js', 'modules/detection/rules/detector-manager.js');
@@ -98,7 +131,8 @@ test('shared Advanced code dialog loads after its base and before every generato
   const dialog = 'sections/advanced/components/code-generator-dialog.js';
   assert.ok(indexIn(list, 'sections/advanced/base-advanced-module.js') < indexIn(list, dialog));
   assert.ok(indexIn(list, dialog) >= 0);
-  for (const folder of ['akamai', 'awswaf', 'cloudflare', 'datadome', 'imperva', 'shapesecurity', 'turnstile', 'geetest']) {
+  // the vendors whose popup code opens the code generator (the others lost their generators in 2.8.7)
+  for (const folder of ['akamai', 'imperva', 'shapesecurity', 'geetest']) {
     const suffix = folder === 'geetest' ? 'actions' : 'view';
     const user = `sections/advanced/vendors/${folder}/${suffix}.js`;
     assert.ok(indexIn(list, user) >= 0, `${user} is registered`);
@@ -110,7 +144,7 @@ test('Turnstile site keys live with the Cloudflare tools and load before both of
   const list = popupScripts();
   const helper = 'sections/advanced/vendors/cloudflare/turnstile-sitekeys.js';
   assert.ok(indexIn(list, helper) >= 0, `${helper} is registered`);
-  for (const user of ['sections/advanced/vendors/cloudflare/actions.js',
+  for (const user of ['sections/advanced/vendors/cloudflare/sitekey-view.js',
     'sections/advanced/vendors/turnstile/actions.js']) {
     assert.ok(indexIn(list, helper) < indexIn(list, user), `${helper} before ${user}`);
   }

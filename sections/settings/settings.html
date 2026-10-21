@@ -241,22 +241,22 @@
             <div class="color-row">
               <span class="color-row-label" data-i18n="settingsBadgeColorLow">Low</span>
               <div class="color-picker-container">
-                <input type="color" id="colorBadgeLow" class="color-field" value="#4CAF50">
-                <span class="color-hex-display" id="hexBadgeLow">#4CAF50</span>
+                <input type="color" id="colorBadgeLow" class="color-field" value="#22c55e">
+                <span class="color-hex-display" id="hexBadgeLow">#22c55e</span>
               </div>
             </div>
             <div class="color-row">
               <span class="color-row-label" data-i18n="settingsBadgeColorMedium">Medium</span>
               <div class="color-picker-container">
-                <input type="color" id="colorBadgeMedium" class="color-field" value="#FFA500">
-                <span class="color-hex-display" id="hexBadgeMedium">#FFA500</span>
+                <input type="color" id="colorBadgeMedium" class="color-field" value="#f59e0b">
+                <span class="color-hex-display" id="hexBadgeMedium">#f59e0b</span>
               </div>
             </div>
             <div class="color-row">
               <span class="color-row-label" data-i18n="settingsBadgeColorHigh">High</span>
               <div class="color-picker-container">
-                <input type="color" id="colorBadgeHigh" class="color-field" value="#FF4444">
-                <span class="color-hex-display" id="hexBadgeHigh">#FF4444</span>
+                <input type="color" id="colorBadgeHigh" class="color-field" value="#ef4444">
+                <span class="color-hex-display" id="hexBadgeHigh">#ef4444</span>
               </div>
             </div>
           </div>
@@ -508,21 +508,31 @@
           </div>
         </div>
 
-        <!-- Blacklisted Domains Group -->
+        <!-- Sites: every site except the skipped ones, or only the chosen sites -->
         <div class="settings-card-group">
-          <div class="settings-card-group-title" data-i18n="blacklistedDomains">Blacklisted Domains</div>
+          <div class="settings-card-group-title" data-scan-mode-show="blocklist" data-i18n="blacklistedDomains">Blacklisted Domains</div>
+          <div class="settings-card-group-title" data-scan-mode-show="allowlist" data-i18n="allowedDomainsTitle" hidden>Chosen Sites</div>
 
           <div class="settings-card">
             <div class="settings-row settings-row--head">
               <div class="settings-row-text">
                 <div class="settings-row-title">
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12,2C17.5,2 22,6.5 22,12C22,17.5 17.5,22 12,22C6.5,22 2,17.5 2,12C2,6.5 6.5,2 12,2M12,4C7.58,4 4,7.58 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,7.58 16.42,4 12,4M16.95,5.63L18.37,7.05L7.05,18.37L5.63,16.95L16.95,5.63Z"/></svg>
-                  <span data-i18n="settingsCardSkipDomains">Skip Domains</span>
+                  <span data-scan-mode-show="blocklist" data-i18n="settingsCardSkipDomains">Skip Domains</span>
+                  <span data-scan-mode-show="allowlist" data-i18n="settingsCardAllowDomains" hidden>Scan Only These Sites</span>
                 </div>
-                <p class="settings-row-desc" data-i18n="blacklistedDomainsDesc">Domains where detection is completely skipped</p>
+                <p class="settings-row-desc" data-scan-mode-show="blocklist" data-i18n="blacklistedDomainsDesc">Domains where detection is completely skipped</p>
+                <p class="settings-row-desc" data-scan-mode-show="allowlist" data-i18n="allowedDomainsDesc" hidden>Detection runs only on these sites and their subdomains. Everywhere else it is paused.</p>
               </div>
             </div>
             <div class="settings-card-body settings-card-body--blacklist">
+              <div class="setting-row">
+                <label class="setting-row-label" for="scanMode" data-i18n="scanModeTitle">Sites to scan</label>
+                <select id="scanMode" class="select-field">
+                  <option value="blocklist" data-i18n="scanModeBlock">Every site except the ones I skip</option>
+                  <option value="allowlist" data-i18n="scanModeAllow">Only the sites I choose</option>
+                </select>
+              </div>
               <button id="addCurrentDomainBtn" class="action-btn action-btn-block">
                 <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="currentColor"/>
@@ -546,6 +556,21 @@
                 <button id="blacklistNextBtn" class="pagination-btn">
                   <svg width="12" height="12" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12Z" fill="currentColor"/></svg>
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sites where JS hooks are off -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title" data-i18n="hooksOffGroupTitle">Sites without JS hooks</div>
+
+          <div class="settings-card">
+            <div class="settings-card-body">
+              <div class="setting-row">
+                <label class="setting-row-label" for="hooksOffDomains" data-i18n="hooksOffLabel">Turn JS hooks off on these sites</label>
+                <textarea id="hooksOffDomains" class="textarea-field textarea-field--mono site-list-box" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="example.com" aria-describedby="hooksOffHint"></textarea>
+                <p class="setting-row-hint" id="hooksOffHint" data-i18n="hooksOffHint">JS hooks watch a page's browser API calls to find fingerprinting. Use this for a site that misbehaves with them: its other detections keep working, but fingerprinting is not checked. One site per line, subdomains included; reload the page to apply.</p>
               </div>
             </div>
           </div>
@@ -779,6 +804,25 @@
                 </button>
               </div>
 
+              <div class="setting-group setting-group--stacked" id="webhookSecretGroup">
+                <div class="setting-label">
+                  <span class="webhook-title-row">
+                    <label for="webhookSecret" data-i18n="webhookSecretLabel">Signing secret</label>
+                  </span>
+                  <!-- The header name is an argument, so no translation can change it -->
+                  <span class="setting-description" id="webhookSecretDesc" data-i18n-fmt="webhookSecretDescFmt" data-i18n-args="X-Scrapfly-Webhook-Signature">Adds an HMAC-SHA256 of the body in the X-Scrapfly-Webhook-Signature header. Leave empty for no signature; GET, HEAD and multipart requests are never signed.</span>
+                </div>
+                <input type="password" id="webhookSecret" class="input-field" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="webhookSecretDesc webhookSecretError webhookSecretNote">
+                <div class="webhook-payload-foot">
+                  <p id="webhookSecretError" class="webhook-field-error" data-i18n="webhookSecretInvalid" hidden>Signing secret: use up to 512 ASCII characters (no accents or emoji)</p>
+                  <span class="webhook-secret-actions">
+                    <button type="button" id="webhookSecretGenerateBtn" class="webhook-link-btn" data-i18n="webhookSecretGenerate">Generate</button>
+                    <button type="button" id="webhookSecretCopyBtn" class="webhook-link-btn" data-i18n="advCommonCopy" disabled>Copy</button>
+                  </span>
+                </div>
+                <p class="webhook-ct-hint" id="webhookSecretNote" data-i18n="settingsShareSecretNote">Stored only in this browser and left out of settings exports.</p>
+              </div>
+
               <div class="setting-group setting-group--stacked" id="webhookPayloadGroup">
                 <div class="setting-label">
                   <span class="webhook-title-row">
@@ -807,6 +851,43 @@
                   </svg>
                   <span data-i18n="settingsTestBtn">Test</span>
                 </button>
+              </div>
+
+              <div class="setting-group setting-group--stacked" id="webhookFilterGroup">
+                <label class="setting-label">
+                  <span data-i18n="webhookFilterTitle">Send only when</span>
+                  <span class="setting-description" data-i18n="webhookFilterDesc">A page is sent only if all of these hold. The payload still lists everything found on it.</span>
+                </label>
+                <div class="setting-row setting-row--inline">
+                  <label class="setting-row-label" for="webhookMinConfidence" data-i18n="webhookMinConfidenceLabel">Minimum confidence (%)</label>
+                  <input type="number" id="webhookMinConfidence" class="input-field input-field--short" min="0" max="100" step="1" value="0">
+                </div>
+                <div class="setting-row webhook-filter-categories" role="group" aria-labelledby="webhookCategoriesLabel">
+                  <span id="webhookCategoriesLabel" class="setting-row-label" data-i18n="webhookCategoriesLabel">Categories</span>
+                  <div class="webhook-category-row">
+                    <label class="webhook-category"><input type="checkbox" data-webhook-category="antibot"><span class="category-icon" aria-hidden="true"></span><span data-i18n="categoryAntibot">Anti-bot</span></label>
+                    <label class="webhook-category"><input type="checkbox" data-webhook-category="captcha"><span class="category-icon" aria-hidden="true"></span><span data-i18n="categoryCaptcha">Captcha</span></label>
+                    <label class="webhook-category"><input type="checkbox" data-webhook-category="fingerprint"><span class="category-icon" aria-hidden="true"></span><span data-i18n="categoryFingerprint">Fingerprint</span></label>
+                  </div>
+                  <p class="setting-row-hint" data-i18n="webhookCategoriesHint">Leave all unchecked to send for any category.</p>
+                </div>
+                <div class="setting-row">
+                  <label class="setting-row-label" for="webhookDomains" data-i18n="webhookDomainsLabel">Only these sites</label>
+                  <textarea id="webhookDomains" class="textarea-field textarea-field--mono site-list-box" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="shop.example.com" aria-describedby="webhookDomainsHint"></textarea>
+                  <p class="setting-row-hint" id="webhookDomainsHint" data-i18n="webhookDomainsHint">One per line, with their subdomains. Empty means every site.</p>
+                </div>
+              </div>
+
+              <div class="setting-group setting-group--stacked" id="webhookLogGroup">
+                <div class="setting-label">
+                  <span data-i18n="webhookLogTitle">Recent deliveries</span>
+                  <span class="setting-description" data-i18n="webhookLogDesc">The last 20 attempts: when, which page, what came back. Addresses and payloads are never kept.</span>
+                </div>
+                <ul id="webhookLogList" class="webhook-log-list" aria-live="polite"></ul>
+                <div class="webhook-payload-foot">
+                  <span></span>
+                  <button type="button" id="webhookLogClearBtn" class="webhook-link-btn" data-i18n="webhookLogClear">Clear</button>
+                </div>
               </div>
           </div>
         </div>
@@ -982,6 +1063,14 @@
                 </div>
               </div>
               <div class="setting-row setting-row--inline">
+                <label class="setting-row-label" for="historyFingerprintDays" data-i18n="settingsHistoryFingerprintDays">Delete fingerprinting-only pages after</label>
+                <div class="setting-row-controls setting-row-controls--days">
+                  <input type="number" id="historyFingerprintDays" class="input-field input-field--center" min="0" max="3650" value="0">
+                  <span class="setting-row-unit" data-i18n="timeUnitDays">Days</span>
+                </div>
+              </div>
+              <p class="setting-row-hint" data-i18n="settingsHistoryFingerprintDaysHint">0 keeps them like every other page, so only Auto-delete applies to them. Pinned pages are never deleted.</p>
+              <div class="setting-row setting-row--inline">
                 <label class="setting-row-label" for="exportFormat" data-i18n="settingsExportFormat">Export Format</label>
                 <select id="exportFormat" class="select-field">
                   <option value="json">JSON</option>
@@ -1065,8 +1154,59 @@
               <p class="setting-row-hint" data-i18n="settingsHistoryMinConfidenceDesc">A page is saved only when its strongest detection reaches this confidence. 0 saves every page.</p>
               <div class="setting-row">
                 <label class="setting-row-label" for="historyExcludedDomains" data-i18n="settingsHistoryExcluded">Sites History ignores</label>
-                <textarea id="historyExcludedDomains" class="textarea-field textarea-field--mono" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="example.com" aria-describedby="historyExcludedHint"></textarea>
+                <textarea id="historyExcludedDomains" class="textarea-field textarea-field--mono site-list-box" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="example.com" aria-describedby="historyExcludedHint"></textarea>
                 <p class="setting-row-hint" id="historyExcludedHint" data-i18n="settingsHistoryExcludedDesc">One site per line; its subdomains are included. Detection still runs on them.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pages that pin themselves: kept when History is cleaned up -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title" data-i18n="settingsGroupHistoryAutoPin">Pin pages automatically</div>
+
+          <div class="settings-card">
+            <div class="settings-card-body">
+              <div class="setting-row setting-row--inline setting-row--toggle">
+                <span class="setting-row-label" data-i18n="settingsHistoryAutoPinHard">Pages with a hard protection</span>
+                <label class="switch switch-sm">
+                  <input type="checkbox" id="historyAutoPinHard">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <p class="setting-row-hint" data-i18n="settingsHistoryAutoPinHardDesc">An anti-bot or CAPTCHA of High difficulty. Fingerprinting never pins a page by its difficulty.</p>
+              <div class="setting-row">
+                <label class="setting-row-label" for="historyAutoPinVendors" data-i18n="settingsHistoryAutoPinVendors">Pages protected by</label>
+                <textarea id="historyAutoPinVendors" class="textarea-field textarea-field--mono site-list-box" rows="3" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Cloudflare" aria-describedby="historyAutoPinVendorsHint"></textarea>
+                <p class="setting-row-hint" id="historyAutoPinVendorsHint" data-i18n="settingsHistoryAutoPinVendorsHint">One protection per line, named as the Detection tab names it.</p>
+              </div>
+              <div class="setting-row setting-row--inline">
+                <label class="setting-row-label" for="historyAutoPinMinConfidence" data-i18n="settingsHistoryAutoPinMinConfidence">Only from a confidence of (%)</label>
+                <input type="number" id="historyAutoPinMinConfidence" class="input-field input-field--short" min="0" max="100" value="80">
+              </div>
+              <p class="setting-row-hint" id="historyAutoPinNote" data-i18n-fmt="settingsHistoryAutoPinNote">Up to {0} pages are pinned this way. Unpin one and it is never pinned again by itself.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- The watchlist: pinned pages marked to watch are scanned again in the background -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title" data-i18n="settingsGroupHistoryWatch">Watch pinned pages</div>
+
+          <div class="settings-card">
+            <div class="settings-card-body">
+              <div class="setting-row setting-row--inline">
+                <label class="setting-row-label" for="historyWatch" data-i18n="settingsHistoryWatchFrequency">Check them</label>
+                <select id="historyWatch" class="select-field">
+                  <option value="off" data-i18n="settingsBackupOff">Off</option>
+                  <option value="daily" data-i18n="settingsBackupDaily">Every day</option>
+                  <option value="weekly" data-i18n="settingsBackupWeekly">Every week</option>
+                </select>
+              </div>
+              <p class="setting-row-hint" data-i18n="settingsHistoryWatchHint">Pages you pin and choose Watch for changes on are opened again in a background tab, one at a time (up to 10), and scanned. A page that gains or loses an anti-bot or CAPTCHA protection is marked Changed, with a notification when alerts are on. Each check is a real visit with your browser's cookies, so a signed-in page is visited as you, and a browser window must be open.</p>
+              <div class="setting-row setting-row--inline">
+                <span class="setting-row-hint history-backup-last" id="historyWatchLast"></span>
+                <button type="button" id="historyWatchNowBtn" class="action-btn action-btn-outline" data-i18n="settingsHistoryWatchNow">Check now</button>
               </div>
             </div>
           </div>
@@ -1138,6 +1278,11 @@
 
           <div class="settings-card" id="historyStorageCard">
             <div class="settings-card-body">
+              <div class="setting-row setting-row--inline">
+                <label class="setting-row-label" for="historyMaxMB" data-i18n="settingsHistorySize">Size limit</label>
+                <select id="historyMaxMB" class="select-field"></select>
+              </div>
+              <p class="setting-row-hint" data-i18n="settingsHistorySizeHint">A larger size keeps more pages and uses more of your disk. Lowering the size removes the oldest pages that are not pinned.</p>
               <div class="setting-row">
                 <span class="setting-row-label" data-i18n="settingsHistoryStorage">Storage used</span>
                 <div class="history-meter" id="historyMeter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="historyMeterText">
@@ -1176,6 +1321,57 @@
             </div>
             <div class="settings-stats-body">
               <button type="button" id="openHistoryStatsBtn" class="action-btn action-btn-block action-btn-outline" data-i18n="settingsOpenStats">Open statistics</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Storage: where the space goes, and what can be cleared -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title settings-card-group-title--rule" data-i18n="settingsStorageTitle">Storage</div>
+          <div class="settings-card settings-card--data">
+            <div class="data-card-head">
+              <span class="data-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C16.42,16 20,14.21 20,12V9C20,11.21 16.42,13 12,13C7.58,13 4,11.21 4,9M4,14V17C4,19.21 7.58,21 12,21C16.42,21 20,19.21 20,17V14C20,16.21 16.42,18 12,18C7.58,18 4,16.21 4,14Z"/></svg>
+              </span>
+              <div class="data-card-head-text">
+                <div class="data-card-title" id="storageTotalText">&nbsp;</div>
+                <p class="data-card-desc" data-i18n="settingsStorageDesc">What the extension keeps in this browser. Settings and rules cannot be cleared from here.</p>
+              </div>
+            </div>
+            <div class="data-card-body">
+              <div class="history-meter" id="storageMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="storageTotalText"><span class="history-meter-fill" id="storageMeterFill"></span></div>
+              <ul class="storage-rows" id="storageRows"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backup and restore: settings, your own rules and History in one file -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title settings-card-group-title--rule" data-i18n="settingsBackupTitle">Backup and restore</div>
+          <div class="settings-card settings-card--data">
+            <div class="data-card-head">
+              <span class="data-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,3C7.58,3 4,4.79 4,7C4,9.21 7.58,11 12,11C16.42,11 20,9.21 20,7C20,4.79 16.42,3 12,3M4,9V12C4,14.21 7.58,16 12,16C12.78,16 13.53,15.93 14.23,15.8C13.92,15.14 13.75,14.4 13.75,13.63C13.75,13.1 13.84,12.58 14,12.09C13.38,12.17 12.71,12.22 12,12.22C7.58,12.22 4,10.43 4,8.22M20,9V12.5C19.3,12.19 18.52,12 17.75,12C17.41,12 17.08,12.04 16.76,12.11C17.29,11.31 18,10.3 18,9.5M4,14V17C4,19.21 7.58,21 12,21C12.79,21 13.55,20.94 14.27,20.83C13.96,20.2 13.78,19.5 13.78,18.75C13.78,18.5 13.8,18.25 13.84,18C13.25,18.07 12.64,18.1 12,18.1C7.58,18.1 4,16.31 4,14.1M18,14L22,18L18,22V19H15V17H18V14Z"/></svg>
+              </span>
+              <div class="data-card-head-text">
+                <div class="data-card-title" data-i18n="settingsBackupItemTitle">Everything</div>
+                <p class="data-card-desc" data-i18n="settingsBackupItemDesc">Settings, your own rules and History in one file. Webhook and sharing details are not included.</p>
+              </div>
+            </div>
+            <div class="data-card-body">
+              <div class="data-item">
+                <div class="data-item-actions">
+                  <button id="backUpEverythingBtn" type="button" class="data-btn data-export-btn">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,12L16,16H13.5V19H10.5V16H8L12,12Z" fill="currentColor"/></svg>
+                    <span data-i18n="backupMakeBtn">Back up</span>
+                  </button>
+                  <button id="restoreBackupBtn" type="button" class="data-btn data-import-btn">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,19L8,15H10.5V12H13.5V15H16L12,19Z" fill="currentColor"/></svg>
+                    <span data-i18n="backupRestoreBtn">Restore</span>
+                  </button>
+                  <input type="file" id="restoreBackupFile" accept=".json,application/json" hidden>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1242,6 +1438,92 @@
                     <span data-i18n="btnImport">Import</span>
                   </button>
                   <input type="file" id="settingsImportHistoryFile" accept=".json,application/json" hidden>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets and reset: a few settings changed together, and the way back to the defaults -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title settings-card-group-title--rule" data-i18n="settingsPresetsTitle">Presets and reset</div>
+          <div class="settings-card settings-card--data">
+            <div class="data-card-head">
+              <span class="data-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8,13C6.14,13 4.59,14.28 4.14,16H2V18H4.14C4.59,19.72 6.14,21 8,21C9.86,21 11.41,19.72 11.86,18H22V16H11.86C11.41,14.28 9.86,13 8,13M8,19A2,2 0 0,1 6,17A2,2 0 0,1 8,15A2,2 0 0,1 10,17A2,2 0 0,1 8,19M19.86,6C19.41,4.28 17.86,3 16,3C14.14,3 12.59,4.28 12.14,6H2V8H12.14C12.59,9.72 14.14,11 16,11C17.86,11 19.41,9.72 19.86,8H22V6H19.86M16,9A2,2 0 0,1 14,7A2,2 0 0,1 16,5A2,2 0 0,1 18,7A2,2 0 0,1 16,9Z"/></svg>
+              </span>
+              <div class="data-card-head-text">
+                <div class="data-card-title" data-i18n="settingsDataSettingsRow">Settings</div>
+                <p class="data-card-desc" data-i18n="settingsPresetsDesc">Change several settings at once. Rules, History, site lists, language and theme are never changed.</p>
+              </div>
+            </div>
+            <div class="data-card-body">
+              <div class="data-item">
+                <div class="data-item-head">
+                  <span class="data-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M12,11.99H19C18.47,16.11 15.72,19.78 12,20.93V12H5V6.3L12,3.19V11.99Z"/></svg>
+                  </span>
+                  <div class="data-item-text">
+                    <div class="data-item-title" data-i18n="presetPrivacyName">Privacy</div>
+                    <p class="data-item-desc data-item-desc--wrap" data-i18n="presetPrivacyDesc">Keeps less on this device and sends nothing out.</p>
+                  </div>
+                </div>
+                <div class="data-item-actions data-item-actions--single">
+                  <button type="button" class="data-btn data-export-btn" data-preset="privacy"><span data-i18n="presetApply">Apply</span></button>
+                </div>
+              </div>
+              <div class="data-item">
+                <div class="data-item-head">
+                  <span class="data-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.7,16.3L4.4,12L8.7,7.7L7.3,6.3L1.6,12L7.3,17.7L8.7,16.3M15.3,16.3L16.7,17.7L22.4,12L16.7,6.3L15.3,7.7L19.6,12L15.3,16.3Z"/></svg>
+                  </span>
+                  <div class="data-item-text">
+                    <div class="data-item-title" data-i18n="presetDeveloperName">Developer</div>
+                    <p class="data-item-desc data-item-desc--wrap" data-i18n="presetDeveloperDesc">Debug logs and the JS API, for working on rules.</p>
+                  </div>
+                </div>
+                <div class="data-item-actions data-item-actions--single">
+                  <button type="button" class="data-btn data-export-btn" data-preset="developer"><span data-i18n="presetApply">Apply</span></button>
+                </div>
+              </div>
+              <div class="data-item">
+                <div class="data-item-head">
+                  <span class="data-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,5V1L7,6L12,11V7A6,6 0 0,1 18,13A6,6 0 0,1 12,19A6,6 0 0,1 6,13H4A8,8 0 0,0 12,21A8,8 0 0,0 20,13A8,8 0 0,0 12,5Z"/></svg>
+                  </span>
+                  <div class="data-item-text">
+                    <div class="data-item-title" data-i18n="settingsResetTitle">Reset settings</div>
+                    <p class="data-item-desc data-item-desc--wrap" data-i18n="settingsResetDesc">Every setting returns to its default. Rules, History, site lists, language and theme are kept.</p>
+                  </div>
+                </div>
+                <div class="data-item-actions data-item-actions--single">
+                  <button type="button" id="resetSettingsBtn" class="data-btn data-reset-btn"><span data-i18n="settingsResetBtn">Reset…</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support: a summary people can paste into a bug report -->
+        <div class="settings-card-group">
+          <div class="settings-card-group-title settings-card-group-title--rule" data-i18n="settingsSupportTitle">Support</div>
+          <div class="settings-card settings-card--data">
+            <div class="data-card-head">
+              <span class="data-card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19,3H14.82C14.4,1.84 13.3,1 12,1C10.7,1 9.6,1.84 9.18,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M12,3A1,1 0 0,1 13,4A1,1 0 0,1 12,5A1,1 0 0,1 11,4A1,1 0 0,1 12,3M7,7H17V5H19V19H5V5H7V7M7.5,13.5L9,12L11,14L15.5,9.5L17,11L11,17L7.5,13.5Z"/></svg>
+              </span>
+              <div class="data-card-head-text">
+                <div class="data-card-title" data-i18n="settingsDiagnosticsTitle">Diagnostics</div>
+                <p class="data-card-desc" data-i18n="settingsDiagnosticsDesc">Copy a summary for a bug report: versions, settings and counts. It has no sites, addresses or keys.</p>
+              </div>
+            </div>
+            <div class="data-card-body">
+              <div class="data-item">
+                <div class="data-item-actions data-item-actions--single">
+                  <button id="copyDiagnosticsBtn" class="data-btn data-export-btn" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" fill="currentColor"/></svg>
+                    <span data-i18n="settingsCopyDiagnostics">Copy diagnostics</span>
+                  </button>
                 </div>
               </div>
             </div>

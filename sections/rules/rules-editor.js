@@ -86,13 +86,7 @@ Rules.prototype.populateDetectionMethods = function(detector) {
     if (!container) return;
 
     if (!detector.detection) {
-      detector.detection = {
-        urls: [],
-        headers: [],
-        cookies: [],
-        content: [],
-        dom: []
-      };
+      detector.detection = {};
     }
 
     let methodsHtml = '';
@@ -160,7 +154,7 @@ Rules.prototype.populateDetectionMethods = function(detector) {
               value = method.condition || 'exists';
             }
 
-            const confidence = method.confidence || 100;
+            const confidence = method.confidence || (methodType === 'dom' ? Constants.DEFAULT_DOM_CONFIDENCE : Constants.DEFAULT_MATCH_CONFIDENCE);
             // Stable id combinations refer to, and whether the pattern may fire alone
             const patternId = ((typeof DetectionCombinations !== 'undefined') && DetectionCombinations.idOf(detector, method))
               || `${methodType}-${index + 1}`;
@@ -1369,7 +1363,7 @@ Rules.prototype.saveRule = async function() {
     }
     if (!saved) return false;
 
-    chrome.runtime.sendMessage({ type: 'RELOAD_DETECTORS' }, () => { void chrome.runtime.lastError; });
+    chrome.runtime.sendMessage({ type: WorkerMessages.RELOAD_DETECTORS }, () => { void chrome.runtime.lastError; });
     if (this.categoryManager && this.colorManager) {
       const color = this.colorManager.getColor();
       this.updateDetectorBadgeColor(edit.detectorName, color);

@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -13,6 +14,7 @@ function harness() {
   const timers = [];
   const current = { url: 'https://example.test/', documentId: 'doc-first' };
   const context = {
+    WorkerMessages: require('../modules/core/worker-messages.js'),
     URL, Promise, Map, Set, Date, AbortController, PatternCache: class {},
     Constants: { REQUEST_DETECTION_PENDING_TIMEOUT: 10000, DETECTION_SKIP_THRESHOLD: 1500 },
     Logger: new Proxy({}, { get: () => () => {} }),
@@ -20,7 +22,7 @@ function harness() {
     workerKeepaliveManager: null,
     setTimeout: callback => timers.push(callback), clearTimeout: () => {},
     startBadgeSpinner: tabId => effects.push({ type: 'spinner', tabId }),
-    Utils: { isValidContentScriptTab: () => true, shouldSkipDetection: () => false },
+    Utils: { isValidContentScriptTab: () => true, shouldSkipDetection: () => false, isUrlBlacklisted: async () => false },
     chrome: {
       storage: { local: { get: async () => ({ scrapfly_enabled: true }) } },
       runtime: {}, webNavigation: { getFrame: async () => ({ ...current }) },
@@ -55,6 +57,20 @@ function harness() {
   };
   return { ctx: context, current, messages, effects, timers, request, reply, begin };
 }
+
+test('a skipped site, or one not chosen in "only these sites" mode, is never scanned on request', async () => {
+  const h = harness();
+  const asked = [];
+  h.ctx.Utils.isUrlBlacklisted = async (url) => { asked.push(url); return true; };
+  const request = h.request();
+  await request.done;
+  assert.deepEqual(asked, ['https://example.test/']);
+  assert.deepEqual({ ...request.responses[0] }, { status: 'skipped', reason: 'excluded' });
+  // No content-script ping, no RUN_DETECTION, no pending marker and no badge change
+  assert.equal(h.messages.length, 0);
+  assert.equal(h.effects.length, 0);
+  assert.equal(h.ctx.activeDetections.size, 0);
+});
 
 test('manual requests preserve an already-running page scan', async () => {
   const h = harness();

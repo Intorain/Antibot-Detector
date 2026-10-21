@@ -4,6 +4,8 @@ class History {
     this.detectorManager = detectorManager;
     this.historyItems = [];
     this.searchQuery = '';
+    // The filter chips under the search (HistoryFilter): kept while the popup is open
+    this.activeChips = { pinned: false, changed: false, categories: [] };
     this.initialized = false;
     this.listenersAttached = false;
     this.paginationManager = null;
@@ -108,18 +110,71 @@ class History {
     const historyEmpty = document.querySelector('#historyEmpty');
     if (historyEmpty) historyEmpty.style.display = 'none';
 
-    const itemsToShow = this.searchQuery
-      ? this.getFilteredItems()
-      : this.historyItems;
+    const itemsToShow = this.getFilteredItems();
+    this.syncFilterChips();
 
     if (this.paginationManager) {
       this.paginationManager.setItems(itemsToShow);
     }
 
+    // The search and the chips match nothing: say so, with a way back, instead of an empty list
+    const noResults = itemsToShow.length === 0;
+    const noResultsBlock = document.querySelector('#historyNoResults');
+    if (noResultsBlock) noResultsBlock.hidden = !noResults;
+    const historyList = document.querySelector('#historyList');
+    if (historyList) historyList.style.display = noResults ? 'none' : 'block';
+
     const historyPagination = document.querySelector('#historyPagination');
     if (historyPagination && itemsToShow.length > 0) {
       historyPagination.style.display = 'flex';
     }
+  }
+
+  /**
+   * The chip row follows the entries: hidden while History is empty, each chip shows whether it is on,
+   * and a category chip carries its category icon in the colour chosen in Settings.
+   */
+  syncFilterChips() {
+    const row = document.querySelector('#historyFilters');
+    if (!row) return;
+    row.hidden = this.historyItems.length === 0;
+    row.querySelectorAll('.history-filter-chip').forEach((chip) => {
+      const key = chip.dataset.filter;
+      const on = key === 'pinned' || key === 'changed' ? this.activeChips[key] === true : this.activeChips.categories.includes(key);
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const own = chip.querySelector('[data-ui-icon]');
+      if (own && !own.firstChild) own.innerHTML = FormatUtils.uiIconSvg(own.dataset.uiIcon);
+      if (!chip.dataset.category) return;
+      const holder = chip.querySelector('.category-icon');
+      if (holder && !holder.firstChild) holder.innerHTML = FormatUtils.categoryIconSvg(key);
+      const colour = this.detectorManager?.getCategoryInfo?.(key)?.colour || FormatUtils.DEFAULT_CATEGORY_COLORS[key];
+      if (colour) chip.style.setProperty('--chip-color', colour);
+    });
+  }
+
+  /**
+   * Turn a chip on or off (Pinned, Changed or a category) and show what it leaves.
+   * @param {string} key - 'pinned', 'changed', 'antibot' or 'captcha'
+   */
+  toggleFilterChip(key) {
+    const chips = this.activeChips;
+    if (key === 'pinned' || key === 'changed') {
+      chips[key] = !chips[key];
+    } else if (HistoryFilter.CATEGORIES.includes(key)) {
+      chips.categories = chips.categories.includes(key) ? chips.categories.filter(k => k !== key) : [...chips.categories, key];
+    } else {
+      return;
+    }
+    this.renderHistory();
+  }
+
+  /** Back to the whole History: every chip off and the search emptied. */
+  clearFilters() {
+    this.activeChips = { pinned: false, changed: false, categories: [] };
+    this.searchQuery = '';
+    const searchInput = document.querySelector('#historySearch');
+    if (searchInput) searchInput.value = '';
+    this.renderHistory();
   }
 
   /**
@@ -144,7 +199,10 @@ class History {
     const unknownLabel = _tr('timeUnknown', 'Unknown');
 
     const pinnedTip = _tr('historyPinnedTip', 'Pinned: kept when History is cleaned up');
-    const PIN_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5" fill="none"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>';
+    const autoPinnedTip = _tr('historyAutoPinnedTip', 'Pinned automatically: kept when History is cleaned up. Unpin it and it is never pinned again by itself.');
+    const PIN_ICON = FormatUtils.uiIconSvg('pin');
+    const WATCH_ICON = FormatUtils.uiIconSvg('watch');
+    const watchTip = _tr('historyWatchTip', 'Watching for changes');
     // "Changed": the page's protections differ from its earlier scan; the hover lists what was added and removed
     const changedBadgeHtml = (item) => {
       const change = item.changed;
@@ -185,7 +243,8 @@ class History {
             </span>
             <div class="history-item-content">
               <div class="history-title-row">
-                ${item.pinned === true ? `<span class="history-pin" ${FormatUtils.tipAttrs(pinnedTip)}>${PIN_ICON}</span>` : ''}
+                ${item.pinned === true ? `<span class="history-pin" ${FormatUtils.tipAttrs(item.autoPinned === true ? autoPinnedTip : pinnedTip)}>${PIN_ICON}</span>` : ''}
+                ${item.watch === true ? `<span class="history-watch" ${FormatUtils.tipAttrs(watchTip, item.watchedAt ? _tr('historyWatchCheckedFmt', 'Last checked {0}').replace('{0}', FormatUtils.getTimeAgo(item.watchedAt)) : _tr('historyWatchNever', 'Not checked yet'))}>${WATCH_ICON}</span>` : ''}
                 <div class="history-title" title="${safeTitle}">${safeTitle}</div>
                 ${changedBadgeHtml(item)}
               </div>
@@ -299,7 +358,7 @@ class History {
       const noDetections = FormatUtils.t('historyNoDetections', 'No detections');
       return `<span class="history-detection-tag">${FormatUtils.escapeHtml(noDetections)}</span>`;
     }
-    const keys = ['antibot', 'captcha', 'fingerprint'];
+    const keys = Categories.KEYS;
     const order = (this.detectionSort?.categoryOrder || keys).filter(key => keys.includes(key));
     keys.forEach(key => { if (!order.includes(key)) order.push(key); });
     const sorted = DetectionUtils.sortDetections(detections, this.detectionSort);
@@ -318,118 +377,6 @@ class History {
     });
     // A click goes to the card, which opens the details with each protection
     return `<span class="history-summary">${parts.join('')}</span>`;
-  }
-
-  renderHistoryDetections(detections, itemId, maxTags = 4) {
-    if (!detections || detections.length === 0) {
-      const noDetections = FormatUtils.t('historyNoDetections', 'No detections');
-      return `<span class="history-detection-tag">${FormatUtils.escapeHtml(noDetections)}</span>`;
-    }
-    const unknownName = FormatUtils.t('timeUnknown', 'Unknown');
-
-    let tagsHtml = '';
-
-    // Same order as the detail dialog and the Detection tab (Settings → Show first)
-    const sortedDetections = DetectionUtils.sortDetections(detections, this.detectionSort);
-
-    // Helper function to get category color
-    const getCategoryColor = (category) => {
-      const cat = category?.toLowerCase() || '';
-      if (cat.includes('antibot') || cat.includes('anti-bot')) return '#FF5733';
-      if (cat.includes('captcha')) return '#33C3FF';
-      if (cat.includes('fingerprint')) return '#3b82f6';
-      return '#666666';
-    };
-
-    sortedDetections.slice(0, maxTags).forEach(detection => {
-      const rawName = FormatUtils.detectorName(detection);
-      const name = rawName || unknownName;
-      const category = detection.category || '';
-      const categoryColor = getCategoryColor(category);
-      const categoryKey = FormatUtils.categoryKey(detection);
-      const confidenceValue = Math.round(Number(detection.confidence) || 0);
-      // Same hover card as elsewhere: name with its category dot, category and confidence
-      const tooltipAttrs = FormatUtils.tipAttrs(name,
-        `${FormatUtils.categoryLabel(categoryKey)} · ${FormatUtils.t('clipboardConfidenceFmt', 'Confidence: {0}%', confidenceValue)}`,
-        [], `cat-${categoryKey}`);
-      const safeName = FormatUtils.escapeHtml(name);
-
-      // Get detector object to retrieve icon
-      let detectorObj = null;
-      let iconHtml = '';
-
-      if (this.detectorManager && category && rawName) {
-        detectorObj = this.detectorManager.getDetectorByName(category, name);
-
-        if (!detectorObj) {
-          // Try with normalized category names
-          const categoryMappings = {
-            'Anti-Bot': 'antibot',
-            'antibot': 'antibot',
-            'CAPTCHA': 'captcha',
-            'captcha': 'captcha',
-            'Fingerprint': 'fingerprint',
-            'fingerprint': 'fingerprint'
-          };
-          const normalizedCategory = categoryMappings[category] || category.toLowerCase().replace(/[^a-z]/g, '');
-          detectorObj = this.detectorManager.getDetectorByName(normalizedCategory, name);
-        }
-      }
-
-      const normalizedCategoryName = String(category || detectorObj?.category || '')
-        .toLowerCase()
-        .replace(/[^a-z]/g, '');
-      const isFingerprintCategory = normalizedCategoryName === 'fingerprint' || normalizedCategoryName.includes('fingerprint');
-
-      // Generate icon HTML
-      let isFingerprint = false;
-      if (detectorObj && detectorObj.icon) {
-        const iconName = detectorObj.icon.toLowerCase();
-        // Check if it's a fingerprint SVG icon
-        if (FormatUtils.FINGERPRINT_ICONS[iconName]) {
-          iconHtml = `<div class="detection-icon-svg fingerprint-icon fingerprint-icon-shell">${FormatUtils.FINGERPRINT_ICONS[iconName]}</div>`;
-          isFingerprint = true;
-        } else {
-          const iconUrl = chrome.runtime.getURL(`detectors/icons/${detectorObj.icon}`);
-          if (isFingerprintCategory) {
-            iconHtml = `<div class="detection-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${iconUrl}" alt="${safeName}" class="fingerprint-icon-image fingerprint-icon-image--builtin history-fingerprint-image"></div>`;
-            isFingerprint = true;
-          } else {
-            // Brand logos: the dark copy in the dark theme, the original in the light one
-            iconHtml = FormatUtils.brandLogoHtml(detectorObj.icon, name, 'detection-icon');
-          }
-        }
-      } else {
-        // Fallback: Use Scrapfly icon for all detectors without official icons
-        const scrapflyIconUrl = chrome.runtime.getURL('icons/icon128.png');
-        if (isFingerprintCategory) {
-          iconHtml = `<div class="detection-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${scrapflyIconUrl}" alt="${safeName}" class="fingerprint-icon-image fingerprint-icon-image--default history-fingerprint-image"></div>`;
-          isFingerprint = true;
-        } else {
-          // No vendor logo: the Scrapfly mark sits bare on the chip (no white plate)
-          iconHtml = `<img src="${chrome.runtime.getURL('icons/icon128.png')}" alt="${safeName}" class="detection-icon detection-icon--default">`;
-        }
-      }
-
-      const badgeClass = isFingerprint ? 'history-detection-tag icon-badge fingerprint-badge' : 'history-detection-tag icon-badge';
-      tagsHtml += `<span class="${badgeClass}" ${tooltipAttrs} style="border-color: ${categoryColor};">${iconHtml}</span>`;
-    });
-
-    if (sortedDetections.length > maxTags) {
-      const hiddenDetections = sortedDetections.slice(maxTags);
-      // The hidden ones, each with its category dot and confidence
-      const rows = hiddenDetections.slice(0, 8).map(d => {
-        const key = FormatUtils.categoryKey(d);
-        const value = Math.round(Number(d.confidence) || 0);
-        return { label: FormatUtils.detectorName(d) || unknownName, dot: `cat-${key}`, value: `${value}%`, tone: FormatUtils.confidenceTone(value) };
-      });
-      if (hiddenDetections.length > 8) rows.push({ label: FormatUtils.t('tipMoreFmt', '+{0} more', hiddenDetections.length - 8) });
-      const tooltipAttr = ` ${FormatUtils.tipAttrs(FormatUtils.t('tipMoreFmt', '+{0} more', hiddenDetections.length), '', rows)}`;
-
-      tagsHtml += `<span class="history-detection-tag more-detections" data-history-item-id="${itemId}"${tooltipAttr}>+${hiddenDetections.length}</span>`;
-    }
-
-    return tagsHtml;
   }
 
   /**
@@ -486,14 +433,8 @@ class History {
     const difficultyTone = { High: 'red', Medium: 'amber', Low: 'green' }[stats.difficulty] || 'green';
 
     // Per-category counts for the modal breakdown (Anti-bot, Captcha, Fingerprint, other)
-    const categoryCounts = { antibot: 0, captcha: 0, fingerprint: 0, other: 0 };
-    detections.forEach(d => {
-      const cat = String(d.category || '').toLowerCase().replace(/[^a-z]/g, '');
-      if (cat.includes('antibot')) categoryCounts.antibot++;
-      else if (cat.includes('captcha')) categoryCounts.captcha++;
-      else if (cat.includes('fingerprint')) categoryCounts.fingerprint++;
-      else categoryCounts.other++;
-    });
+    const categoryCounts = Object.fromEntries(Categories.KEYS_AND_OTHER.map(key => [key, 0]));
+    detections.forEach(d => { categoryCounts[Categories.keyOf(d)]++; });
 
     return {
       ...stats,
@@ -639,10 +580,14 @@ class History {
     const historyList = document.querySelector('#historyList');
     const historyEmpty = document.querySelector('#historyEmpty');
     const historyPagination = document.querySelector('#historyPagination');
+    const historyFilters = document.querySelector('#historyFilters');
+    const historyNoResults = document.querySelector('#historyNoResults');
 
     if (historyList) historyList.style.display = 'none';
     if (historyEmpty) historyEmpty.style.display = 'flex';
     if (historyPagination) historyPagination.style.display = 'none';
+    if (historyFilters) historyFilters.hidden = true;
+    if (historyNoResults) historyNoResults.hidden = true;
   }
 
   /**
@@ -674,22 +619,16 @@ class History {
   }
 
   /**
-   * Get filtered history items based on search query
+   * The entries the search and the filter chips leave (HistoryFilter): the search looks in the
+   * address, the title, the note and the protections' names
    * @returns {Array} Filtered history items
    */
   getFilteredItems() {
-    if (!this.searchQuery) return this.historyItems;
-
-    return this.historyItems.filter(item => {
-      const url = (item.url || '').toLowerCase();
-      const title = (item.title || '').toLowerCase();
-      const detectionNames = (item.detections || [])
-        .map(d => FormatUtils.detectorName(d).toLowerCase())
-        .join(' ');
-
-      return url.includes(this.searchQuery) ||
-             title.includes(this.searchQuery) ||
-             detectionNames.includes(this.searchQuery);
+    return HistoryFilter.filter(this.historyItems, {
+      query: this.searchQuery,
+      chips: this.activeChips,
+      nameOf: detection => FormatUtils.detectorName(detection),
+      categoryOf: detection => FormatUtils.categoryKey(detection)
     });
   }
 
@@ -702,11 +641,9 @@ class History {
   withDetectorIcons(detections) {
     const dm = this.detectorManager;
     if (!dm) return detections;
-    const categories = { 'anti-bot': 'antibot', antibot: 'antibot', captcha: 'captcha', fingerprint: 'fingerprint' };
     return detections.map(detection => {
       const name = detection?.detector?.name || detection?.name;
-      const rawCategory = String(detection?.category || detection?.detector?.category || '');
-      const category = categories[rawCategory.toLowerCase()] || rawCategory.toLowerCase().replace(/[^a-z]/g, '');
+      const category = Categories.normalize(detection);
       const found = (detection?.detector?.id && dm.findDetectorById?.(detection.detector.id))
         || (name && category && dm.getDetectorByName?.(category, name));
       if (!found) return detection;
@@ -931,7 +868,7 @@ class History {
       const cacheScope = ['domain', 'path', 'full'].includes(mappedScope) ? mappedScope : 'domain';
 
       const request = {
-        type: 'HISTORY_CLEAR_CACHE',
+        type: WorkerMessages.HISTORY_CLEAR_CACHE,
         url: historyItem.url,
         cacheScope
       };
@@ -978,6 +915,13 @@ class History {
       const domain = this.getDomainFromUrl(historyItem.url);
       if (!domain || domain === 'Unknown') {
         NotificationHelper.error(_tr('invalidDomain', 'Invalid domain'));
+        return;
+      }
+
+      // In the mode where the list holds the only sites to scan, the entry's site joins that list (nothing is lost, so no question)
+      if ((this.scanMode || 'blocklist') === 'allowlist') {
+        if (!await StorageManager.setDomainAllowed(domain, true)) throw new Error('Failed to save settings');
+        NotificationHelper.success(_fmt('siteAllowedFmt', `Added "${domain}" to the sites to scan`, domain));
         return;
       }
 
@@ -1068,18 +1012,6 @@ class History {
       return `<div class="history-modal-empty">${_tr('historyNoDetectionsFound', 'No detections found')}</div>`;
     }
 
-    const categoryKeyByValue = {
-      'anti-bot': 'categoryAntibot', 'antibot': 'categoryAntibot',
-      'captcha': 'categoryCaptcha',
-      'fingerprint': 'categoryFingerprint', 'fingerprinting': 'categoryFingerprint'
-    };
-    const categoryClass = (category) => {
-      const cat = String(category || '').toLowerCase().replace(/[^a-z]/g, '');
-      if (cat.includes('antibot')) return 'antibot';
-      if (cat.includes('captcha')) return 'captcha';
-      if (cat.includes('fingerprint')) return 'fingerprint';
-      return 'other';
-    };
     // Settings → Detection → Show first (category order or highest confidence),
     // as in the Detection tab. The original index is kept so
     // data-detection-index still points into the stored array.
@@ -1091,10 +1023,10 @@ class History {
       const name = rawName || _tr('unknownDetection', 'Unknown Detection');
       const safeName = FormatUtils.escapeHtml(name);
       const category = detection.category || '';
-      const categoryKey = categoryKeyByValue[String(category).toLowerCase()] || null;
+      const categoryKey = Categories.labelOf(category)?.[0] || null;
       const translatedCategory = categoryKey ? _tr(categoryKey, category) : category;
       const safeCategory = FormatUtils.escapeHtml(translatedCategory);
-      const catClass = categoryClass(category);
+      const catClass = Categories.keyOf(category);
       const confidence = Math.round(Number(detection.confidence) || 0);
       const hasMethods = detection.matches && detection.matches.length > 0;
 
@@ -1107,23 +1039,23 @@ class History {
       }
       const isFingerprintCategory = catClass === 'fingerprint';
 
-      // Detector icon: vendor logo on a white plate, fingerprint glyphs tinted blue
-      let detectorIconHtml = '';
-      if (detectorObj && detectorObj.icon) {
-        const iconName = detectorObj.icon.toLowerCase();
-        if (FormatUtils.FINGERPRINT_ICONS[iconName]) {
-          detectorIconHtml = `<div class="modal-detector-icon-svg fingerprint-icon fingerprint-icon-shell">${FormatUtils.FINGERPRINT_ICONS[iconName]}</div>`;
-        } else {
-          const iconUrl = chrome.runtime.getURL(`detectors/icons/${detectorObj.icon}`);
-          detectorIconHtml = isFingerprintCategory
-            ? `<div class="modal-detector-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${iconUrl}" alt="${safeName}" class="fingerprint-icon-image fingerprint-icon-image--builtin history-modal-fingerprint-image"></div>`
-            : FormatUtils.brandLogoHtml(detectorObj.icon, rawName || name, 'modal-detector-icon');
-        }
+      // Detector icon, the same choice as the Detection tab (FormatUtils.detectorIcon): vendor logo on a white plate,
+      // fingerprint glyphs tinted blue, an uploaded image, an emoji, or the Scrapfly logo
+      const icon = FormatUtils.detectorIcon(detectorObj);
+      let detectorIconHtml;
+      if (icon.kind === 'glyph') {
+        detectorIconHtml = `<div class="modal-detector-icon-svg fingerprint-icon fingerprint-icon-shell">${FormatUtils.FINGERPRINT_ICONS[icon.value]}</div>`;
+      } else if (icon.kind === 'emoji') {
+        detectorIconHtml = FormatUtils.escapeHtml(icon.value);
+      } else if (icon.kind === 'file' && !isFingerprintCategory) {
+        detectorIconHtml = FormatUtils.brandLogoHtml(icon.value, rawName || name, 'modal-detector-icon');
       } else {
-        const scrapflyIconUrl = chrome.runtime.getURL('icons/icon128.png');
+        const [src, source] = icon.kind === 'custom' ? [icon.value, 'custom']
+          : icon.kind === 'file' ? [chrome.runtime.getURL(`detectors/icons/${icon.value}`), 'builtin']
+            : [chrome.runtime.getURL('icons/icon128.png'), 'default'];
         detectorIconHtml = isFingerprintCategory
-          ? `<div class="modal-detector-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${scrapflyIconUrl}" alt="${safeName}" class="fingerprint-icon-image fingerprint-icon-image--default history-modal-fingerprint-image"></div>`
-          : `<img src="${scrapflyIconUrl}" alt="${safeName}" class="modal-detector-icon modal-detector-icon--default">`;
+          ? `<div class="modal-detector-icon-svg fingerprint-icon fingerprint-icon-shell"><img src="${FormatUtils.escapeAttr(src)}" alt="${safeName}" class="fingerprint-icon-image fingerprint-icon-image--${source} history-modal-fingerprint-image"></div>`
+          : `<img src="${FormatUtils.escapeAttr(src)}" alt="${safeName}" class="modal-detector-icon${source === 'default' ? ' modal-detector-icon--default' : ''}">`;
       }
 
       const methodsHtml = this.renderDetectionMethods(detection.matches || []);
@@ -1490,6 +1422,7 @@ class History {
       if (el) el.textContent = FormatUtils.t(key, fallback);
     };
     label('pin', item.pinned === true ? 'historyUnpin' : 'historyPin', item.pinned === true ? 'Unpin' : 'Pin');
+    label('watch', item.watch === true ? 'historyUnwatch' : 'historyWatch', item.watch === true ? 'Stop watching' : 'Watch for changes');
     label('note', item.note ? 'historyEditNote' : 'historyAddNote', item.note ? 'Edit note' : 'Add note');
   }
 
@@ -1499,10 +1432,37 @@ class History {
    * @param {{pinned?: boolean, note?: string}} patch
    */
   async annotateItem(item, patch) {
-    await this.sendHistoryChange({ type: HistoryStore.Messages.UPDATE_ITEM, id: item.id, patch });
+    const response = await this.sendHistoryChange({ type: HistoryStore.Messages.UPDATE_ITEM, id: item.id, patch });
     // Show it now; a pinned entry's age and the limit no longer apply to it, so the list is read again
     await this.loadHistoryFromStorage();
     this.renderHistory();
+    return response;
+  }
+
+  /**
+   * Watch an entry for changes (the watchlist re-scans it in the background; watching pins it) or stop watching it.
+   * @param {object} item - History entry
+   */
+  async toggleWatch(item) {
+    const watch = item.watch !== true;
+    try {
+      const response = await this.annotateItem(item, { watch });
+      if (watch && response.updated === 0 && response.limit) {
+        NotificationHelper.error(FormatUtils.t('historyWatchLimitFmt', 'You can watch up to {0} pages. Stop watching one first.', response.limit));
+        return;
+      }
+      if (!watch) {
+        NotificationHelper.success(FormatUtils.t('historyWatchStoppedNotice', 'No longer watching this page'));
+        return;
+      }
+      const settings = await Utils.getHistorySettings();
+      NotificationHelper.success(HistoryPolicy.watchModeOf(settings) === 'off'
+        ? FormatUtils.t('historyWatchStartedOffNotice', 'Watching this page. Turn on Watch pinned pages in Settings → History for it to be checked.')
+        : FormatUtils.t('historyWatchStartedNotice', 'Watching this page'));
+    } catch (error) {
+      Logger.warn('UI', '[History] Watch failed', error);
+      NotificationHelper.error(error.message);
+    }
   }
 
   /**
@@ -1612,11 +1572,12 @@ class History {
     domain.setAttribute('dir', 'ltr');
     domain.autocomplete = 'off';
     const pinned = check('historyExportPinnedOnly', 'Pinned pages only', false);
+    const changed = check('historyExportChangedOnly', 'Changed pages only', false);
     const count = document.createElement('div');
     count.className = 'history-dialog-count';
     count.setAttribute('role', 'status');
 
-    const filters = () => ({ category: category.value, days: parseInt(period.value, 10), domain: domain.value, pinnedOnly: pinned.box.checked });
+    const filters = () => ({ category: category.value, days: parseInt(period.value, 10), domain: domain.value, pinnedOnly: pinned.box.checked, changedOnly: changed.box.checked });
     const matching = () => HistoryExport.filter(this.historyItems, filters());
     const refresh = () => {
       const n = matching().length;
@@ -1625,7 +1586,7 @@ class History {
         : FormatUtils.t('historyExportNone', 'No entries match these filters');
       count.classList.toggle('is-empty', n === 0);
     };
-    [category, period, domain, pinned.box].forEach(el => el.addEventListener(el === domain ? 'input' : 'change', refresh));
+    [category, period, domain, pinned.box, changed.box].forEach(el => el.addEventListener(el === domain ? 'input' : 'change', refresh));
     refresh();
 
     const form = document.createElement('div');
@@ -1636,6 +1597,7 @@ class History {
       field('historyExportPeriod', 'Period', period),
       field('historyExportDomain', 'Site contains', domain),
       pinned.row,
+      changed.row,
       count
     );
 
@@ -1758,9 +1720,11 @@ class History {
     try {
       const settings = await Utils.getSettings();
       this.detectionSort = DetectionUtils.detectionSortOf(settings.detection);
+      this.scanMode = ScanScope.modeOf(settings.detection);
     } catch (error) {
       this.detectionSort = DetectionUtils.detectionSortOf();
     }
+    this.syncScanModeMenu();
   }
 
   registerSettingsListener() {
@@ -1776,7 +1740,7 @@ class History {
         .catch(error => Logger.warn('UI', '[History] Re-sort after settings change failed', error));
     });
     chrome.runtime.onMessage.addListener((message) => {
-      if (!message || message.type !== 'SETTINGS_UPDATED') {
+      if (!message || message.type !== WorkerMessages.SETTINGS_UPDATED) {
         return;
       }
 
@@ -1805,6 +1769,12 @@ class History {
   /**
    * Load HTML template into history tab
    */
+  /** The entry menu offers "Add to Blacklist" or "Scan this site", whichever list Settings → Detection → Sites to scan reads. */
+  syncScanModeMenu() {
+    const mode = this.scanMode || 'blocklist';
+    for (const element of document.querySelectorAll('#historyItemMenu [data-scan-mode-show]')) element.hidden = element.dataset.scanModeShow !== mode;
+  }
+
   async loadHTML() {
     try {
       const response = await fetch(chrome.runtime.getURL('sections/history/history.html'));
@@ -1813,6 +1783,7 @@ class History {
       const historyTab = document.querySelector('#historyTab');
       if (historyTab) {
         historyTab.innerHTML = html;
+        this.syncScanModeMenu();
       }
     } catch (error) {
       Logger.error('UI', '[History] HTML load failed', error);
@@ -1834,6 +1805,17 @@ class History {
         this.handleSearch(e.target.value);
       });
     }
+
+    // Filter chips, and the "Clear filters" button of the no-matches message
+    const filterRow = document.querySelector('#historyFilters');
+    if (filterRow) {
+      filterRow.addEventListener('click', (e) => {
+        const chip = e.target.closest('.history-filter-chip');
+        if (chip) this.toggleFilterChip(chip.dataset.filter);
+      });
+    }
+    const clearFiltersBtn = document.querySelector('#historyClearFilters');
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
 
     // Toolbar "…" menu (import / export / clear)
     const menuBtn = document.querySelector('#historyMenuBtn');
@@ -1866,6 +1848,8 @@ class History {
           this.copyHistoryItem(item);
         } else if (action === 'pin') {
           this.togglePin(item);
+        } else if (action === 'watch') {
+          this.toggleWatch(item);
         } else if (action === 'note') {
           this.editNote(item);
         } else if (action === 'clear-cache') {

@@ -15,6 +15,30 @@
     <input type="file" id="importHistoryFile" accept=".json" style="display: none;">
   </div>
 
+  <!-- Filter chips under the search: Pinned, Changed and the categories (combined with AND, categories with OR) -->
+  <div id="historyFilters" class="history-filters" role="group" aria-label="Filter history" data-i18n-aria-label="historyFiltersLabel" hidden>
+    <button type="button" class="history-filter-chip" data-filter="pinned" aria-pressed="false">
+      <span class="history-filter-icon" data-ui-icon="pin" aria-hidden="true"></span>
+      <span data-i18n="historyFilterPinned">Pinned</span>
+    </button>
+    <button type="button" class="history-filter-chip history-filter-chip--changed" data-filter="changed" aria-pressed="false">
+      <span class="history-filter-icon" data-ui-icon="changed" aria-hidden="true"></span>
+      <span data-i18n="historyChangedBadge">Changed</span>
+    </button>
+    <button type="button" class="history-filter-chip" data-filter="antibot" data-category="antibot" aria-pressed="false">
+      <span class="history-filter-icon category-icon" aria-hidden="true"></span>
+      <span data-i18n="categoryAntibot">Anti-bot</span>
+    </button>
+    <button type="button" class="history-filter-chip" data-filter="captcha" data-category="captcha" aria-pressed="false">
+      <span class="history-filter-icon category-icon" aria-hidden="true"></span>
+      <span data-i18n="categoryCaptcha">Captcha</span>
+    </button>
+    <button type="button" class="history-filter-chip" data-filter="fingerprint" data-category="fingerprint" aria-pressed="false">
+      <span class="history-filter-icon category-icon" aria-hidden="true"></span>
+      <span data-i18n="categoryFingerprint">Fingerprint</span>
+    </button>
+  </div>
+
   <!-- Toolbar "…" menu: whole-history actions (import / export / clear) -->
   <div id="historyMenu" class="history-menu" role="menu" hidden>
     <button id="importHistoryBtn" class="history-menu-item" role="menuitem" title="Import history" data-i18n-title="historyImportTitle">
@@ -52,6 +76,12 @@
       </svg>
       <span data-menu-label="pin" data-i18n="historyPin">Pin</span>
     </button>
+    <button class="history-menu-item" role="menuitem" data-action="watch">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span data-menu-label="watch" data-i18n="historyWatch">Watch for changes</span>
+    </button>
     <button class="history-menu-item" role="menuitem" data-action="note">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>
@@ -75,7 +105,8 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>
       </svg>
-      <span data-i18n="addBlacklistBtn">Add to Blacklist</span>
+      <span data-scan-mode-show="blocklist" data-i18n="addBlacklistBtn">Add to Blacklist</span>
+      <span data-scan-mode-show="allowlist" data-i18n="detectionAllowSiteBtn" hidden>Scan this site</span>
     </button>
     <div class="history-menu-separator" role="separator"></div>
     <button class="history-menu-item history-menu-item-danger" role="menuitem" data-action="delete">
@@ -108,6 +139,12 @@
         </svg>
       </button>
     </div>
+  </div>
+
+  <!-- History has entries but the search and the chips match none -->
+  <div id="historyNoResults" class="empty-state history-no-results" hidden>
+    <p data-i18n="historyNoResults">No entries match your search or filters.</p>
+    <button type="button" id="historyClearFilters" class="history-clear-filters" data-i18n="historyClearFilters">Clear filters</button>
   </div>
 
   <div id="historyEmpty" class="empty-state" style="display: none;">

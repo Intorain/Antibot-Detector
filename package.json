@@ -1,6 +1,6 @@
 {
   "name": "scrapfly-extension",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "private": true,
   "description": "Scrapfly MV3 extension — verification scripts (no build step, no runtime dependencies).",
   "scripts": {
@@ -21,6 +21,11 @@
     "e2e:refactor": "node scripts/e2e-refactor.js",
     "e2e:languages": "node scripts/e2e-languages.js",
     "e2e:history": "node scripts/e2e-history.js",
+    "e2e:data": "node scripts/e2e-data.js",
+    "e2e:scope": "node scripts/e2e-scope.js",
+    "e2e:webhook": "node scripts/e2e-webhook.js",
+    "e2e:hooks": "node scripts/e2e-hooks.js",
+    "e2e:translate": "node scripts/e2e-translate.js",
     "e2e:live": "node scripts/e2e-live.js"
   }
 }

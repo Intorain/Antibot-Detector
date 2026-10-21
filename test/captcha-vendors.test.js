@@ -296,7 +296,7 @@ test('the worker routes every vendor\'s Analyze Scripts and reports only that ve
       storage: { local: { async get() { return {}; }, async set() {} } } } };
   context.self = context;
   vm.createContext(context);
-  for (const file of ['modules/core/message-types.js', 'modules/advanced/captcha-vendors.js', 'modules/advanced/vendor-registry.js', 'modules/advanced/result-model.js',
+  for (const file of ['modules/core/message-types.js', 'modules/core/message-sender.js', 'modules/core/capture-retention.js', 'modules/advanced/captcha-vendors.js', 'modules/advanced/vendor-registry.js', 'modules/advanced/result-model.js',
     'background/advanced/history-store.js', 'background/advanced/page-notice.js', 'background/advanced/collector-utils.js', 'background/advanced/job-manager.js',
     'background/advanced/script-analysis.js', 'background/advanced/vendors/captcha/interceptor.js', 'background/handlers/messages-advanced-capture.js']) {
     vm.runInContext(read(file), context, { filename: file });
@@ -325,6 +325,7 @@ test('the no-tools screen groups supported protections by category, with logos a
   const context = { window: {}, document: {}, console, FormatUtils, Logger: { ui() {}, debug() {}, error() {} } };
   context.globalThis = context;
   vm.createContext(context);
+  vm.runInContext(read('modules/core/categories.js'), context);
   vm.runInContext(read('modules/advanced/captcha-vendors.js'), context);
   vm.runInContext(read('modules/advanced/vendor-registry.js'), context);
   for (const file of ['advanced.js', 'advanced-tools.js']) vm.runInContext(read(`sections/advanced/${file}`), context);

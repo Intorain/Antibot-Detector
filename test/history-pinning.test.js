@@ -148,3 +148,88 @@ test('PING answers ok, so the popup can tell a worker that has these features fr
   });
   assert.deepStrictEqual(answer, { status: 'ok' });
 });
+
+// ---- Pages that pin themselves: unpinning is final
+
+test('unpinning a pinned entry marks it, so a later scan never pins it again; pinning it again clears the mark', () => {
+  const auto = entry('a', { pinned: true, autoPinned: true });
+  const unpinned = HistoryStore.annotate(auto, { pinned: false });
+  assert.deepStrictEqual(unpinned, entry('a', { unpinned: true }));
+  const again = HistoryStore.annotate(unpinned, { pinned: true });
+  assert.deepStrictEqual(again, entry('a', { pinned: true }), 'a pin the person chose is their own: not an automatic one');
+  const own = HistoryStore.annotate(entry('b', { pinned: true }), { pinned: false });
+  assert.deepStrictEqual(own, entry('b', { unpinned: true }), 'a pin the person chose is final too');
+});
+
+test('pinning an automatic pin by hand makes it the person\'s own, and unpinning an entry that was not pinned marks nothing', () => {
+  assert.deepStrictEqual(HistoryStore.annotate(entry('a', { pinned: true, autoPinned: true }), { pinned: true }), entry('a', { pinned: true }));
+  assert.deepStrictEqual(HistoryStore.annotate(entry('a'), { pinned: false }), entry('a'));
+});
+
+test('a note changes nothing about the pin', () => {
+  const auto = entry('a', { pinned: true, autoPinned: true });
+  assert.deepStrictEqual(HistoryStore.annotate(auto, { note: 'x' }), { ...auto, note: 'x' });
+  assert.deepStrictEqual(HistoryStore.annotate(entry('a', { unpinned: true }), { note: 'x' }), entry('a', { unpinned: true, note: 'x' }));
+  assert.ok(!('note' in HistoryStore.annotate(entry('a', { note: 'x' }), { note: '' })));
+});
+
+test('UPDATE_ITEM marks an unpinned entry in the stored history', async () => {
+  const storage = memory(JSON.stringify({ items: [entry('a', { pinned: true, autoPinned: true }), entry('b', { pinned: true })] }));
+  const registry = {};
+  HistoryStore.registerHandlers(registry, storage);
+  global.chrome = { runtime: { getURL: (p) => `chrome-extension://abc/${p}` } };
+  try {
+    const page = { url: 'chrome-extension://abc/popup.html' };
+    await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'a', patch: { pinned: false } }, page);
+    await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'b', patch: { note: 'keep' } }, page);
+    const items = read(storage).items;
+    assert.deepStrictEqual(items[0], entry('a', { unpinned: true }));
+    assert.deepStrictEqual(items[1], entry('b', { pinned: true, note: 'keep' }));
+  } finally {
+    delete global.chrome;
+  }
+});
+
+// ---- The watchlist: watching pins a page, unpinning stops it, and the list is short
+
+test('watching a page pins it as the person\'s own pin; stopping removes the watchlist\'s bookkeeping', () => {
+  const auto = entry('a', { pinned: true, autoPinned: true });
+  assert.deepStrictEqual(HistoryStore.annotate(auto, { watch: true }), entry('a', { pinned: true, watch: true }), 'an automatic pin becomes the person\'s');
+  assert.deepStrictEqual(HistoryStore.annotate(entry('b', { unpinned: true }), { watch: true }), entry('b', { pinned: true, watch: true }));
+  assert.deepStrictEqual(HistoryStore.annotate(entry('c'), { watch: true }), entry('c', { pinned: true, watch: true }));
+  assert.deepStrictEqual(HistoryStore.annotate(entry('d', { pinned: true, watch: true, watchedAt: 5 }), { watch: false }), entry('d', { pinned: true }), 'still pinned');
+  assert.deepStrictEqual(HistoryStore.annotate(entry('e', { pinned: true, watch: true, watchedAt: 5 }), { pinned: false }), entry('e', { unpinned: true }), 'only a pinned page is watched');
+});
+
+test('the annotation of a patch keeps the watch flag only as a boolean', () => {
+  assert.deepStrictEqual(HistoryStore.cleanAnnotation({ watch: true, pinned: 'yes', note: 'x' }), { watch: true, note: 'x' });
+  assert.deepStrictEqual(HistoryStore.cleanAnnotation({ watch: 'yes' }), {});
+});
+
+test('UPDATE_ITEM refuses an eleventh watched page, and lets a watched one be set again or stopped', async () => {
+  const watched = Array.from({ length: 10 }, (_, i) => entry(`w${i}`, { pinned: true, watch: true }));
+  const storage = memory(JSON.stringify({ items: [entry('new'), ...watched] }));
+  const registry = {};
+  HistoryStore.registerHandlers(registry, storage);
+  global.chrome = { runtime: { getURL: (p) => `chrome-extension://abc/${p}` } };
+  try {
+    const page = { url: 'chrome-extension://abc/popup.html' };
+    let r = await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'new', patch: { watch: true } }, page);
+    assert.strictEqual(r.status, 'ok');
+    assert.strictEqual(r.updated, 0);
+    assert.strictEqual(r.limit, 10);
+    assert.ok(!read(storage).items.find(i => i.id === 'new').watch, 'nothing was changed');
+    r = await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'w3', patch: { watch: true } }, page);
+    assert.strictEqual(r.updated, 1, 'a page already on the list is not an eleventh');
+    r = await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'w0', patch: { watch: false } }, page);
+    assert.strictEqual(r.updated, 1);
+    r = await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'new', patch: { watch: true } }, page);
+    assert.strictEqual(r.updated, 1, 'room again');
+    assert.deepStrictEqual(read(storage).items.find(i => i.id === 'new'), entry('new', { pinned: true, watch: true }));
+    r = await call(registry, HistoryStore.Messages.UPDATE_ITEM, { id: 'w1', patch: { pinned: false } }, page);
+    assert.ok(!read(storage).items.find(i => i.id === 'w1').watch, 'unpinning stops the watching');
+    assert.strictEqual(HistoryStore.Messages.WATCH_NOW, 'HISTORY_WATCH_NOW');
+  } finally {
+    delete global.chrome;
+  }
+});

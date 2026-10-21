@@ -183,6 +183,12 @@ class DetectionEngineManager {
             const logCollectorEnabled = actualSettings.logCollectorEnabled || false;
             const enableJsApi = actualSettings.jsApi?.enableJsApi ?? false;
             const hooksConfig = HooksConfig.fromSettings(actualSettings);
+            // A site where JS hooks are off (Settings → Detection → Sites without JS hooks): the install carries no hooks
+            // and no response capture; the MAIN world takes its early recorders off the page and its frames, along with
+            // the frame accessors (only the bind shims stay, which keep the page's own calls working). The window checks
+            // stay: they only read the page's globals
+            const hooksOff = ScanScope.hooksOff(actualSettings.detection, window.location?.hostname);
+            if (hooksOff) Logger.debug('DETECTION', 'JS hooks are off on this site');
 
             const detectorsData = result.scrapfly_detectors;
 
@@ -237,7 +243,7 @@ class DetectionEngineManager {
             }
 
             dispatchInstallHooks({
-                hookDefinitions,
+                hookDefinitions: hooksOff ? [] : hookDefinitions,
                 windowProperties,
                 debugMode,
                 debugVerbose,
@@ -245,7 +251,7 @@ class DetectionEngineManager {
                 enableJsApi,
                 hooksConfig,
                 fingerprintEnabled: true,
-                responseCapture: demResponseCaptureSpec(detectorsData.detectors, window.location?.hostname)
+                ...(hooksOff ? { hooksOff: true } : { responseCapture: demResponseCaptureSpec(detectorsData.detectors, window.location?.hostname) })
             });
 
         } catch (error) {
@@ -881,7 +887,7 @@ class DetectionEngineManager {
                         type: 'cookie',
                         name: matchingCookie.name,
                         value: `${matchingCookie.name}=${matchingCookie.value || ''}`,
-                        confidence: cookiePattern.confidence || 80,
+                        confidence: cookiePattern.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                         patternId: DetectionEngineManager.patternIdOf(detector, cookiePattern),
                         description: cookiePattern.description
                     });
@@ -936,7 +942,7 @@ class DetectionEngineManager {
                                     type: 'header',
                                     name: headerPattern.name,
                                     value: `${headerName}: ${valueToCheck}`,
-                                    confidence: headerPattern.confidence || 80,
+                                    confidence: headerPattern.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                                     patternId: DetectionEngineManager.patternIdOf(detector, headerPattern),
                                     description: headerPattern.description
                                 });
@@ -948,7 +954,7 @@ class DetectionEngineManager {
                                 type: 'header',
                                 name: headerPattern.name,
                                 value: `${headerName}: ${headerValue}`,
-                                confidence: headerPattern.confidence || 80,
+                                confidence: headerPattern.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                                 patternId: DetectionEngineManager.patternIdOf(detector, headerPattern),
                                 description: headerPattern.description
                             });
@@ -1071,7 +1077,7 @@ class DetectionEngineManager {
                             type: 'payload',
                             pattern: payloadPattern.text,
                             value: matchedValue,
-                            confidence: payloadPattern.confidence || 80,
+                            confidence: payloadPattern.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                             patternId: DetectionEngineManager.patternIdOf(detector, payloadPattern),
                             description: payloadPattern.description || 'Payload pattern detected'
                         });
@@ -1177,7 +1183,7 @@ class DetectionEngineManager {
                         type: 'payload',
                         pattern: payloadPattern.text,
                         value: matchedValue,
-                        confidence: payloadPattern.confidence || 80,
+                        confidence: payloadPattern.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                         patternId: DetectionEngineManager.patternIdOf(detector, payloadPattern),
                         description: payloadPattern.description || 'Payload pattern detected'
                     });
@@ -1209,7 +1215,7 @@ class DetectionEngineManager {
                         value: value.length > 80 ? value.slice(0, 80) + '...' : value,
                         fullUrl: response.url,
                         body: 'response',
-                        confidence: rule.confidence || 80,
+                        confidence: rule.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                         patternId: DetectionEngineManager.patternIdOf(detector, rule),
                         description: rule.description || 'Response pattern detected'
                     });
@@ -1232,7 +1238,7 @@ class DetectionEngineManager {
                         type: 'dom',
                         selector: domPattern.selector,
                         value: `${domPattern.selector}=${truncatedText}`,
-                        confidence: domPattern.confidence || 85,
+                        confidence: domPattern.confidence || Constants.DEFAULT_DOM_CONFIDENCE,
                         patternId: DetectionEngineManager.patternIdOf(detector, domPattern),
                         description: domPattern.description
                     });
@@ -1391,7 +1397,7 @@ class DetectionEngineManager {
                             type: 'js_hooks',
                             target: hookData.target,
                             value: hookData.target,
-                            confidence: hookData.confidence || 80,
+                            confidence: hookData.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                             description: hookData.description || 'JavaScript API hook'
                         });
 
@@ -1411,13 +1417,13 @@ class DetectionEngineManager {
                         const detectorInfo = DetectionEngineManager.buildDetectorInfo(detector, hookData.detectorName, hookData.detectorId);
                         detections.push({
                             detected: true,
-                            confidence: hookData.confidence || 80,
+                            confidence: hookData.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                             difficulty: detectorInfo.difficulty,
                             matches: [{
                                 type: 'js_hooks',
                                 target: hookData.target,
                                 value: hookData.target,
-                                confidence: hookData.confidence || 80,
+                                confidence: hookData.confidence || Constants.DEFAULT_MATCH_CONFIDENCE,
                                 description: hookData.description || 'JavaScript API hook'
                             }],
                             detectionMethods: ['js_hooks'],
@@ -1465,16 +1471,55 @@ class DetectionEngineManager {
         return demHandleHookMessage.apply(this, arguments);
     }
 
+    // Pages a watchlist check is scanning right now, by address without its query: their cached result must not answer
+    // (nothing would be scanned) nor stand in for the new one (a page that lost its protections must say so)
+    static _cacheBypass = new Map();
+
+    static bypassCache(url) {
+        const key = UrlUtils.hashUrl(url, 'path');
+        DetectionEngineManager._cacheBypass.set(key, (DetectionEngineManager._cacheBypass.get(key) || 0) + 1);
+    }
+
+    static restoreCache(url) {
+        const key = UrlUtils.hashUrl(url, 'path');
+        const left = (DetectionEngineManager._cacheBypass.get(key) || 0) - 1;
+        if (left > 0) DetectionEngineManager._cacheBypass.set(key, left);
+        else DetectionEngineManager._cacheBypass.delete(key);
+    }
+
+    static isCacheBypassed(url) {
+        return DetectionEngineManager._cacheBypass.size > 0 && DetectionEngineManager._cacheBypass.has(UrlUtils.hashUrl(url, 'path'));
+    }
+
+    /**
+     * Whether JS hooks are off on this page's site (Settings → Detection → Sites without JS hooks). A cached result
+     * describes one or the other: what a scan finds with the hooks is not what it finds without them.
+     * @param {string} url - Page URL
+     * @returns {Promise<boolean>}
+     */
+    static async hooksOffFor(url) {
+        try {
+            const settings = await Utils.getSettings();
+            return ScanScope.hooksOff(settings && settings.detection, UrlUtils.getHostnameFromUrl(url));
+        } catch (error) {
+            return false; // an unreadable setting never costs a cache lookup
+        }
+    }
+
     /**
      * Look up cached detection data by URL hash
      * @param {string} url - Page URL
      * @returns {Promise<object|null>} Cached detection data or null
      */
     static async getStoredDetection(url) {
+        if (DetectionEngineManager.isCacheBypassed(url)) return null;
         const releaseStorageLock = await acquireDetectionStorageLock();
         try { // outer: release the storage lock in finally
         try {
             const cacheScope = await Utils.getCacheScope();
+            const hooksOff = await DetectionEngineManager.hooksOffFor(url);
+            // Only a result found under the same hooks setting answers; the other one is not removed, it ages out
+            const sameHooks = (stored) => (stored.hooksOff === true) === hooksOff;
             const result = await chrome.storage.local.get([DetectionEngineManager.STORAGE_KEY]);
             let storage = result[DetectionEngineManager.STORAGE_KEY] || {};
             if (typeof storage === 'string') {
@@ -1501,6 +1546,11 @@ class DetectionEngineManager {
                 if (Date.now() >= stored.expiry) {
                     Logger.debug('CACHE', `Expired (${source}): ${url}`);
                     expiredKeys.push(key);
+                    return null;
+                }
+
+                if (!sameHooks(stored)) {
+                    Logger.debug('CACHE', `Skipped (found with JS hooks ${hooksOff ? 'on' : 'off'}): ${url}`);
                     return null;
                 }
 
@@ -1546,7 +1596,7 @@ class DetectionEngineManager {
                     continue;
                 }
                 const storedHostname = stored.hostname || UrlUtils.getHostnameFromUrl(stored.url || '');
-                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname)) {
+                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname) && sameHooks(stored)) {
                     if (!hostnameFallback ||
                         getStoredDetectionCount(stored) > getStoredDetectionCount(hostnameFallback) ||
                         (getStoredDetectionCount(stored) === getStoredDetectionCount(hostnameFallback) && stored.timestamp > hostnameFallback.timestamp)) {
@@ -1625,6 +1675,9 @@ class DetectionEngineManager {
         try { // outer: release the storage lock in finally
         try {
             const cacheScope = await Utils.getCacheScope();
+            // A result found without the hooks is marked, and never stands in for one found with them (or the other way)
+            const hooksOff = await DetectionEngineManager.hooksOffFor(url);
+            const sameHooks = (stored) => (stored.hooksOff === true) === hooksOff;
             const result = await chrome.storage.local.get([DetectionEngineManager.STORAGE_KEY]);
             let storage = result[DetectionEngineManager.STORAGE_KEY] || {};
             if (typeof storage === 'string') {
@@ -1642,18 +1695,20 @@ class DetectionEngineManager {
             const existingStoredData = storage[urlHash];
             const existingIsValid = existingStoredData &&
                 (!existingStoredData.cacheScope || existingStoredData.cacheScope === cacheScope) &&
-                Date.now() < existingStoredData.expiry;
+                Date.now() < existingStoredData.expiry && sameHooks(existingStoredData);
             const getStoredDetectionCount = (stored) => (
                 stored?.detectionCount ?? (Array.isArray(stored?.detectionResults) ? stored.detectionResults.length : 0)
             );
-            let existingPositiveData = existingIsValid && getStoredDetectionCount(existingStoredData) > 0
+            // A watchlist check keeps no earlier result: it exists to say what the page shows now
+            const fresh = DetectionEngineManager.isCacheBypassed(url);
+            let existingPositiveData = !fresh && existingIsValid && getStoredDetectionCount(existingStoredData) > 0
                 ? existingStoredData
                 : null;
 
-            if (detectionResults.length === 0 && !existingPositiveData) {
+            if (detectionResults.length === 0 && !existingPositiveData && !fresh) {
                 const requestedHostname = UrlUtils.getHostnameFromUrl(url);
                 for (const stored of Object.values(storage)) {
-                    if (!stored || Date.now() >= stored.expiry || getStoredDetectionCount(stored) <= 0) {
+                    if (!stored || Date.now() >= stored.expiry || getStoredDetectionCount(stored) <= 0 || !sameHooks(stored)) {
                         continue;
                     }
 
@@ -1744,7 +1799,8 @@ class DetectionEngineManager {
                 confidence: overallConfidence,
                 detectionCount: detectionResults.length,
                 fromStorage: false,
-                cacheScope: cacheScope
+                cacheScope: cacheScope,
+                ...(hooksOff ? { hooksOff: true } : {})
             };
 
             storage[urlHash] = storedData;
@@ -1876,7 +1932,7 @@ class DetectionEngineManager {
      * @param {object} dependencies - Required dependencies
      */
     static async handlePageLoadNotification(request, sender, dependencies) {
-        const { chrome, CategoryManager, HistoryRecorder, Utils, categoryManager, recentDetectionRequests,
+        const { chrome, CategoryManager, HistoryRecorder, Utils, categoryManager, recentDetectionRequests, Settings,
             isCurrentDocument = async () => true } = dependencies;
         const ignored = { status: 'url_changed' };
 
@@ -1932,7 +1988,7 @@ class DetectionEngineManager {
 
             // Update badge with cached detection count
             if (storedData.detectionCount > 0) {
-                const badgeColors = await CategoryManager.getBadgeColors(categoryManager);
+                const badgeColors = await CategoryManager.getBadgeColors();
                 if (!await isCurrentDocument()) return ignored;
                 const count = storedData.detectionCount.toString();
                 const color = DetectionUtils.getBadgeColor(storedData.detectionResults || [], badgeColors);
@@ -1947,7 +2003,7 @@ class DetectionEngineManager {
 
             // Notify popup if open
             chrome.runtime.sendMessage({
-                type: 'NEW_DETECTION_DATA',
+                type: WorkerMessages.NEW_DETECTION_DATA,
                 tabId: tabId,
                 url: pageUrl,
                 detectionResults: storedData.detectionResults,
@@ -1963,6 +2019,26 @@ class DetectionEngineManager {
                 type: globalThis.ScrapflyBridgeProtocol.MESSAGE_TYPES.CACHE_HIT_DISABLE_MONITORING,
                 url: pageUrl
             }, targetDocument).catch(() => {});
+
+            // A watchlist check's tab that landed on a cached page (its watched address redirected there): the check gets
+            // the cached result as the scan's outcome and judges the address itself; the webhook and History are the
+            // check's business, never this tab's
+            if (typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId)) {
+                HistoryWatch.scanFinished(tabId, pageUrl, storedData.detectionResults || []);
+                return;
+            }
+
+            // The webhook, for people who want it on every page load ("Send on every page load"): the setting is read there
+            if (Settings && typeof Settings.sendWebhookIfEnabled === 'function' && storedData.detectionResults && storedData.detectionResults.length > 0) {
+                const tab = await chrome.tabs.get(tabId).catch(() => null);
+                if (!await isCurrentDocument()) return ignored;
+                await Settings.sendWebhookIfEnabled({
+                    url: pageUrl,
+                    hostname: UrlUtils.getHostnameFromUrl(pageUrl),
+                    title: (tab && tab.title) || 'Untitled',
+                    favicon: UrlUtils.normalizeFaviconForStorage(tab && tab.favIconUrl, pageUrl)
+                }, storedData.detectionResults, { trigger: 'cache' });
+            }
 
             // Check if we should save to history on cache hit
             const historySettings = await Utils.getHistorySettings();
@@ -1992,7 +2068,7 @@ class DetectionEngineManager {
         }
 
         // Cache miss - skip if recent detection exists
-        if (Utils.shouldSkipDetection(tabId, 1500, recentDetectionRequests)) {
+        if (Utils.shouldSkipDetection(tabId, Constants.REQUEST_SKIP_THRESHOLD, recentDetectionRequests)) {
             Logger.debug('SCAN', `Duplicate request for tab ${tabId} ignored`);
             return;
         }
@@ -2014,7 +2090,7 @@ class DetectionEngineManager {
         const sendDataRequest = async () => {
             try {
                 if (!await isCurrentDocument()) return ignored;
-                chrome.tabs.sendMessage(tabId, { type: 'REQUEST_PAGE_DATA' }, targetDocument, () => {
+                chrome.tabs.sendMessage(tabId, { type: WorkerMessages.REQUEST_PAGE_DATA }, targetDocument, () => {
                     if (chrome.runtime.lastError) {
                         const errorMsg = chrome.runtime.lastError?.message || '';
                         if ((errorMsg.includes('Could not establish connection') ||
@@ -2042,6 +2118,26 @@ class DetectionEngineManager {
      * @param {Set} manuallyClearedCaches - Set to track manually cleared URLs
      * @returns {boolean} True (async response)
      */
+    /** Settings → Data → Storage → Clear: every saved detection result, under the same lock as the stores and the single clear. */
+    static async handleClearAllDetectionCache(sendResponse) {
+        try {
+            const releaseStorageLock = await acquireDetectionStorageLock();
+            let count = 0;
+            try {
+                const result = await chrome.storage.local.get([DetectionEngineManager.STORAGE_KEY]);
+                count = Object.keys(result[DetectionEngineManager.STORAGE_KEY] || {}).length;
+                await chrome.storage.local.remove([DetectionEngineManager.STORAGE_KEY, 'scrapfly_js_hook_detections']);
+            } finally {
+                releaseStorageLock();
+            }
+            sendResponse({ status: 'cleared', count });
+        } catch (error) {
+            Logger.error('DETECTION', 'Error clearing the whole cache:', error);
+            sendResponse({ status: 'error', error: error.message });
+        }
+        return true;
+    }
+
     static async handleClearDetectionCache(request, sendResponse, manuallyClearedCaches = null) {
         try {
             const requestedScopeRaw = String(request.cacheScope || '').toLowerCase();
@@ -2138,6 +2234,14 @@ class DetectionEngineManager {
                 sendResponse({ status: 'error', error: 'Invalid URL for detection' });
                 return true;
             }
+            // A skipped site, or one left out in "only these sites" mode, is never scanned on request:
+            // its page load stored nothing, so returning to its tab would otherwise ask for a scan here
+            const excluded = await Utils.isUrlBlacklisted(tab.url);
+            if (!ownsSlot()) { skipSuperseded(); return true; }
+            if (excluded) {
+                sendResponse({ status: 'skipped', reason: 'excluded' });
+                return true;
+            }
 
             const normalizeUrl = value => {
                 try { const url = new URL(value); url.hash = ''; return url.href; }
@@ -2172,7 +2276,7 @@ class DetectionEngineManager {
             // Pin both messages to this document so a same-URL reload cannot
             // receive a request that was admitted for its predecessor.
             const scriptExists = await new Promise(resolve => {
-                chrome.tabs.sendMessage(tabId, { type: 'GET_DETECTION_STATUS' }, targetDocument, response => {
+                chrome.tabs.sendMessage(tabId, { type: WorkerMessages.GET_DETECTION_STATUS }, targetDocument, response => {
                     resolve(!chrome.runtime.lastError && response?.status === 'active');
                 });
             });
@@ -2211,7 +2315,7 @@ class DetectionEngineManager {
             }
 
             const response = await new Promise(resolve => {
-                chrome.tabs.sendMessage(tabId, { type: 'RUN_DETECTION', silent: isSilent }, targetDocument, value => {
+                chrome.tabs.sendMessage(tabId, { type: WorkerMessages.RUN_DETECTION, silent: isSilent }, targetDocument, value => {
                     // runtime.lastError is valid only inside this callback.
                     resolve({ value, error: chrome.runtime.lastError?.message });
                 });

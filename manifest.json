@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
 
@@ -19,7 +19,8 @@
     "cookies",
     "notifications",
     "downloads",
-    "alarms"
+    "alarms",
+    "unlimitedStorage"
   ],
 
   "host_permissions": [
@@ -48,10 +49,14 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": [
         "modules/core/bridge-protocol.js",
+        "modules/core/worker-messages.js",
         "modules/core/logger.js",
         "modules/core/constants.js",
         "modules/core/hooks-config.js",
         "modules/detection/conditions/window-condition-grammar.js",
+        "modules/core/categories.js",
+        "modules/core/domain-list.js",
+        "modules/core/scan-scope.js",
         "utils/format-utils.js",
         "utils/url-utils.js",
         "utils/detection-utils.js",

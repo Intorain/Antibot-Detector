@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -12,6 +13,7 @@ function harness() {
   const timers = new Map();
   const current = { url: 'https://example.test/', documentId: 'doc-current' };
   const context = {
+    WorkerMessages: require('../modules/core/worker-messages.js'),
     URL, Map, Set, Date, Promise, AbortController, console,
     Logger: new Proxy({}, { get: () => () => {} }),
     cachedHooksConfig: { MAX_DETECTION_MS: 100 }, getHooksDeadline: now => now + 100,
@@ -30,7 +32,7 @@ function harness() {
     'payloadStore', 'networkUrlsStore', 'headersStore', 'requestHeadersStore', 'responseCookiesStore', 'recentDetectionRequests']) context[key] = new Map();
   context.tabsUsingCache = new Set();
   vm.createContext(context);
-  for (const file of ['modules/core/bridge-protocol.js', 'background/detection-session-store.js', 'background/handlers/messages-detection.js']) {
+  for (const file of ['modules/core/bridge-protocol.js', 'modules/core/categories.js', 'background/detection-session-store.js', 'background/handlers/messages-detection.js']) {
     vm.runInContext(read(file), context, { filename: file });
   }
   const registry = {};
@@ -168,7 +170,8 @@ function pageLoadHarness() {
   const timers = [];
   const state = { current: true, retry: false };
   const context = {
-    Promise, Date, Map, Set, PatternCache: class {},
+    WorkerMessages: require('../modules/core/worker-messages.js'),
+    Promise, Date, Map, Set, PatternCache: class {}, Constants: { DETECTION_SKIP_THRESHOLD: 2000 },
     Logger: new Proxy({}, { get: () => () => {} }),
     DetectionUtils: { getBadgeColor: () => '#123456' },
     UrlUtils: { getHostnameFromUrl: () => 'example.test', normalizeFaviconForStorage: value => value },
@@ -253,6 +256,50 @@ test('PAGE_LOAD cached notifications target the sending document and record its 
   assert.equal(h.effects.find(effect => effect.kind === 'badge').data.text, '1');
   assert.deepEqual({ ...h.effects.find(effect => effect.kind === 'tab').options }, { documentId: 'doc-current' });
   assert.equal(h.effects.filter(effect => effect.kind === 'history').length, 1);
+});
+
+test('PAGE_LOAD offers a cached page to the webhook as a cache delivery, described by the document that sent it', async () => {
+  const h = pageLoadHarness();
+  const sent = [];
+  h.dependencies.Settings = { sendWebhookIfEnabled: async (page, results, options) => { sent.push(JSON.parse(JSON.stringify({ page, count: results.length, options }))); } };
+  await h.run();
+  assert.equal(sent.length, 1);
+  assert.deepEqual(sent[0].options, { trigger: 'cache' });
+  assert.deepEqual({ url: sent[0].page.url, hostname: sent[0].page.hostname, title: sent[0].page.title, count: sent[0].count }, { url: 'https://example.test/', hostname: 'example.test', title: 'Example', count: 1 });
+});
+
+test('PAGE_LOAD offers nothing to the webhook for a replacement document or a cached page without detections', async () => {
+  const replaced = pageLoadHarness();
+  const gate = deferred();
+  const sent = [];
+  replaced.dependencies.Settings = { sendWebhookIfEnabled: async (...args) => { sent.push(args); } };
+  replaced.context.chrome.tabs.get = () => gate.promise;
+  const result = replaced.run();
+  await flush();
+  replaced.state.current = false;
+  gate.resolve({ title: 'Next document' });
+  assert.equal((await result).status, 'url_changed');
+
+  const empty = pageLoadHarness();
+  empty.dependencies.Settings = { sendWebhookIfEnabled: async (...args) => { sent.push(args); } };
+  empty.context.Engine.getStoredDetection = async () => ({ detectionCount: 0, detectionResults: [] });
+  await empty.run();
+  assert.deepEqual(sent, []);
+});
+
+test('PAGE_LOAD on a watchlist tab that landed on a cached page hands the result to the check, and sends and records nothing', async () => {
+  const h = pageLoadHarness();
+  const sent = [];
+  const finished = [];
+  h.dependencies.Settings = { sendWebhookIfEnabled: async (...args) => { sent.push(args); } };
+  h.context.HistoryWatch = { isWatchTab: () => true, scanFinished: (tabId, url, results) => finished.push({ tabId, url, count: results.length }) };
+  await h.run();
+  assert.deepEqual(sent, [], 'no cache delivery to the webhook');
+  assert.equal(h.effects.filter(effect => effect.kind === 'history').length, 0, 'no History entry of this tab\'s own');
+  assert.equal(finished.length, 1);
+  assert.equal(finished[0].url, 'https://example.test/');
+  assert.equal(finished[0].count, 1);
+  assert.equal(h.effects.find(effect => effect.kind === 'badge').data.text, '1', 'the badge still shows the cached result');
 });
 
 test('PAGE_LOAD retries stop when their document is replaced', async () => {

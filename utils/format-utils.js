@@ -2,6 +2,10 @@
  * FormatUtils - Pure formatting and display utility functions
  * Time formatting, HTML escaping, clipboard operations
  */
+// The detection categories are described once, in modules/core/categories.js (the popup and the worker load it first)
+if (typeof Categories === 'undefined' && typeof module !== 'undefined' && typeof require === 'function') {
+  globalThis.Categories = require('../modules/core/categories.js');
+}
 class FormatUtils {
 
   // Milliseconds per duration unit. A month counts as 30 days, a year as 365.
@@ -27,6 +31,9 @@ class FormatUtils {
     return duration * unitMs;
   }
 
+  /** How long a detection result is cached when nothing says otherwise (Settings → Detection starts from it). */
+  static DEFAULT_CACHE = Object.freeze({ duration: 7, unit: 'days' });
+
   /**
    * Bring a stored cache duration inside the per-unit range without changing
    * its length. Values saved before the ranges existed (e.g. 48 hours) move
@@ -44,7 +51,7 @@ class FormatUtils {
     const value = Number(duration);
     const sourceUnit = unitMs[unit] ? unit : 'hours';
     if (!Number.isFinite(value) || value <= 0) {
-      return { duration: 7, unit: 'days', exact: false };
+      return { ...FormatUtils.DEFAULT_CACHE, exact: false };
     }
     if (Number.isInteger(value) && value >= 1 && value <= max[sourceUnit]) {
       return { duration: value, unit: sourceUnit, exact: true };
@@ -303,7 +310,7 @@ class FormatUtils {
   });
 
   /** Default category colours (Settings → Category colours starts from these). */
-  static DEFAULT_CATEGORY_COLORS = Object.freeze({ antibot: '#FF5733', captcha: '#33C3FF', fingerprint: '#3b82f6' });
+  static DEFAULT_CATEGORY_COLORS = Categories.DEFAULT_COLORS;
 
   /** i18n key and English label of each detection method, plural aliases included. */
   static METHOD_LABELS = Object.freeze({
@@ -335,6 +342,18 @@ class FormatUtils {
     fingerprint: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5a8 8 0 0 1 11 0"/><path d="M5 12a7 7 0 0 1 14 0v1"/><path d="M8.5 20c-.6-1.6-.9-3.4-.9-5.3V12a4.4 4.4 0 0 1 8.8 0v2"/><path d="M12 11.5v3.2c0 2.2.5 4.2 1.4 5.8"/><path d="M16.4 17.5c.2 1 .5 1.9.9 2.7"/></svg>'
   };
 
+  /** Icons of a pinned page, of a page whose protections changed and of a watched page (History chips and cards); currentColor, 12px. */
+  static UI_ICONS = Object.freeze({
+    watch: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5" fill="none"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>',
+    changed: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>'
+  });
+
+  /** One of UI_ICONS ('pin', 'changed', 'watch'), or '' for an unknown name. */
+  static uiIconSvg(name) {
+    return FormatUtils.UI_ICONS[name] || '';
+  }
+
   /** Line icons of the detection methods (and of a combination); currentColor, 12px. */
   static METHOD_ICONS = Object.freeze({
     cookie: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9 3 3 0 0 0 3 3 3 3 0 0 0 3 3 3 3 0 0 0 3 3z"/><circle cx="8.5" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="15" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="16" r="1" fill="currentColor" stroke="none"/></svg>',
@@ -347,6 +366,24 @@ class FormatUtils {
     payload: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>',
     combination: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.4 8.2l3.4 7.5M16.6 8.2l-3.4 7.5"/></svg>'
   });
+
+  /**
+   * What a detector's icon is, decided once for every view: an uploaded image (customIcon), the Scrapfly logo (no icon,
+   * "default", "custom" or "custom.png"), a fingerprint glyph (FINGERPRINT_ICONS), an emoji or text, or a file of
+   * detectors/icons. Each view draws the answer in its own markup.
+   * @param {{icon?: string, customIcon?: string}} [detector]
+   * @returns {{kind: 'custom'|'default'|'glyph'|'emoji'|'file', value: string}}
+   */
+  static detectorIcon(detector) {
+    const source = detector && typeof detector === 'object' ? detector : {};
+    if (typeof source.customIcon === 'string' && source.customIcon) return { kind: 'custom', value: source.customIcon };
+    const icon = typeof source.icon === 'string' ? source.icon.trim() : '';
+    const lower = icon.toLowerCase();
+    if (!icon || lower === 'default' || lower === 'custom' || lower === 'custom.png') return { kind: 'default', value: '' };
+    if (FormatUtils.FINGERPRINT_ICONS[lower]) return { kind: 'glyph', value: lower };
+    if (!/\.(?:png|jpe?g|svg|gif|webp)\b|https?:/i.test(icon)) return { kind: 'emoji', value: icon };
+    return { kind: 'file', value: icon };
+  }
 
   /** Settings → Tag Colors: the saved key of each method and its default colour. */
   static METHOD_TAG_COLOR_KEYS = Object.freeze({ cookie: 'cookies', header: 'headers', url: 'urls', content: 'content', dom: 'dom', window: 'window', js_hooks: 'js_hooks', payload: 'payload' });
@@ -458,20 +495,11 @@ class FormatUtils {
 
   /** anti-bot / captcha / fingerprint / other from a detection or category name. */
   static categoryKey(value) {
-    const raw = value && typeof value === 'object' ? (value.category || value.detector?.category) : value;
-    const normalized = String(raw || '').toLowerCase().replace(/[^a-z]/g, '');
-    if (normalized.includes('captcha')) return 'captcha';
-    if (normalized.includes('fingerprint')) return 'fingerprint';
-    if (normalized.includes('antibot') || normalized.includes('bot') || normalized.includes('waf')) return 'antibot';
-    return 'other';
+    return Categories.keyOf(value);
   }
 
   static categoryLabel(key) {
-    const labels = {
-      antibot: ['categoryAntibot', 'Anti-bot'], captcha: ['categoryCaptcha', 'Captcha'],
-      fingerprint: ['categoryFingerprint', 'Fingerprint'], other: ['statsCategoryOther', 'Other']
-    };
-    const [messageKey, fallback] = labels[key] || labels.other;
+    const [messageKey, fallback] = Categories.LABELS[key] || Categories.LABELS.other;
     return FormatUtils.t(messageKey, fallback);
   }
 
@@ -511,8 +539,8 @@ class FormatUtils {
    */
   static detectionBreakdown(detections = []) {
     const list = (Array.isArray(detections) ? detections : []).filter(d => d && typeof d === 'object');
-    const order = ['antibot', 'captcha', 'fingerprint', 'other'];
-    const counts = { antibot: 0, captcha: 0, fingerprint: 0, other: 0 };
+    const order = Categories.KEYS_AND_OTHER;
+    const counts = Object.fromEntries(order.map(key => [key, 0]));
     list.forEach(d => { counts[FormatUtils.categoryKey(d)]++; });
     const total = list.length;
     const categories = order.filter(key => counts[key] > 0)

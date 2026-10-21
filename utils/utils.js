@@ -185,7 +185,7 @@ class Utils {
 
     try {
       chrome.runtime.sendMessage({
-        type: 'PAGE_LOAD_NOTIFICATION',
+        type: WorkerMessages.PAGE_LOAD_NOTIFICATION,
         url: window.location.href,
         timestamp: Date.now(),
         triggerSource: triggerSource
@@ -246,7 +246,7 @@ class Utils {
 
       try {
         chrome.runtime.sendMessage({
-          type: 'DETECTION_DATA',
+          type: WorkerMessages.DETECTION_DATA,
           data: plainPageData,
           tabId: null,
           timestamp: Date.now()
@@ -372,23 +372,31 @@ class Utils {
       historyExcludedDomains: Array.isArray(historySettings.historyExcludedDomains) ? historySettings.historyExcludedDomains.filter(d => typeof d === 'string') : [],
       historyChangeAlerts: ['pinned', 'all'].includes(historySettings.historyChangeAlerts) ? historySettings.historyChangeAlerts : 'off',
       historyBackup: ['daily', 'weekly', 'monthly'].includes(historySettings.historyBackup) ? historySettings.historyBackup : 'off',
-      historyClearOnClose: historySettings.historyClearOnClose === true
+      historyClearOnClose: historySettings.historyClearOnClose === true,
+      // Pages that pin themselves (HistoryPolicy.shouldAutoPin reads and clamps these)
+      historyAutoPinHard: historySettings.historyAutoPinHard === true,
+      historyAutoPinVendors: Array.isArray(historySettings.historyAutoPinVendors) ? historySettings.historyAutoPinVendors.filter(name => typeof name === 'string') : [],
+      historyAutoPinMinConfidence: historySettings.historyAutoPinMinConfidence,
+      // The size History may take (HistoryStore.budgetFor reads it; larger than 6 MB needs the unlimitedStorage permission)
+      historyMaxMB: historySettings.historyMaxMB,
+      // The watchlist (HistoryPolicy.watchModeOf reads it: off, daily or weekly)
+      historyWatch: historySettings.historyWatch
     };
   }
 
   /**
-   * Check if a URL is blacklisted
+   * Is this page left unscanned because of Settings → Detection → Sites? (The name is from when the only mode was a
+   * list of skipped sites; the other mode is a list of the only sites to scan: see ScanScope.)
    * @param {string} url - URL to check
-   * @returns {Promise<boolean>} True if URL's domain is blacklisted
+   * @returns {Promise<boolean>} True if the page is skipped
    */
   static async isUrlBlacklisted(url) {
     if (!url) return false;
 
     try {
       const settings = await this.getSettings();
-      const blacklist = settings.detection?.blacklistedDomains || settings.blacklistedDomains || [];
-      const hostname = UrlUtils.getHostnameFromUrl(url);
-      return blacklist.includes(hostname);
+      const legacy = settings.blacklistedDomains ? { blacklistedDomains: settings.blacklistedDomains } : {};
+      return ScanScope.isExcluded(url, { ...legacy, ...settings.detection });
     } catch (error) {
       Logger.error('UTIL', 'Error checking blacklist:', error);
       return false;

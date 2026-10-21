@@ -3,13 +3,30 @@ class CategoryManager {
     constructor() {
         this.categories = {};
         this.initialized = false;
+        this.watchStorage();
+    }
+
+    /**
+     * Colours saved elsewhere reach this instance too: the worker syncs them after a Save in Settings, and an open
+     * popup would otherwise draw its chips with the colours it loaded.
+     */
+    watchStorage() {
+        if (typeof chrome === 'undefined' || !chrome.storage?.onChanged?.addListener) return;
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area !== 'local' || !changes.scrapfly_categories || !this.initialized) return;
+            const value = typeof StorageManager !== 'undefined'
+                ? StorageManager.parseStoredValue(changes.scrapfly_categories.newValue, 'scrapfly_categories')
+                : changes.scrapfly_categories.newValue;
+            const categories = value && (value.categories || value);
+            if (categories && typeof categories === 'object') this.categories = categories;
+        });
     }
 
     static getPackagedFallbackIndex() {
         return {
             version: '1.0.0',
             antibot: {
-                colour: '#FF5733',
+                colour: Categories.DEFAULT_COLORS.antibot,
                 detectors: [
                     'detect-akamai',
                     'detect-cloudflare',
@@ -26,11 +43,25 @@ class CategoryManager {
                     'detect-meetrics',
                     'detect-ocule',
                     'detect-cheq',
-                    'detect-kasada'
+                    'detect-kasada',
+                    'detect-anubis',
+                    'detect-aliyunwaf',
+                    'detect-jiasule',
+                    'detect-ruishu',
+                    'detect-fingerprintjs',
+                    'detect-netacea',
+                    'detect-azurefrontdoor',
+                    'detect-yundun',
+                    'detect-radware',
+                    'detect-amazon',
+                    'detect-cloudflare-waitingroom',
+                    'detect-hunt',
+                    'detect-deepseek-pow',
+                    'detect-openai-sentinel'
                 ]
             },
             captcha: {
-                colour: '#33C3FF',
+                colour: Categories.DEFAULT_COLORS.captcha,
                 detectors: [
                     'detect-hcaptcha',
                     'detect-recaptcha',
@@ -40,11 +71,21 @@ class CategoryManager {
                     'detect-aliexpress',
                     'detect-friendlycaptcha',
                     'detect-captchaeu',
-                    'detect-turnstile'
+                    'detect-turnstile',
+                    'detect-yidun',
+                    'detect-aliyun',
+                    'detect-smartcaptcha',
+                    'detect-dingxiang',
+                    'detect-capy',
+                    'detect-shumei',
+                    'detect-mtcaptcha',
+                    'detect-binance-captcha',
+                    'detect-prosopo',
+                    'detect-basilisk'
                 ]
             },
             fingerprint: {
-                colour: '#3b82f6',
+                colour: Categories.DEFAULT_COLORS.fingerprint,
                 detectors: [
                     'detect-audio-fingerprint',
                     'detect-battery-fingerprint',
@@ -69,21 +110,8 @@ class CategoryManager {
                     'detect-webrtc-fingerprint'
                 ]
             },
-            tags: {
-                dom: { colour: '#3b82f6' },
-                header: { colour: '#FF33A8' },
-                cookie: { colour: '#FFC133' },
-                content: { colour: '#33FFF3' },
-                url: { colour: '#00BCD4' },
-                js_hooks: { colour: '#00E5FF' },
-                window: { colour: '#4CAF50' },
-                payload: { colour: '#9C27B0' }
-            },
-            badge: {
-                low: { colour: '#4CAF50' },
-                medium: { colour: '#FFA500' },
-                high: { colour: '#FF4444' }
-            }
+            tags: Object.fromEntries(Object.entries(FormatUtils.METHOD_TAG_COLOR_KEYS)
+                .map(([method, key]) => [method, { colour: FormatUtils.DEFAULT_TAG_COLORS[key] }]))
         };
     }
 
@@ -131,10 +159,6 @@ class CategoryManager {
 
             const indexData = await response.json();
             this.categories = indexData;
-
-            if (!this.categories.badge) {
-                Logger.warn('DETECTOR', 'No badge section found in index.json');
-            }
 
         } catch (error) {
             Logger.error('DETECTOR', 'Failed to load detectors index, using packaged fallback', error);
@@ -272,6 +296,14 @@ class CategoryManager {
                     }
                 }
 
+                // The tag colours (Settings → Tag colours) reach the chips of the details, History and Rules the same way
+                const tagColors = settingsData?.tagColors || {};
+                for (const [method, key] of Object.entries(FormatUtils.METHOD_TAG_COLOR_KEYS)) {
+                    if (typeof tagColors[key] !== 'string' || !/^#[0-9a-f]{6}$/i.test(tagColors[key])) continue;
+                    this.categories.tags = this.categories.tags || {};
+                    this.categories.tags[method] = { ...this.categories.tags[method], colour: tagColors[key] };
+                }
+
                 // Save updated categories to storage
                 await this.saveToStorage();
                 return true;
@@ -289,27 +321,12 @@ class CategoryManager {
      * @returns {string} Formatted display name
      */
     getCategoryDisplayName(categoryName) {
-        const i18nKeyByCategory = {
-            antibot: 'categoryAntibot',
-            captcha: 'categoryCaptcha',
-            fingerprint: 'categoryFingerprint'
-        };
-        const key = i18nKeyByCategory[categoryName?.toLowerCase()];
-        if (key && typeof I18n !== 'undefined') {
-            const translated = I18n.get(key);
-            if (translated) return translated;
+        const known = Categories.labelOf(categoryName);
+        if (known) {
+            const translated = typeof I18n !== 'undefined' ? I18n.get(known[0]) : null;
+            return translated || known[1];
         }
-
-        switch (categoryName?.toLowerCase()) {
-            case 'antibot':
-                return 'Anti-Bot';
-            case 'captcha':
-                return 'Captcha';
-            case 'fingerprint':
-                return 'Fingerprint';
-            default:
-                return categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
-        }
+        return categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
     }
 
     /**
@@ -318,17 +335,7 @@ class CategoryManager {
      * @returns {string} CSS class name for badges
      */
     getCategoryBadgeClass(categoryName) {
-        switch (categoryName?.toLowerCase()) {
-            case 'antibot':
-            case 'anti-bot':
-                return 'antibot';
-            case 'captcha':
-                return 'captcha';
-            case 'fingerprint':
-                return 'fingerprint';
-            default:
-                return 'primary';
-        }
+        return Categories.badgeClass(categoryName);
     }
 
     /**
@@ -360,46 +367,6 @@ class CategoryManager {
     }
 
     /**
-     * Get badge colors configuration
-     * @returns {object} Object with low, medium, high badge colors
-     */
-    getBadgeColors() {
-        return this.categories.badge || {
-            low: { colour: BADGE.COLORS.LOW },
-            medium: { colour: BADGE.COLORS.MEDIUM },
-            high: { colour: BADGE.COLORS.HIGH }
-        };
-    }
-
-    /**
-     * Get color for a specific badge level
-     * @param {string} level - Badge level: 'low', 'medium', or 'high'
-     * @returns {string} Badge color hex value or default
-     */
-    getBadgeColor(level) {
-        const badgeColors = this.getBadgeColors();
-        const normalizedLevel = level.toLowerCase();
-
-        const levelData = badgeColors[normalizedLevel];
-
-        let color;
-        if (typeof levelData === 'string') {
-            color = levelData;
-        } else if (levelData && levelData.colour) {
-            color = levelData.colour;
-        } else {
-            const defaults = {
-                low: BADGE.COLORS.LOW,
-                medium: BADGE.COLORS.MEDIUM,
-                high: BADGE.COLORS.HIGH
-            };
-            color = defaults[normalizedLevel] || BADGE.COLORS.LOW;
-        }
-
-        return color;
-    }
-
-    /**
      * Badge colours explicitly saved from the settings modal, read raw from
      * storage (not merged with defaults), or null when none were saved.
      * @returns {Promise<Object|null>} {low, medium, high}
@@ -424,77 +391,13 @@ class CategoryManager {
     }
 
     /**
-     * Get badge colors from CategoryManager instance or storage
-     * @param {CategoryManager} [categoryManagerInstance] - Optional CategoryManager instance
+     * The toolbar badge colours: the ones saved in Settings → Badge colors, else the shared defaults
+     * (the same ones Settings shows before anything is saved).
      * @returns {Promise<Object>} Badge colors {low, medium, high}
      */
-    static async getBadgeColors(categoryManagerInstance = null) {
-        try {
-            // Colours the user saved in Settings > General > Badge Colors win over
-            // the index.json defaults; without this the setting never reached the
-            // toolbar badge.
-            const saved = await CategoryManager.getSavedBadgeColors();
-            if (saved) return saved;
-
-            if (categoryManagerInstance && categoryManagerInstance.initialized) {
-                return {
-                    low: categoryManagerInstance.getBadgeColor('low'),
-                    medium: categoryManagerInstance.getBadgeColor('medium'),
-                    high: categoryManagerInstance.getBadgeColor('high')
-                };
-            }
-
-            const normalizeColor = (value, fallback) => {
-                if (typeof value === 'string') return value;
-                if (value && typeof value === 'object') {
-                    if (typeof value.colour === 'string') return value.colour;
-                    if (typeof value.color === 'string') return value.color;
-                }
-                return fallback;
-            };
-
-            const result = await chrome.storage.local.get(['scrapfly_categories', 'scrapfly_settings']);
-
-            if (result.scrapfly_categories) {
-                const categoriesData = typeof result.scrapfly_categories === 'string'
-                    ? JSON.parse(result.scrapfly_categories)
-                    : result.scrapfly_categories;
-
-                const categoriesRoot = categoriesData?.categories || categoriesData;
-                const badge = categoriesRoot?.badge;
-
-                if (badge) {
-                    return {
-                        low: normalizeColor(badge.low, BADGE.COLORS.LOW),
-                        medium: normalizeColor(badge.medium, BADGE.COLORS.MEDIUM),
-                        high: normalizeColor(badge.high, BADGE.COLORS.HIGH)
-                    };
-                }
-            }
-
-            const settingsData = await Utils.getSettings();
-            const badgeColors = settingsData?.badgeColors;
-            if (badgeColors) {
-                return {
-                    low: badgeColors.low || BADGE.COLORS.LOW,
-                    medium: badgeColors.medium || BADGE.COLORS.MEDIUM,
-                    high: badgeColors.high || BADGE.COLORS.HIGH
-                };
-            }
-
-            return {
-                low: BADGE.COLORS.LOW,
-                medium: BADGE.COLORS.MEDIUM,
-                high: BADGE.COLORS.HIGH
-            };
-        } catch (error) {
-            Logger.error('BADGE', 'Error getting badge colors', error);
-            return {
-                low: BADGE.COLORS.LOW,
-                medium: BADGE.COLORS.MEDIUM,
-                high: BADGE.COLORS.HIGH
-            };
-        }
+    static async getBadgeColors() {
+        const saved = await CategoryManager.getSavedBadgeColors();
+        return saved || { low: BADGE.COLORS.LOW, medium: BADGE.COLORS.MEDIUM, high: BADGE.COLORS.HIGH };
     }
 }
 

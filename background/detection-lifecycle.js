@@ -191,6 +191,10 @@ async function applyLateResponses(tabId) {
     const tab = await chrome.tabs.get(tabId).catch(() => null);
     const pageUrl = tab && tab.url;
     if (!pageUrl || detectionStates.has(tabId)) return;
+    // A skipped site, or one left out in "only these sites" mode, keeps nothing from its responses either: no cache
+    // entry, no badge count, no popup update (the page-load check refused its scan for the same reason)
+    if (await Utils.isUrlBlacklisted(pageUrl)) return;
+    if (detectionStates.has(tabId)) return;
     const responses = responsesForPage(tabId, pageUrl);
     if (responses.length === 0) return;
     const storedUrls = networkUrlsStore.get(tabId);
@@ -225,7 +229,7 @@ async function applyLateResponses(tabId) {
     await setBadgeForDetections(tabId, pageUrl, finalResults);
     Logger.detection(`${Logger.hostOf(pageUrl)}: added from responses after the scan: ${evidence.map(d => d.detector?.name || d.name).join(', ')}`);
     chrome.runtime.sendMessage({
-        type: 'NEW_DETECTION_DATA',
+        type: WorkerMessages.NEW_DETECTION_DATA,
         tabId,
         url: pageUrl,
         detectionResults: finalResults,
@@ -284,6 +288,18 @@ async function finalizeDetection(tabId, state) {
     if (!DetectionSessionStore.isCurrent(tabId, state)) return;
 
     let finalResults = Array.from(mergedDetections.values()).filter(rescoreCombinations);
+
+    // A site that is skipped, or left out in "only these sites" mode, keeps nothing from a scan (one that began
+    // before it was excluded, or a request that got past the checks): no cache entry, History, webhook or page
+    // event, and its badge says it is paused. A watchlist check only opens pages that pass the same test.
+    const watchTab = typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId);
+    if (!watchTab && await Utils.isUrlBlacklisted(state.url)) {
+        if (!DetectionSessionStore.isCurrent(tabId, state)) return;
+        Logger.detection(`${Logger.hostOf(state.url)}: excluded domain, scan results not kept`);
+        await setBadgeForDetections(tabId, state.url, [], () => DetectionSessionStore.isCurrent(tabId, state));
+        if (DetectionSessionStore.isCurrent(tabId, state)) DetectionSessionStore.finish(tabId, state);
+        return;
+    }
     const normalizedFavicon = UrlUtils.normalizeFaviconForStorage(state.favicon, state.url);
 
     // Store to cache
@@ -301,6 +317,11 @@ async function finalizeDetection(tabId, state) {
         finalResults = storedDataWithExpiry.detectionResults;
         Logger.detection(`${Logger.hostOf(state.url)}: rescan found nothing, kept the cached detections`);
     }
+
+    // A watchlist check is waiting for this scan: it gets the finished results, and the scan leaves no History entry
+    // of its own (the check updates the page it watches) and sends nothing to the webhook
+    const watching = typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId);
+    if (watching) HistoryWatch.scanFinished(tabId, state.url, finalResults);
 
     // Update state with expiry info for immediate popup queries
     if (storedDataWithExpiry) {
@@ -320,7 +341,7 @@ async function finalizeDetection(tabId, state) {
 
     // Notify popup (with the cache fields it shows: expiry, scope, favicon)
     chrome.runtime.sendMessage({
-        type: 'NEW_DETECTION_DATA',
+        type: WorkerMessages.NEW_DETECTION_DATA,
         tabId: tabId,
         url: state.url,
         detectionResults: finalResults,
@@ -335,7 +356,7 @@ async function finalizeDetection(tabId, state) {
     // Notify content script for JS API event dispatch (onDetection)
     try {
         await chrome.tabs.sendMessage(tabId, {
-            type: 'DETECTION_COMPLETE',
+            type: WorkerMessages.DETECTION_COMPLETE,
             url: state.url,
             detections: finalResults,
             detectionCount: finalResults.length,
@@ -349,7 +370,7 @@ async function finalizeDetection(tabId, state) {
     if (!DetectionSessionStore.isCurrent(tabId, state)) return;
 
     // Save complete detections (includes hooks/fingerprints) to history
-    if (finalResults.length > 0 && !preservedExistingCache) {
+    if (finalResults.length > 0 && !preservedExistingCache && !watching) {
         try {
             const pageData = {
                 url: state.url,
@@ -371,6 +392,21 @@ async function finalizeDetection(tabId, state) {
             }
         } catch (error) {
             Logger.error('DETECTION', '[Finalize] Error saving to history:', error);
+        }
+    }
+
+    // The webhook gets the finished results (hooks, fingerprints and late requests included) of a page scanned just now
+    // (whatever happens to the webhook never fails the scan)
+    if (finalResults.length > 0 && !preservedExistingCache && !watching && DetectionSessionStore.isCurrent(tabId, state)) {
+        try {
+            await Settings.sendWebhookIfEnabled({
+                url: state.url,
+                hostname: UrlUtils.getHostnameFromUrl(state.url),
+                title: state.tabTitle,
+                favicon: UrlUtils.normalizeFaviconForStorage(state.favicon, state.url)
+            }, finalResults, { trigger: 'scan' });
+        } catch (error) {
+            Logger.warn('NETWORK', 'The webhook step failed', error);
         }
     }
 
@@ -696,10 +732,5 @@ async function processDetectionData(message, sender) {
         if (DetectionSessionStore.fail(tabId, state, error)) throw error;
     }
 
-    // Defer popup notification until finalization with complete results
-
-    // Send webhook if enabled
-    if (DetectionSessionStore.isCurrent(tabId, state) && detectionResults.length > 0) {
-        await Settings.sendWebhookIfEnabled(pageData, detectionResults);
-    }
+    // The popup and the webhook are told at finalization, with the complete results
 }

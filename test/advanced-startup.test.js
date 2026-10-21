@@ -1,4 +1,5 @@
 const { test } = require('node:test');
+global.WorkerMessages = require('../modules/core/worker-messages.js');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -19,7 +20,7 @@ function load(response, settings) {
     '#noAdvancedState': { style: { display: 'none' } }, '#advancedLoadingState': { style: { display: 'flex' } } };
   const requests = [];
   const retries = [];
-  const context = { window: {}, Logger: { ui() {}, debug() {}, error() {} },
+  const context = { WorkerMessages: require('../modules/core/worker-messages.js'), window: {}, Logger: { ui() {}, debug() {}, error() {} },
     FormatUtils: require('../utils/format-utils'),
     document: { querySelector: selector => elements[selector] || null },
     chrome: { runtime: { getURL: p => p, sendMessage: (message, callback) => {
@@ -28,6 +29,8 @@ function load(response, settings) {
     setTimeout: (callback, delay) => { if (delay === 500) { retries.push(delay); queueMicrotask(callback); } return 1; }, clearTimeout() {} };
   if (settings !== undefined) context.Utils = { getSettings: async () => settings };
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../modules/core/categories.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../modules/core/capture-retention.js'), 'utf8'), context);
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../modules/advanced/vendor-registry.js'), 'utf8'), context);
   for (const file of ['advanced.js', 'advanced-runtime.js', 'advanced-tools.js']) vm.runInContext(read(`sections/advanced/${file}`), context);
   const advanced = new context.window.Advanced({ initialized: true }, { currentResults: [] });

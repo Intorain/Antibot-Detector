@@ -38,7 +38,7 @@ SettingsRuntime.handleEnableToggle = async function(enabled, context = null) {
 
       if (!hasBackgroundContext) {
         chrome.runtime.sendMessage({
-          type: 'EXTENSION_TOGGLE_CHANGED',
+          type: WorkerMessages.EXTENSION_TOGGLE_CHANGED,
           enabled: enabled
         }).catch(() => {});
       }
@@ -49,7 +49,7 @@ SettingsRuntime.handleEnableToggle = async function(enabled, context = null) {
         // In popup context (!hasBackgroundContext), skip — background handles it via EXTENSION_TOGGLE_CHANGED.
         // Without this guard, popup sets all badges to EMPTY which races with background's restore.
         if (hasBackgroundContext) {
-          const badgeColors = await context.CategoryManager.getBadgeColors(context.categoryManager);
+          const badgeColors = await context.CategoryManager.getBadgeColors();
           const tabs = await chrome.tabs.query({});
 
           for (const tab of tabs) {
@@ -253,8 +253,31 @@ SettingsRuntime.buildWebhookRequest = function(webhook, ctx) {
     return { url, options };
 };
 
+/**
+ * Sign a built request when a secret is set (WebhookBody: the HMAC-SHA256 of the text body in Scrapfly's two
+ * signature headers). Custom headers named like either one go first, whatever their case: a plain object handed to
+ * fetch would otherwise join them into one "forged, real" header. Nothing is sent when signing fails, and the error
+ * names neither the secret nor the body.
+ */
+SettingsRuntime._signWebhookRequest = async function(options, secret) {
+    if (!WebhookBody.cleanSecret(secret)) return options;
+    const reserved = [WebhookBody.SIGNATURE_HEADER, WebhookBody.SIGNATURE_HEADER_LOWERCASE].map(name => name.toLowerCase());
+    for (const name of Object.keys(options.headers || {})) {
+        if (reserved.includes(name.toLowerCase())) delete options.headers[name];
+    }
+    let digest;
+    try {
+        digest = await WebhookBody.signature(secret, options.body);
+    } catch (_) {
+        throw new Error('Webhook signing failed');
+    }
+    if (digest) options.headers = Object.assign(options.headers || {}, WebhookBody.signatureHeaders(digest));
+    return options;
+};
+
 SettingsRuntime.sendWebhook = async function(webhook, ctx) {
     const { url, options } = SettingsRuntime.buildWebhookRequest(webhook, ctx);
+    await SettingsRuntime._signWebhookRequest(options, webhook.webhookSecret);
     try {
         return await fetch(url, options);
     } catch (_) {
@@ -263,19 +286,7 @@ SettingsRuntime.sendWebhook = async function(webhook, ctx) {
     }
 };
 
-SettingsRuntime.sendWebhookIfEnabled = async function(pageData, detectionResults) {
-    try {
-        const settings = await Utils.getSettings();
-        const webhook = settings.webhook || {};
-        if (!webhook.enableWebhook || !webhook.webhookUrl) return;
-        const ctx = SettingsRuntime._buildWebhookContext(pageData, detectionResults);
-        const response = await SettingsRuntime.sendWebhook(webhook, ctx);
-        if (response.ok) Logger.network('Webhook sent successfully', { status: response.status });
-        else Logger.warn('NETWORK', 'Webhook returned non-OK status', { status: response.status });
-    } catch (_) {
-        Logger.error('NETWORK', 'Webhook could not be sent');
-    }
-};
+// Whether a page is sent, and the record of it: modules/settings/webhook-runtime.js (the service worker's side)
 
 SettingsRuntime.dispatchJsApiEvent = async function(eventName, data = {}) {
     try {
