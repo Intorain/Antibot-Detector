@@ -141,3 +141,24 @@ test('changedOnly keeps the pages marked Changed by their latest scan, and combi
   assert.deepStrictEqual(E.filter(items, { changedOnly: true, pinnedOnly: true }, NOW).map(i => i.id), ['c1']);
   assert.deepStrictEqual(E.filter(items, { changedOnly: true, category: 'captcha' }, NOW).map(i => i.id), ['c2']);
 });
+
+test('Markdown export: a table with one escaped row per page, dated when timestamps are on', () => {
+  const HistoryExportMd = require('../modules/core/history-export.js');
+  const items = [{ url: 'https://a.example/x', hostname: 'a.example', title: 'A | B', timestamp: 1_800_000_000_000, pinned: true, note: 'line1\nline2',
+    detections: [{ detector: { name: 'Cloudflare' }, category: 'Anti-Bot', confidence: 95 }] }];
+  const out = HistoryExportMd.build(items, { format: 'md' });
+  assert.strictEqual(out.type, 'text/markdown');
+  assert.strictEqual(out.extension, 'md');
+  assert.ok(out.text.includes('| Page | Address | Date | Protections | Pinned | Note |'));
+  assert.ok(out.text.includes('| A \\| B | https://a.example/x | 2027-01-15T08:00:00.000Z | Cloudflare (Anti-Bot, 95%) | yes | line1 line2 |'));
+  assert.ok(!HistoryExportMd.build(items, { format: 'md', includeTimestamps: false }).text.includes('Date'));
+  assert.strictEqual(HistoryExportMd.fileName('md', 0), 'scrapfly-history-1970-01-01.md');
+});
+
+test('Markdown export: a page title cannot become an image, a link, HTML or a new row', () => {
+  const HistoryExportMd = require('../modules/core/history-export.js');
+  const text = HistoryExportMd.build([{ url: 'https://a.example/', title: '![x](https://t.example/p.gif) <img src=x> [l](u) *b* `c`', detections: [] }], { format: 'md' }).text;
+  const row = text.split('\n')[4];
+  assert.ok(row.includes('!\\[x\\](https://t.example/p.gif) \\<img src=x\\> \\[l\\](u) \\*b\\* \\`c\\`'), row);
+  assert.strictEqual((row.match(/(?<!\\)\|/g) || []).length, 7, 'six cells, no extra column');
+});

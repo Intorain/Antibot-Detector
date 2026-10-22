@@ -1960,6 +1960,7 @@ class DetectionEngineManager {
                 chrome.action.setBadgeText({ text: BADGE.TEXT.DISABLED, tabId: tabId }).catch(() => {});
                 setBadgeTextColor(tabId, false, BADGE.COLORS.DISABLED);
                 chrome.action.setBadgeBackgroundColor({ color: BADGE.COLORS.DISABLED, tabId: tabId }).catch(() => {});
+                if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'off');
                 return;
             }
         } catch (error) {
@@ -1975,6 +1976,7 @@ class DetectionEngineManager {
             chrome.action.setBadgeText({ text: BADGE.TEXT.BLACKLISTED, tabId: tabId }).catch(() => {});
             setBadgeTextColor(tabId, true);
             chrome.action.setBadgeBackgroundColor({ color: BADGE.COLORS.BLACKLISTED, tabId: tabId }).catch(() => {});
+            if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'skipped');
             return;
         }
         setPausedIcon(tabId, false);
@@ -1995,10 +1997,12 @@ class DetectionEngineManager {
                 chrome.action.setBadgeText({ text: count, tabId: tabId }).catch(() => {});
                 setBadgeTextColor(tabId, false, color);
                 chrome.action.setBadgeBackgroundColor({ color: color, tabId: tabId }).catch(() => {});
+                if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'found', storedData.detectionResults || []);
             } else {
                 chrome.action.setBadgeText({ text: BADGE.TEXT.CLEAN, tabId: tabId }).catch(() => {});
                 setBadgeTextColor(tabId);
                 chrome.action.setBadgeBackgroundColor({ color: BADGE.COLORS.CLEAN, tabId: tabId }).catch(() => {});
+                if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'clean');
             }
 
             // Notify popup if open

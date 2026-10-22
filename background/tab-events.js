@@ -114,6 +114,7 @@ function setupTabListeners() {
             chrome.action.setBadgeBackgroundColor({ color: BADGE.COLORS.DISABLED, tabId: tabId }).catch((error) => {
                 Logger.debug('BACKGROUND', `[TabUpdate] Failed to set badge color for tab ${tabId}:`, error.message);
             });
+            if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'off');
         }
 
         // URL change: abort active detection, clear cache tracking
@@ -222,12 +223,14 @@ function setupTabListeners() {
                     const badgeText = await chrome.action.getBadgeText({ tabId: newTabId }).catch(() => '');
                     if (badgeText === BADGE.TEXT.DISABLED || isLoadingBadgeText(badgeText)) {
                         await chrome.action.setBadgeText({ text: BADGE.TEXT.EMPTY, tabId: newTabId }).catch(() => {});
+                        if (typeof ToolbarTitle !== 'undefined') await ToolbarTitle.reset(chrome, newTabId);
                     }
                 }
             } else if (!hasInFlightDetection) {
                 const badgeText = await chrome.action.getBadgeText({ tabId: newTabId }).catch(() => '');
                 if (badgeText === BADGE.TEXT.DISABLED || isLoadingBadgeText(badgeText)) {
                     await chrome.action.setBadgeText({ text: BADGE.TEXT.EMPTY, tabId: newTabId }).catch(() => {});
+                    if (typeof ToolbarTitle !== 'undefined') await ToolbarTitle.reset(chrome, newTabId);
                 }
             }
         } catch (error) {

@@ -46,7 +46,8 @@ function harness({ webhook = {}, stored = {}, translations = {}, fetchImpl } = {
     document: {
       querySelector: selector => fields[selector] || null,
       querySelectorAll: selector => (selector === '[data-webhook-category]' ? boxes : []),
-      createElement: tag => new Element(tag)
+      createElement: tag => new Element(tag),
+      createTextNode: text => ({ text })
     },
     chrome: {
       runtime: { sendMessage(message, callback) { sent.push(message); if (callback) callback({ status: 'ok' }); }, lastError: undefined },
@@ -291,3 +292,133 @@ test('an invalid secret is flagged under the field, blocks Save with its message
   assert.equal(h.sent.length, 0, 'no record line for a Test that did not run');
   assert.equal(h.fields['#testWebhookBtn'].disabled, false);
 });
+
+// ---- Validate JSON under the payload template
+function payloadHarness() {
+  const h = harness();
+  const status = { hidden: true, className: '', textContent: '', offsetWidth: 0, flashed: 0, classList: { remove() {}, add(name) { if (name === 'is-checked') status.flashed++; } } };
+  const textarea = Object.assign(h.fields['#webhookPayload'], {
+    focused: false, selection: null, scrollTop: 0, clientHeight: 100, attributes: {},
+    focus() { this.focused = true; }, setSelectionRange(from, to) { this.selection = [from, to]; },
+    setAttribute(name, value) { this.attributes[name] = value; }, removeAttribute(name) { delete this.attributes[name]; }
+  });
+  const button = { hidden: true };
+  h.fields['#webhookPayloadStatus'] = status;
+  h.fields['#webhookPayloadValidateBtn'] = button;
+  return { ...h, status, textarea, button, view: h.ui() };
+}
+
+test('Validate JSON confirms a valid template: a toast, the status flashes, and the field is marked valid', () => {
+  const h = payloadHarness();
+  h.textarea.value = '{"url": "<SITEURL>", "count": <DETECTION_COUNT>}';
+  assert.deepEqual(h.plain(h.SettingsUI.validateWebhookPayloadNow.call(h.view)), { ok: true });
+  assert.equal(h.status.textContent, 'Valid JSON');
+  assert.match(h.status.className, /is-valid/);
+  assert.equal(h.status.flashed, 1);
+  assert.equal(h.textarea.attributes['aria-invalid'], 'false');
+  assert.deepEqual(h.notifications, ['Valid JSON']);
+  assert.equal(h.textarea.selection, null, 'a valid template leaves the caret alone');
+  assert.equal(h.button.hidden, false, 'the button is there for a JSON template');
+});
+
+test('Validate JSON on an empty template says the default payload is sent, and the status is neutral', () => {
+  const h = payloadHarness();
+  h.textarea.value = '  ';
+  const result = h.plain(h.SettingsUI.validateWebhookPayloadNow.call(h.view));
+  assert.equal(result.ok, true);
+  assert.equal(result.empty, true);
+  assert.equal(h.status.hidden, false);
+  assert.match(h.status.className, /is-neutral/);
+  assert.equal(h.status.textContent, 'Empty: the default payload is sent');
+  assert.deepEqual(h.notifications, ['Empty: the default payload is sent']);
+});
+
+test('Validate JSON on an invalid template names the line, selects it and brings it into view', () => {
+  const h = payloadHarness();
+  h.textarea.value = '{\n  "a": 1,\n  "b": \n}\n';
+  const result = h.plain(h.SettingsUI.validateWebhookPayloadNow.call(h.view));
+  assert.equal(result.ok, false);
+  assert.equal(result.line, 4, 'the closing brace after the empty value is where it breaks');
+  const lines = h.textarea.value.split('\n');
+  const start = lines.slice(0, result.line - 1).reduce((sum, line) => sum + line.length + 1, 0);
+  assert.deepEqual(h.textarea.selection, [start, start + lines[result.line - 1].length], 'the whole failing line is selected');
+  assert.equal(h.textarea.focused, true);
+  assert.equal(h.status.textContent, `Invalid JSON (line ${result.line})`);
+  assert.match(h.status.className, /is-invalid/);
+  assert.equal(h.textarea.attributes['aria-invalid'], 'true');
+  assert.deepEqual(h.notifications, [`Invalid JSON (line ${result.line})`]);
+});
+
+test('the line to select stays inside the template, and the button is off for a body that is not JSON', () => {
+  const h = payloadHarness();
+  h.textarea.value = 'a\nb';
+  h.SettingsUI.selectWebhookPayloadLine(h.textarea, 99);
+  assert.deepEqual(h.textarea.selection, [2, 3], 'a line past the end selects the last line');
+  h.SettingsUI.selectWebhookPayloadLine(h.textarea, 0);
+  assert.deepEqual(h.textarea.selection, [0, 1], 'line 0 counts as the first');
+
+  h.fields['#webhookContentType'] = { value: 'text/plain' };
+  h.SettingsUI.refreshWebhookPayloadValidation.call(h.view);
+  assert.equal(h.button.hidden, true);
+  assert.equal(h.status.hidden, true);
+});
+
+test('the Settings page has the Validate JSON button beside Reset template, and the script wires it once', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../sections/settings/settings.html'), 'utf8');
+  assert.match(html, /id="webhookPayloadValidateBtn"[^>]*data-i18n="webhookValidateJson"/);
+  assert.ok(html.indexOf('id="webhookPayloadValidateBtn"') < html.indexOf('id="webhookPayloadResetBtn"'));
+  const code = fs.readFileSync(path.join(__dirname, '../sections/settings/settings-ui-webhook.js'), 'utf8');
+  assert.equal(code.split('#webhookPayloadValidateBtn').length - 1, 2, 'one lookup to show or hide it and one to wire it');
+});
+
+// ---- The variables in colour
+function mirrorParts(mirror) {
+  return mirror.children.map(node => (node.className ? ['variable', node.textContent] : ['text', node.text]));
+}
+
+test('the template is drawn again behind the field with the variables Scrapfly fills in colour, an unknown one left plain', () => {
+  const h = payloadHarness();
+  const mirror = h.context.document.createElement('pre');
+  h.fields['#webhookPayloadMirror'] = mirror;
+  h.textarea.value = '{"url": "<SITEURL>", "x": <UNKNOWN>, "n": <DETECTION_COUNT>}\n';
+  h.SettingsUI.renderWebhookPayloadMirror();
+  assert.deepEqual(mirrorParts(mirror), [
+    ['text', '{"url": "'], ['variable', '<SITEURL>'], ['text', '", "x": <UNKNOWN>, "n": '], ['variable', '<DETECTION_COUNT>'],
+    ['text', '}\n'], ['text', ' ']
+  ], 'a last empty line gets a character, so the two boxes keep the same height');
+  assert.ok(mirror.children.filter(node => node.className).every(node => node.className === 'template-var'));
+});
+
+test('every variable of the sender gets its colour, and markup in the template stays text', () => {
+  const h = payloadHarness();
+  const mirror = h.context.document.createElement('pre');
+  h.fields['#webhookPayloadMirror'] = mirror;
+  h.textarea.value = WebhookBody.VARIABLES.map(v => v.token).join(' ');
+  h.SettingsUI.renderWebhookPayloadMirror();
+  assert.deepEqual(mirror.children.filter(node => node.className).map(node => node.textContent), WebhookBody.VARIABLES.map(v => v.token));
+
+  h.textarea.value = '<img src=x onerror=alert(1)> <script>x</script>';
+  h.SettingsUI.renderWebhookPayloadMirror();
+  assert.deepEqual(mirrorParts(mirror), [['text', '<img src=x onerror=alert(1)> <script>x</script>']], 'no element is made from the template');
+});
+
+test('the mirror follows the check and the scroll of the field, and an empty field leaves it empty', () => {
+  const h = payloadHarness();
+  const mirror = Object.assign(h.context.document.createElement('pre'), { scrollTop: 0 });
+  h.fields['#webhookPayloadMirror'] = mirror;
+  h.textarea.value = '{"t": "<TITLE>"}';
+  h.textarea.scrollTop = 40;
+  h.SettingsUI.refreshWebhookPayloadValidation.call(h.view);
+  assert.deepEqual(mirrorParts(mirror), [['text', '{"t": "'], ['variable', '<TITLE>'], ['text', '"}']], 'typing, a variable chip and Reset all end in the check');
+  assert.equal(mirror.scrollTop, 40);
+  h.textarea.value = '';
+  h.SettingsUI.renderWebhookPayloadMirror();
+  assert.deepEqual(mirrorParts(mirror), []);
+});
+
+test('the Settings page puts the mirror behind the template field, hidden from screen readers', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../sections/settings/settings.html'), 'utf8');
+  const editor = /<div class="template-editor">\s*<pre id="webhookPayloadMirror" class="template-editor-mirror" aria-hidden="true"><\/pre>\s*<textarea id="webhookPayload"/.exec(html);
+  assert.ok(editor, 'the mirror comes first, so the textarea is drawn over it');
+});
+

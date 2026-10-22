@@ -5,6 +5,30 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.3] - 2026-10-22
+
+### Added
+
+- Clicking a "Protections changed" notification opens that page; the backup-failed and History-full notices open Settings → History.
+- Hovering the toolbar icon names what the page has (for example "Cloudflare 95%, DataDome 90%"), or says it is clean, skipped or switched off.
+- Detection tab: Copy offers the uploaded summary, a Markdown table for tickets and chats, or JSON; none includes cookie or header values.
+- Keyboard shortcut Alt+Shift+S (Control+Shift+S on Mac) scans the page again, and the popup can get a shortcut too; Settings → General opens the browser's shortcut settings.
+- History: Open page and Scan again now in an entry's … menu, Scan again now in its details; a scan reloads the page's tab or opens one.
+- Rules: Duplicate in a rule's … menu opens the editor on a copy that saves as a new custom rule; the original stays unchanged.
+- Markdown export: History → Export and Settings → History write one row per page; Statistics → Export writes a report of totals, protections and sites.
+- Settings → Detection → Webhook: Validate JSON under the payload template checks it now and selects the line that fails.
+
+### Changed
+
+- Webhook: the payload template shows its variables in colour, and the JSON check under it has an icon.
+- Webhook Categories are chips like History's, and the tick boxes of History's export dialog match the rest of the interface.
+- Advanced: when a page has only one protection with tools, its tools open straight away instead of one card to choose.
+
+### Fixed
+
+- History → Copy entry copied cookie and header values and address queries, which can hold live tokens; it now leaves them out, like every other copy.
+- Webhook: the JSON check under the payload template names the right line for a stray bracket or a template that stops too soon; it said line 1.
+
 ## [3.0.2] - 2026-10-20
 
 ### Added
@@ -591,6 +615,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.3]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/scrapfly/Antibot-Detector/compare/v2.8.9...v3.0.0

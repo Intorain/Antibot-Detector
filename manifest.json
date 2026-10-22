@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
 
@@ -78,6 +78,16 @@
       "all_frames": false
     }
   ],
+
+  "commands": {
+    "rescan-tab": {
+      "suggested_key": { "default": "Alt+Shift+S", "mac": "MacCtrl+Shift+S" },
+      "description": "__MSG_commandRescanTab__"
+    },
+    "_execute_action": {
+      "description": "__MSG_commandOpenPopup__"
+    }
+  },
 
   "action": {
     "default_popup": "popup.html",

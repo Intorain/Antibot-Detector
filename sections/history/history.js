@@ -774,6 +774,110 @@ class History {
   }
 
   /**
+   * What "Copy entry" writes for one match: what was matched, never its value.
+   * A cookie or header keeps its name, an address loses its query and hash, a
+   * payload keeps its rule pattern: those values carry live tokens
+   * (__cf_bm, datadome, reese84…), which every other copy leaves out too.
+   * @param {object} match - A saved match
+   * @returns {string} The label, '' when there is nothing safe to show
+   */
+  static copyLabel(match) {
+    if (!match || typeof match !== 'object') return '';
+    const type = String(match.type || '').toLowerCase();
+    const text = (v) => (typeof v === 'string' ? v.trim() : '');
+    const before = (value, sep) => {
+      const raw = text(value);
+      const at = raw.indexOf(sep);
+      return at > 0 ? raw.slice(0, at).trim() : '';
+    };
+    const noQuery = (value) => text(value).replace(/[?#].*$/s, '');
+    if (type === 'cookie' || type === 'cookies') return before(match.value, '=') || text(match.name) || text(match.pattern);
+    if (type === 'header' || type === 'headers') return before(match.value, ':') || text(match.name) || text(match.pattern);
+    if (type === 'dom') return History.domSelectorOf(match.value) || text(match.selector) || text(match.pattern);
+    if (type === 'payload') return text(match.pattern) || text(match.name);
+    if (match.fullUrl) return noQuery(match.fullUrl);
+    if (type === 'url' || type === 'urls') return noQuery(match.value) || text(match.pattern) || text(match.name);
+    // Window properties, hook targets, script text: what matched is the value itself
+    return text(match.value) || text(match.name) || text(match.selector) || text(match.pattern);
+  }
+
+  /** "selector=text" as History keeps a DOM match: the selector, "=" inside [ ] kept. */
+  static domSelectorOf(value) {
+    const raw = typeof value === 'string' ? value : '';
+    let depth = 0;
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i] === '[') depth++;
+      else if (raw[i] === ']') depth = Math.max(0, depth - 1);
+      else if (raw[i] === '=' && depth === 0) return raw.slice(0, i).trim();
+    }
+    return raw.trim();
+  }
+
+  /** Only web pages are opened from History. */
+  static isOpenableUrl(url) {
+    try {
+      const parsed = new URL(String(url || ''));
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /**
+   * History → … → Open page: the saved address in a new tab, which scans it as
+   * usual (or shows its saved result while that is fresh).
+   * @returns {Promise<boolean>} false for an address that is not a web page
+   */
+  async openHistoryItem(historyItem) {
+    if (!History.isOpenableUrl(historyItem && historyItem.url)) return false;
+    await chrome.tabs.create({ url: historyItem.url, active: true });
+    return true;
+  }
+
+  /**
+   * History → … → Scan again now: the page's saved result is cleared, then the
+   * page is scanned from the start, in the tab that already shows it (reloaded)
+   * or in a new one. No confirmation: asking for a scan is the confirmation.
+   * @returns {Promise<'reloaded'|'opened'|false>}
+   */
+  async rescanHistoryItem(historyItem) {
+    if (!History.isOpenableUrl(historyItem && historyItem.url)) return false;
+    const rawScope = String(historyItem.cacheScope || 'domain').toLowerCase();
+    const mappedScope = rawScope === 'url' ? 'full' : rawScope;
+    const cacheScope = ['domain', 'path', 'full'].includes(mappedScope) ? mappedScope : 'domain';
+    let open = null;
+    try {
+      const tabs = await chrome.tabs.query({ url: historyItem.url.replace(/#.*$/, '') });
+      open = (tabs || []).find(tab => tab && typeof tab.id === 'number' && tab.url === historyItem.url) || (tabs || [])[0] || null;
+    } catch (_) {
+      open = null; // an address chrome.tabs.query cannot match: open a new tab
+    }
+    const request = { type: WorkerMessages.HISTORY_CLEAR_CACHE, url: historyItem.url, cacheScope };
+    if (open) request.tabId = open.id;
+    try {
+      await chrome.runtime.sendMessage(request);
+    } catch (error) {
+      Logger.warn('UI', '[History] Could not clear the saved result before the scan:', error && error.message);
+    }
+    if (open) {
+      try {
+        await chrome.tabs.reload(open.id);
+      } catch (_) {
+        // The tab closed in between: open the page instead
+        await chrome.tabs.create({ url: historyItem.url, active: true });
+        return 'opened';
+      }
+      await chrome.tabs.update(open.id, { active: true }).catch(() => {});
+      if (typeof open.windowId === 'number' && chrome.windows && chrome.windows.update) {
+        await chrome.windows.update(open.windowId, { focused: true }).catch(() => {});
+      }
+      return 'reloaded';
+    }
+    await chrome.tabs.create({ url: historyItem.url, active: true });
+    return 'opened';
+  }
+
+  /**
    * Format history item as text
    * @param {object} historyItem - History item
    * @returns {string} Formatted text
@@ -783,7 +887,8 @@ class History {
     const title = (historyItem.title && historyItem.title !== 'Untitled')
       ? historyItem.title
       : L('historyUiUntitled', 'Untitled');
-    let text = L('clipboardUrlFmt', 'URL: {0}', historyItem.url) + '\n';
+    // The address without its query and fragment: they can hold session tokens (like the Detection tab's copies)
+    let text = L('clipboardUrlFmt', 'URL: {0}', String(historyItem.url || '').replace(/[?#].*$/s, '')) + '\n';
     text += L('clipboardTitleFmt', 'Title: {0}', title) + '\n';
     text += L('clipboardTimestampFmt', 'Timestamp: {0}', FormatUtils.formatDateTime(historyItem.timestamp)) + '\n';
     text += '\n' + L('clipboardDetectionsListFmt', 'Detections ({0}):', historyItem.detections?.length || 0) + '\n';
@@ -803,7 +908,7 @@ class History {
         text += '   ' + L('clipboardDetectionMethodsHeading', 'Detection Methods:') + '\n';
         detection.matches.forEach(match => {
           const methodType = (match.type || 'unknown').replace(/_/g, ' ').toUpperCase();
-          const value = match.fullUrl || match.value || match.name || match.selector || match.pattern || unknownValue;
+          const value = History.copyLabel(match) || unknownValue;
           text += `     - ${methodType}: ${value} (${match.confidence || 0}%)\n`;
         });
       }
@@ -1319,6 +1424,15 @@ class History {
       closeBtn.onclick = closeModal;
     }
 
+    const rescanBtn = document.querySelector('#historyModalRescan');
+    if (rescanBtn) {
+      rescanBtn.onclick = (e) => {
+        e.stopPropagation();
+        const item = this.historyItems.find(h => h.id === this._modalItemId);
+        if (item) this.rescanHistoryItem(item);
+      };
+    }
+
     const copyBtn = document.querySelector('#historyModalCopy');
     if (copyBtn) {
       copyBtn.onclick = (e) => {
@@ -1552,7 +1666,7 @@ class History {
       return { row, box };
     };
 
-    const format = select(HistoryExport.FORMATS.map(f => [f, f === 'txt' ? 'TXT' : f.toUpperCase()]), HistoryExport.FORMATS.includes(saved.exportFormat) ? saved.exportFormat : 'json');
+    const format = select(HistoryExport.FORMATS.map(f => [f, f === 'txt' ? 'TXT' : f === 'md' ? 'Markdown' : f.toUpperCase()]), HistoryExport.FORMATS.includes(saved.exportFormat) ? saved.exportFormat : 'json');
     const category = select([
       ['all', FormatUtils.t('historyExportAll', 'All')],
       ['antibot', FormatUtils.t('categoryAntibot', 'Anti-bot')],
@@ -1844,7 +1958,11 @@ class History {
         this.closeMenus();
         if (!item) return;
 
-        if (action === 'copy') {
+        if (action === 'open') {
+          this.openHistoryItem(item);
+        } else if (action === 'rescan') {
+          this.rescanHistoryItem(item);
+        } else if (action === 'copy') {
           this.copyHistoryItem(item);
         } else if (action === 'pin') {
           this.togglePin(item);
