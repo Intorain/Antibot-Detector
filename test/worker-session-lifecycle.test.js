@@ -224,6 +224,7 @@ test('startup initialization and an early event reuse one detector load', async 
   h.ctx.HistoryRetention = { init() {} };
   h.ctx.HistoryBackup = { init() {} };
   h.ctx.HistoryWatch = { init() {} };
+  h.ctx.SettingsRuntime = { initWebhookRetries() {} };
   h.ctx.DetectionCacheRetention = { init() {} };
   h.ctx.HistoryStore = { setQuotaRelief() {}, setBudget() {} };
   h.ctx.I18n = { syncOverrideFromStorage() {} };
@@ -384,4 +385,17 @@ test('every other tab is recorded and sent as before, with the watchlist loaded'
   assert.deepEqual(finished, []);
   assert.equal(h.calls.history.length, 1);
   assert.equal(sent.length, 1);
+});
+
+test('a finished scan leaves the page\'s headers and requests for a later scan of the same page', async () => {
+  // The popup scans an open page again without reloading it once its cached result expired: the response headers
+  // and the requests made at load are not sent again, so the scan read none and header rules stopped matching
+  const h = harness();
+  h.ctx.headersStore.set(7, { url: 'https://example.test/', headers: { 'cf-ray': '1' } });
+  h.ctx.networkUrlsStore.set(7, [{ url: 'https://example.test/sdk.js' }]);
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.equal(h.ctx.detectionStates.has(7), false);
+  assert.equal(h.ctx.headersStore.has(7), true);
+  assert.equal(h.ctx.networkUrlsStore.has(7), true);
 });

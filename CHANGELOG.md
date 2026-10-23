@@ -5,6 +5,33 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.4] - 2026-10-23
+
+### Added
+
+- Statistics: a protection's name in the Protections table shows the domains that have it, and a site's name in Domains or Protection changes opens that site's History in a new tab.
+- History: Compare with… in an entry's … menu shows what changed between two saved scans of the same page (protections added, removed, changed in confidence or evidence) and copies it as Markdown.
+- History: Select entries in the toolbar's … menu lets you tick several entries and pin, watch, export or delete them together; a search or a filter that hides an entry also unselects it.
+- Webhook: a failed delivery can be sent again with Retry in Recent deliveries, and Settings → Detection → Webhook has Retry failed deliveries (on): after 1, 5 and 15 minutes when there was no answer or the server answered 408, 425, 429 or 5xx. The page data of a failed delivery stays in memory for an hour, never on disk.
+- Rules: Test on this page in the rule editor runs the rule as edited (unsaved changes included) on the page the popup is open on, and shows what each cookie, URL, content and DOM pattern finds and whether its combinations fire; patterns only a real scan can answer are marked as such. Nothing is saved or sent.
+
+### Changed
+
+- Rules editor: Detection methods, Combinations, Check against History and Test on this page start folded, with the number of patterns and combinations in their headers.
+- Settings → Detection: the Sites without JS hooks card starts folded under its title, like the other titled cards.
+
+### Fixed
+
+- History: pinning pages automatically pinned a new copy of the same page on every visit until all 50 pins were that page; each address is now pinned once.
+- History watchlist: a check due when the browser starts is no longer lost, a check never leaves its background tab open, and pages that could not be checked are reported.
+- Settings → Data → Reset keeps "only the sites I choose" instead of going back to scanning every site.
+- Copy diagnostics leaves out more site names and short keys, and History's Markdown export gives addresses without their query, like every other copy.
+- Detection: requests the previous page made after its scan no longer count as evidence on the next page opened in the same tab.
+- Detection: a page that changes its own address (single-page apps, removed tracking parameters) no longer cancels its scan halfway.
+- With the cache kept per page or per address, a page where nothing was found no longer shows the detections of another page of the same site.
+- Detection: a page loaded from the cache no longer leaves the popup on "Searching", and scanning an open page again keeps its header evidence.
+- History → Select: Pin and Watch count only the entries they changed.
+
 ## [3.0.3] - 2026-10-22
 
 ### Added
@@ -615,6 +642,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.4]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.3...v3.0.4
 [3.0.3]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.0...v3.0.1

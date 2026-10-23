@@ -51,6 +51,8 @@ importScripts(
     './modules/detection/public-summary.js',
     './modules/core/webhook-filter.js',
     './modules/core/webhook-log.js',
+    './modules/core/webhook-retry.js',
+    './modules/core/rule-test.js',
     './modules/settings/settings-runtime.js',
     './modules/settings/webhook-runtime.js',
     // Interceptors
@@ -83,6 +85,7 @@ importScripts(
     './background/utilities.js',
     './background/scan-report.js',
     './background/detection-lifecycle.js',
+    './background/rule-test.js',
     './background/handlers/router-utils.js',
     './background/handlers/messages-logging.js',
     './background/handlers/messages-detection.js',

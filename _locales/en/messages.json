@@ -6508,7 +6508,7 @@
     "description": "Title of the list of the webhook's most recent attempts"
   },
   "webhookLogDesc": {
-    "message": "The last 20 attempts: when, which page, what came back. Addresses and payloads are never kept.",
+    "message": "The last 20 attempts: when, which page, what came back. The list never keeps addresses or payloads.",
     "description": "Description of the list of the webhook's most recent attempts"
   },
   "webhookLogEmpty": {
@@ -6799,6 +6799,10 @@
     "message": "Checked {0} pages, {1} changed",
     "description": "Toast after Check now; {0} is how many pages were checked, {1} how many had changed"
   },
+  "settingsHistoryWatchUncheckedFmt": {
+    "message": "{0} could not be checked",
+    "description": "Added to the watchlist result in Settings → History: how many watched pages could not be checked (did not load, went to another address or did not answer in time). {0} = a number"
+  },
   "settingsHistoryWatchNothing": {
     "message": "No page is watched yet: pin a page in History and choose Watch for changes.",
     "description": "Toast after Check now when no page is on the watchlist"
@@ -6918,5 +6922,257 @@
   "statsExportMarkdown": {
     "message": "Export Markdown",
     "description": "Statistics → Export menu: downloads the statistics as a Markdown report (totals, protections, sites)"
+  },
+  "statsShowDomainsWithFmt": {
+    "message": "Show the domains with {0}",
+    "description": "Statistics → Protections: hover text of a protection's name, which opens the Domains list narrowed to the domains that have it. {0} = the protection's name"
+  },
+  "statsOpenInHistoryFmt": {
+    "message": "Open {0} in History",
+    "description": "Statistics → Domains and Protection changes: hover text of a site's name, which opens the History tab (in a new tab) narrowed to that site. {0} = the site's host name"
+  },
+  "historyCompare": {
+    "message": "Compare with…",
+    "description": "History entry menu: opens a dialog that compares this saved scan with another saved scan of the same page"
+  },
+  "historyCompareNone": {
+    "message": "No other saved scan of this page to compare with",
+    "description": "Hover text of the disabled Compare with… menu item, and the message when there is nothing to compare with: History holds only one scan of this page"
+  },
+  "historyCompareTitle": {
+    "message": "Compare scans",
+    "description": "Title of the dialog that compares two saved scans of the same page"
+  },
+  "historyCompareWith": {
+    "message": "Compare with",
+    "description": "Label of the list of other saved scans of the page, in the compare dialog"
+  },
+  "historyCompareOptionFmt": {
+    "message": "{0} · {1} found",
+    "description": "One saved scan in the compare dialog's list. {0} = its date and time, {1} = how many protections it found (a number)"
+  },
+  "historyCompareRangeFmt": {
+    "message": "From {0} to {1}",
+    "description": "Compare dialog: the two scans, earlier then later. {0} = the earlier scan's date and time, {1} = the later one's"
+  },
+  "historyCompareAdded": {
+    "message": "Added",
+    "description": "Compare dialog heading: protections found by the later scan and not by the earlier one"
+  },
+  "historyCompareRemoved": {
+    "message": "Removed",
+    "description": "Compare dialog heading: protections found by the earlier scan and no longer by the later one"
+  },
+  "historyCompareChanged": {
+    "message": "Changed",
+    "description": "Compare dialog heading: protections found by both scans with another confidence or other evidence"
+  },
+  "historyCompareUnchanged": {
+    "message": "Unchanged",
+    "description": "Compare dialog heading: protections found by both scans, the same"
+  },
+  "historyCompareIdentical": {
+    "message": "These two scans found the same protections, with the same confidence and evidence.",
+    "description": "Compare dialog: shown when nothing differs between the two scans"
+  },
+  "historyCompareChangeFmt": {
+    "message": "{0}% → {1}% ({2})",
+    "description": "Compare dialog: a protection's confidence in the earlier and the later scan. {0} and {1} = percentages (numbers), {2} = the difference with its sign, for example +25 or −30"
+  },
+  "historyCompareEvidenceAddedFmt": {
+    "message": "New evidence: {0}",
+    "description": "Compare dialog: kinds of evidence the later scan found and the earlier one did not. {0} = a list such as Cookies, Headers"
+  },
+  "historyCompareEvidenceRemovedFmt": {
+    "message": "Evidence gone: {0}",
+    "description": "Compare dialog: kinds of evidence the earlier scan found and the later one did not. {0} = a list such as Cookies, Headers"
+  },
+  "historyCompareCopy": {
+    "message": "Copy as Markdown",
+    "description": "Compare dialog button: copies the comparison as a Markdown report (for a ticket or a chat). Keep Markdown as written"
+  },
+  "historyCompareMdHeadingFmt": {
+    "message": "Compare scans: {0}",
+    "description": "Heading of the copied Markdown comparison. {0} = the site's host name"
+  },
+  "historySelect": {
+    "message": "Select entries",
+    "description": "History toolbar menu: turns on selection, so several entries can be pinned, watched, exported or deleted together"
+  },
+  "historySelectBarLabel": {
+    "message": "Selected entries",
+    "description": "Accessible name of the bar that holds the actions for the selected History entries"
+  },
+  "historySelectDone": {
+    "message": "Done",
+    "description": "History selection bar: leaves selection mode"
+  },
+  "historySelectAll": {
+    "message": "Select all",
+    "description": "History selection bar: selects every entry the list shows (all pages)"
+  },
+  "historySelectNone": {
+    "message": "Select none",
+    "description": "History selection bar: unselects everything (shown when every entry is selected)"
+  },
+  "historySelectedFmt": {
+    "message": "{0} selected",
+    "description": "History selection bar: how many entries are selected. {0} = a number"
+  },
+  "historySelectCheckboxFmt": {
+    "message": "Select {0}",
+    "description": "Accessible name of the checkbox on a History card in selection mode. {0} = the page's title"
+  },
+  "historyBulkPinnedFmt": {
+    "message": "Pinned: {0}",
+    "description": "Notice after pinning the selected History entries. {0} = how many were pinned"
+  },
+  "historyBulkUnpinnedFmt": {
+    "message": "Unpinned: {0}",
+    "description": "Notice after unpinning the selected History entries. {0} = how many were unpinned"
+  },
+  "historyBulkWatchFmt": {
+    "message": "Watching: {0}",
+    "description": "Notice after the selected History entries were set to be watched for changes. {0} = how many"
+  },
+  "historyBulkWatchLimitFmt": {
+    "message": "Watching: {0}. Not added: {1} (you can watch up to {2} pages).",
+    "description": "Notice when the watchlist had room for only some of the selected entries. {0} = how many are now watched, {1} = how many were left out, {2} = the most pages that can be watched"
+  },
+  "historyBulkWatchStoppedFmt": {
+    "message": "Stopped watching: {0}",
+    "description": "Notice after the selected History entries stopped being watched. {0} = how many"
+  },
+  "historyBulkDeleteTitle": {
+    "message": "Delete selected entries",
+    "description": "Title of the confirmation before deleting the selected History entries"
+  },
+  "historyBulkDeleteMessageFmt": {
+    "message": "Delete the selected entries ({0}) from History? This cannot be undone.",
+    "description": "Confirmation before deleting the selected History entries. {0} = how many are selected (a number)"
+  },
+  "historyBulkDeletePinnedFmt": {
+    "message": "Pinned among them: {0}.",
+    "description": "Added to the delete confirmation when some selected entries are pinned. {0} = how many of them are pinned"
+  },
+  "historyBulkDeletedFmt": {
+    "message": "Deleted: {0}",
+    "description": "Notice after deleting the selected History entries. {0} = how many were deleted"
+  },
+  "historyBulkWatchOffFmt": {
+    "message": "Watching: {0}. Turn on Watch pinned pages in Settings → History for them to be checked.",
+    "description": "Notice after the selected History entries were set to be watched, while Settings → History → Watch pinned pages is off, so no check will run yet. {0} = how many pages. Keep the names of the settings as they are in the interface"
+  },
+  "settingsWebhookRetry": {
+    "message": "Retry failed deliveries",
+    "description": "Settings → Detection → Webhook: switch that sends a delivery that failed again by itself, after 1, 5 and 15 minutes"
+  },
+  "settingsWebhookRetryHint": {
+    "message": "After 1, 5 and 15 minutes. The page data of a failed delivery stays in memory for an hour, never on disk, so Retry works in Recent deliveries.",
+    "description": "Hint under the Retry failed deliveries switch. 'Retry' and 'Recent deliveries' name a button and a list in the same screen: keep them like those strings"
+  },
+  "webhookLogRetry": {
+    "message": "Retry",
+    "description": "Button on a failed line of Recent deliveries: sends that delivery again now"
+  },
+  "webhookLogRetrying": {
+    "message": "Retrying…",
+    "description": "The Retry button while the delivery is being sent again"
+  },
+  "webhookLogRetryAtFmt": {
+    "message": "retrying at {0}",
+    "description": "Part of a failed delivery's line in Recent deliveries: the time of day of the next automatic retry. {0} = a time such as 12:35"
+  },
+  "webhookLogTriggerRetryFmt": {
+    "message": "retry {0}",
+    "description": "Part of a delivery's line in Recent deliveries: it is a repeat of a failed delivery. {0} = which repeat (1, 2 or 3)"
+  },
+  "webhookRetrySent": {
+    "message": "Delivered",
+    "description": "Notice after Retry in Recent deliveries worked: the webhook answered successfully"
+  },
+  "webhookRetryFailed": {
+    "message": "Failed again. It stays in the list, so you can retry it.",
+    "description": "Notice after Retry in Recent deliveries failed again"
+  },
+  "webhookRetryGone": {
+    "message": "This delivery can no longer be retried.",
+    "description": "Notice when Retry is pressed for a delivery that is no longer held (an hour passed, or the browser was restarted)"
+  },
+  "webhookRetryOff": {
+    "message": "Turn the webhook on, with an address, to retry.",
+    "description": "Notice when Retry is pressed while the webhook is off or has no address"
+  },
+  "ruleLiveTestTitle": {
+    "message": "Test on this page",
+    "description": "Rule editor: title of the card that runs the rule on the page the popup belongs to"
+  },
+  "ruleLiveTestHint": {
+    "message": "Runs the rule as it is now, unsaved edits included, on the page this popup was opened on. Nothing is saved or sent. Cookies, URLs, content and DOM patterns can be tested; headers, JS hooks, window properties and payloads need a real scan.",
+    "description": "Hint of the Test on this page card. The kinds of patterns (cookies, URLs, content, DOM, headers, JS hooks, window properties, payloads) are named like the editor's own pattern sections"
+  },
+  "ruleLiveTestRun": {
+    "message": "Test",
+    "description": "Button of the Test on this page card: runs the test"
+  },
+  "ruleLiveTestRunning": {
+    "message": "Testing…",
+    "description": "The Test button while the test runs"
+  },
+  "ruleLiveTestMatchesFmt": {
+    "message": "The rule matches {0} (confidence {1}%)",
+    "description": "Result of Test on this page. {0} = the page's host name, {1} = the rule's confidence on it (a number)"
+  },
+  "ruleLiveTestPartialFmt": {
+    "message": "The rule is only partly matched on {0}: a combination needs more evidence",
+    "description": "Result of Test on this page when some patterns matched but no combination is complete. {0} = the page's host name"
+  },
+  "ruleLiveTestNoMatchFmt": {
+    "message": "The rule does not match {0}",
+    "description": "Result of Test on this page when nothing matched. {0} = the page's host name"
+  },
+  "ruleLiveTestCountFmt": {
+    "message": "{0} found",
+    "description": "Test on this page: how many times a pattern matched on the page. {0} = a number"
+  },
+  "ruleLiveTestNone": {
+    "message": "no match",
+    "description": "Test on this page: a pattern that matched nothing on the page"
+  },
+  "ruleLiveTestNeedsScan": {
+    "message": "needs a real scan",
+    "description": "Test on this page: a pattern that cannot be tested here (response headers, JS hooks, window properties, payloads): only a normal scan of the page can answer it"
+  },
+  "ruleLiveTestFires": {
+    "message": "fires",
+    "description": "Test on this page: a combination whose patterns were all found on the page"
+  },
+  "ruleLiveTestNoFire": {
+    "message": "does not fire",
+    "description": "Test on this page: a combination that was not completed on the page"
+  },
+  "ruleLiveTestPageFmt": {
+    "message": "Read {0} scripts, {1} elements, {2} cookies and {3} requests.",
+    "description": "Test on this page: what the page offered to the test. All four are numbers: scripts, page elements, cookies, network requests"
+  },
+  "ruleLiveTestNoRequests": {
+    "message": "The requests the page made are not available now, so URL patterns were checked against its address and scripts only.",
+    "description": "Test on this page: shown when the extension no longer knows the page's network requests"
+  },
+  "ruleLiveTestUntestedNote": {
+    "message": "Patterns marked \"needs a real scan\" are not part of this test: the answer above covers the others.",
+    "description": "Test on this page: explains the 'needs a real scan' marks. Keep the quoted words exactly like the 'needs a real scan' label"
+  },
+  "ruleLiveTestUnsupported": {
+    "message": "Open the popup on a web page to test a rule on it.",
+    "description": "Test on this page: shown when the popup does not belong to a normal web page (a browser page, or the popup opened in its own tab)"
+  },
+  "ruleLiveTestUnreachable": {
+    "message": "The page did not answer. Reload it and try again.",
+    "description": "Test on this page: the page could not be read (it was open before the extension, or it is too slow)"
+  },
+  "ruleLiveTestError": {
+    "message": "The test could not run.",
+    "description": "Test on this page: a failure with no more precise message"
   }
 }

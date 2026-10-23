@@ -218,6 +218,7 @@ Rules.prototype.focusComboName = function(index) {
     : null;
   const name = card && card.querySelector('.combo-summary-name');
   if (!name || typeof name.focus !== 'function') return null;
+  this.revealEditorCard(card);
   if (typeof card.scrollIntoView === 'function') card.scrollIntoView({ block: 'start' });
   name.focus({ preventScroll: true });
   return name;
@@ -678,6 +679,8 @@ Rules.prototype.renderCombinations = function({ focusPicker = false } = {}) {
   if (list) list.scrollTop = scroll;
   if (search && focusPicker) search.focus();
   this.refreshComboPatternBadges();
+  // The folded Combinations header shows how many there are: it follows every add and delete
+  if (typeof this.updateEditorCardSummaries === 'function') this.updateEditorCardSummaries();
 };
 /** Mode select (+ "at least" stepper) of a group; ids include the path so nested ones stay unique. */
 Rules.prototype.renderComboMode = function(node, key, path, index) {
@@ -865,6 +868,7 @@ Rules.prototype.reportInvalidCombination = function(index, message) {
   if (combo) { this.setComboOpen(combo, true); this.renderCombinations(); }
   const card = document.querySelector(`#combinationsContainer .combo-card[data-combo="${index}"]`);
   if (card) {
+    this.revealEditorCard(card);
     card.classList.add('combo-invalid');
     card.scrollIntoView({ block: 'center', behavior: 'smooth' });
     card.querySelector('select')?.focus();

@@ -412,6 +412,8 @@ Rules.prototype.updateMethodPatternCount = function(section) {
         ? ((_t && _t.get('methodOnePattern')) || '1 pattern')
         : ((_t && _t.format('methodPatternsFmt', totalPatterns)) || `${totalPatterns} patterns`);
     }
+    // The folded Detection methods header shows the rule's total: it follows every add and delete
+    if (typeof this.updateEditorCardSummaries === 'function') this.updateEditorCardSummaries();
     return totalPatterns;
   };
 
@@ -680,6 +682,7 @@ Rules.prototype.revealAndFocusInvalidRow = function(invalidRow) {
     const { section, item, input, itemIndexInSection } = invalidRow;
     if (!section || !item) return;
 
+    this.revealEditorCard(section);
     section.classList.remove('collapsed');
 
     const methodType = invalidRow.methodType || this.getMethodSectionType(section);

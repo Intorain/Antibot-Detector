@@ -3,6 +3,15 @@
  * Extracted from background.js to keep tab lifecycle logic isolated.
  */
 
+/** Cancel the tab's scan only when its main frame now holds a different document than the one scanned. */
+async function keepScanIfSameDocument(tabId, state) {
+    const frame = await chrome.webNavigation.getFrame({ tabId, frameId: 0 }).catch(() => null);
+    if (detectionStates.get(tabId) !== state) return;
+    if (frame && frame.documentId === state.documentId) return;
+    DetectionSessionStore.cancel(tabId, 'url_changed', state);
+    stopBadgeSpinner(tabId);
+}
+
 function setupTabListeners() {
     // Clear all data stores and detection state for closed tab
     chrome.tabs.onRemoved.addListener((tabId) => {
@@ -14,6 +23,7 @@ function setupTabListeners() {
         payloadStore.delete(tabId);
         networkUrlsStore.delete(tabId);
         if (typeof responseStore !== 'undefined') responseStore.delete(tabId);
+        if (typeof tabPageRequests !== 'undefined') tabPageRequests.delete(tabId);
 
         if (tabsUsingCache.has(tabId)) {
             tabsUsingCache.delete(tabId);
@@ -101,8 +111,16 @@ function setupTabListeners() {
             const active = activeDetections.get(tabId);
             const nextUrl = changeInfo.url || tab?.url;
             if ((state || active) && (changeInfo.status === 'loading' || (state?.url || active?.url) !== nextUrl)) {
-                DetectionSessionStore.cancel(tabId, 'url_changed', state);
-                stopBadgeSpinner(tabId);
+                if (changeInfo.url && state?.documentId && typeof chrome.webNavigation?.getFrame === 'function') {
+                    // A new address can keep the same document (history.replaceState, pushState, a #hash: Chrome
+                    // reports them as loading too). The scan goes on unless the frame holds another document; a
+                    // real navigation is cancelled when its document commits (onCommitted below). A reload, which
+                    // keeps the address, is cancelled here at once.
+                    keepScanIfSameDocument(tabId, state);
+                } else {
+                    DetectionSessionStore.cancel(tabId, 'url_changed', state);
+                    stopBadgeSpinner(tabId);
+                }
             }
         }
         if (changeInfo.status === 'loading' && !await isExtensionEnabled()) {
@@ -145,6 +163,17 @@ function setupTabListeners() {
             awsWafHandleAnalysisTabUpdate(tabId, changeInfo, tab);
         }
     });
+
+    // A new document committed in the tab's main frame ends the scan of the one before
+    if (chrome.webNavigation?.onCommitted) {
+        chrome.webNavigation.onCommitted.addListener((details) => {
+            if (details.frameId !== 0) return;
+            const state = detectionStates.get(details.tabId);
+            if (!state || !state.documentId || !details.documentId || state.documentId === details.documentId) return;
+            DetectionSessionStore.cancel(details.tabId, 'url_changed', state);
+            stopBadgeSpinner(details.tabId);
+        });
+    }
 
     chrome.tabs.onActivated.addListener(async (activeInfo) => {
         const newTabId = activeInfo.tabId;

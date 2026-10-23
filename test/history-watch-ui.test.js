@@ -77,6 +77,15 @@ test('Check now asks the worker and says how it went', async () => {
   assert.deepEqual(await run({ fail: true }), [['error', 'The last check failed.']]);
 });
 
+test('pages that could not be checked are said: in the last-check line, and as an error when every page failed', async () => {
+  const some = settingsHarness({ stored: { scrapfly_history: watchedItems(3), scrapfly_history_watch: { at: 1234, ok: true, checked: 2, changed: 0, failed: 1 } } });
+  await some.SettingsUI.refreshHistoryWatch();
+  assert.equal(some.last.textContent, '3 of 10 pages watched · Last check: at 1234 · 2 checked, 0 changed · 1 could not be checked');
+  const run = async (reply) => { const h = settingsHarness({ reply }); await h.SettingsUI.checkWatchNow.call({}, h.button); return h.toasts; };
+  assert.deepEqual(await run({ status: 'ok', checked: 2, changed: 1, skipped: 0, failed: 1 }), [['success', 'Checked 2 pages, 1 changed · 1 could not be checked']]);
+  assert.deepEqual(await run({ status: 'ok', checked: 0, changed: 0, skipped: 0, failed: 3 }), [['error', 'Checked 0 pages, 0 changed · 3 could not be checked']], 'every site down is not a success');
+});
+
 // ---- The entry menu and the card
 function historyView({ reply = { status: 'ok', updated: 1 }, mode = 'daily' } = {}) {
   const toasts = [], changes = [];
@@ -84,7 +93,7 @@ function historyView({ reply = { status: 'ok', updated: 1 }, mode = 'daily' } = 
     console, Date, JSON, Math, Set, Map, URL, Intl,
     Logger: new Proxy({}, { get: () => () => {} }),
     FormatUtils: require('../utils/format-utils.js'),
-    HistoryStore, HistoryPolicy,
+    HistoryStore, HistoryPolicy, HistoryCompare: require('../modules/core/history-compare.js'),
     Utils: { getHistorySettings: async () => ({ historyWatch: mode }) },
     NotificationHelper: { success: (text) => toasts.push(['success', text]), error: (text) => toasts.push(['error', text]) },
     chrome: { runtime: { getURL: p => p, sendMessage: async (message) => { changes.push(message); return reply; } } }
@@ -127,10 +136,27 @@ test('"Stop watching" stops it, and a full watchlist says so', async () => {
 test('the entry menu names the action for the entry it opens on', () => {
   const { view } = historyView();
   const labels = {};
-  const menu = { querySelector: (selector) => { const name = /data-menu-label="(\w+)"/.exec(selector)[1]; return labels[name] || (labels[name] = { textContent: '' }); } };
+  const menu = { querySelector: (selector) => { const found = /data-menu-label="(\w+)"/.exec(selector); if (!found) return null; const name = found[1]; return labels[name] || (labels[name] = { textContent: '' }); } };
   view.syncItemMenu(menu, { id: 'a' });
   assert.equal(labels.watch.textContent, 'Watch for changes');
   view.syncItemMenu(menu, { id: 'a', pinned: true, watch: true });
   assert.equal(labels.watch.textContent, 'Stop watching');
   assert.equal(labels.pin.textContent, 'Unpin');
+});
+
+test('Compare with… is disabled, and says why, when the page has no other saved scan', () => {
+  const { view } = historyView();
+  const compare = { disabled: false, title: '' };
+  const menu = { querySelector: (selector) => (selector === '[data-action="compare"]' ? compare : null) };
+  const entry = (id, timestamp) => ({ id, timestamp, url: 'https://shop.example.test/p?x=' + id, hostname: 'shop.example.test' });
+
+  view.historyItems = [entry('a', 2)];
+  view.syncItemMenu(menu, view.historyItems[0]);
+  assert.equal(compare.disabled, true);
+  assert.equal(compare.title, 'No other saved scan of this page to compare with');
+
+  view.historyItems = [entry('a', 2), entry('b', 1)];
+  view.syncItemMenu(menu, view.historyItems[0]);
+  assert.equal(compare.disabled, false);
+  assert.equal(compare.title, '');
 });

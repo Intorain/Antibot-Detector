@@ -85,7 +85,12 @@ test('the connection details are exactly the webhook and sharing settings that a
   const connection = (group) => Object.keys(defaults[group]).filter(key => !(exported[group] && key in exported[group]));
   const listed = (group) => SettingsPresets.CONNECTIONS.filter(path => path.startsWith(`${group}.`)).map(path => path.slice(group.length + 1));
   // A webhook is not exported at all: its connection is everything but the two switches and the "send only when" filter (preferences)
-  const preferences = ['enableWebhook', 'webhookOnCache', 'webhookMinConfidence', 'webhookCategories', 'webhookDomains'];
+  const preferences = ['enableWebhook', 'webhookOnCache', 'webhookRetry', 'webhookMinConfidence', 'webhookCategories', 'webhookDomains'];
   assert.deepStrictEqual(listed('webhook').sort(), connection('webhook').filter(key => !preferences.includes(key)).sort());
   assert.deepStrictEqual(listed('share').sort(), connection('share').sort());
+});
+
+test('a reset keeps which site list is in use, so "only the sites I choose" never turns back into every site', () => {
+  assert.ok(SettingsPresets.KEEP.includes('detection.scanMode'));
+  for (const key of ['detection.allowedDomains', 'detection.blacklistedDomains', 'detection.hooksOffDomains']) assert.ok(SettingsPresets.KEEP.includes(key), key);
 });
