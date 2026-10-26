@@ -5,6 +5,59 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.5] - 2026-10-26
+
+### Added
+
+- New protections: Queue-it, Vercel Firewall, DDoS-Guard and Wordfence (anti-bot), ALTCHA and Cap (CAPTCHA).
+- New fraud and device-intelligence scripts, filed under anti-bot: TransUnion TruValidate (iovation), Forter, Sift, Castle and SEON. Castle bundled into a site (x.com, Atlassian) shows at a low confidence from its cookie.
+- Fingerprinting: Hardware now notices pages asking for the WebGPU adapter and its details, Navigator notices permission checks, and Device Orientation notices reads of orientation and motion sensor values.
+
+### Changed
+
+- PerimeterX is now named HUMAN (PerimeterX); History, the watchlist, Compare, Statistics and pinning by name treat both names as one protection.
+- Azure Front Door scores lower on its own: its headers show the Microsoft edge, not that its firewall is switched on.
+- Detection: in a protection's details, each piece of evidence (an address, cookie or header) copies in full with a click or Enter.
+- Arabic: the popup reads right to left, like the Statistics page; addresses and page titles keep their own order and are cut at their end.
+- Rules editor: in another language than English, descriptions and combination names show and are edited in that language (saved as its translation); the English original and the other languages fold under "Original (English)".
+- Rules editor: after you change a description or a combination name in your language, a bar at the top offers Translate the changes, which puts your new wording into English and every other language.
+- Advanced: the protection's name above its tools is now a heading, no longer a box that looks like one of the tool buttons.
+- Advanced → Analyze Scripts no longer closes the popup: it lists the protection's scripts the page already loaded, at once, and reloads only a page where none were found.
+- Advanced → Analyze Scripts redesigned: one compact list, each script's type and its path (the host only when it is another site's), the whole row copies the address.
+- Advanced → Check Cookies redesigned: a found/expected status line, then one card per cookie with its name and flags, its value as one block to copy, and domain, path and expiry as plain text.
+- Advanced → History redesigned: one search row with a … menu (export, clear), a Current site / All sites switch, vendor and tool chips, and compact rows with the vendor's logo.
+
+### Fixed
+
+- Rules → Update no longer overwrites your own rule that uses an official rule's name, and no longer duplicates an official rule you moved to another category; both now ask first.
+- Rules: importing a rule with a number where text belongs, or with markup in its logo, is refused instead of stopping scans or showing that markup on its card.
+- Rules editor: a confidence of 0 stays 0 when the rule is reopened, and a payload rule listing several HTTP methods keeps them all.
+- Rules: an on/off switch that could not be saved goes back and says so, and deleting a combination names it without stray "&amp;" codes.
+- Detection: a page that was never scanned, whose scan failed or was cut short, or whose cache was just cleared no longer shows the green "Nothing Detected".
+- Detection: clearing the cache or changing the cache scope in Settings no longer leaves the old results on the Detection tab.
+- Detection: scans finish after quick navigation, reloads and address changes within a page (ChatGPT scans no longer stay pending).
+- Detection: browser and extension pages say they cannot be scanned, without the clean-result badges.
+- Detection: requests a page makes after its scan (CHEQ's beacons, for example) now count: the protection and its confidence update in the badge and popup. A slow page's late hook report no longer leaves a scan that never ends.
+- Paused sites show only the action for the selected scan mode, and opening several popups no longer breaks Advanced tools or settings changes.
+- Detection: result cards open with Enter or Space, and their details dialog keeps keyboard focus until it is closed.
+- Settings: Escape in the language list closes only the list, not Settings with its unsaved changes; the list also works with the arrow keys.
+- Settings: Add current domain refuses browser pages and blank tabs instead of adding names like "extensions" or "newtab".
+- Settings: keyboard focus stays inside Settings (and its dialogs) until it is closed, and changing the language asks to save or discard unsaved changes first.
+- Exports, backups and saved rules are named with your own date, not UTC's (an export just after midnight was named for the day before).
+- Rules editor: clicking outside the editor after typing changes asks before dropping them.
+- Rules: a search lists the rule with that exact name first, then names starting with it (searching "Cap" no longer buries Cap under every CAPTCHA).
+- Advanced: Shape Security saves one capture once (it could save the same capture up to six times), and hCaptcha saves once and says when it timed out empty.
+- Advanced: Analyze Scripts and captures are no longer cancelled when the page changes its own address, and a stopped or timed-out analysis says so.
+- Advanced: Imperva and Akamai extract tools ask you to stop a running capture first instead of leaving Start Capturing stuck, and work again after Chrome restarts the extension in the background.
+- Advanced: Akamai Extract Sensor reloads the page once instead of twice; GeeTest and Akamai tools wait for the page to finish loading instead of a fixed delay.
+- Advanced: stopping a FunCaptcha capture that had already ended no longer shows an error, and a captured item opens once per click.
+- Detection: rescanning a page, or moving within a single-page site, after a cached result checks JavaScript hooks and page globals again.
+- Detection: fingerprinting checks no longer stop early on pages that use a watched browser API while still loading, so later calls are still caught.
+- Detection: a site that calls a browser API on the wrong object gets the browser's normal error again instead of a quiet answer (one case could clear the site's storage).
+- Detection: pages can no longer tell the extension's JavaScript hooks from the browser's own functions by reading their source text.
+- Detection: pages that add and remove many frames no longer keep growing in memory, and two rules checking the same page global (a duplicated rule) are both reported.
+- Rules: URL, content and JavaScript-hook rules without a confidence score the default instead of zero, cookie rules score the same in any order, and page plus hook evidence keeps the higher confidence.
+
 ## [3.0.4] - 2026-10-23
 
 ### Added
@@ -642,6 +695,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.5]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.4...v3.0.5
 [3.0.4]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.3...v3.0.4
 [3.0.3]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.1...v3.0.2

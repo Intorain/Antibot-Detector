@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Немає завершеного сканування"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Цю сторінку неможливо просканувати"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Відкрийте звичайний сайт для пошуку захистів. Сторінки браузера та розширень неможливо сканувати."
+  },
   "detectionRetryScanDesc": {
     "message": "Сканування не завершилося. Перезавантажте сторінку, щоб повторити спробу."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Не вдалося зберегти це правило. Ваші зміни не втрачено; повторіть спробу."
+  },
+  "advToolScriptsHint": {
+    "message": "Показати захисні скрипти, які завантажила ця сторінка"
   },
   "advToolReloadScriptsHint": {
     "message": "Перезавантажте сторінку, щоб проаналізувати скрипти захисту"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Історія"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Історія захоплень"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Фільтруйте, переглядайте й експортуйте зібрані захоплення"
-  },
   "advancedFilterSite": {
     "message": "Сайт"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Поточний сайт"
-  },
-  "advancedFilterModule": {
-    "message": "Модуль"
-  },
-  "advancedFilterAllModules": {
-    "message": "Усі модулі"
   },
   "advancedFilterSearch": {
     "message": "Пошук"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Помилка завантаження захоплень: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Поточний сайт ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Спробуйте змінити фільтри або пошуковий запит, щоб знайти захоплення."
-  },
-  "advPanelNoUrl": {
-    "message": "Немає URL"
   },
   "advPanelView": {
     "message": "Переглянути"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Відновити"
-  },
-  "advancedFilterTool": {
-    "message": "Інструмент"
-  },
-  "advancedFilterAllTools": {
-    "message": "Усі інструменти"
   },
   "advFilterKindCapture": {
     "message": "Захоплення"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Не вдалося запустити перевірку."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Не вдалося зберегти зміну. Повторіть спробу."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Відкрийте спливне вікно на сайті, щоб додати його."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Скасувати зміни?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "У цьому правилі є незбережені зміни."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Скасувати"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Аналіз зупинено: вкладка перейшла на іншу сторінку до його завершення"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Час аналізу минув: сторінка не перезавантажилася вчасно"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "На цій вкладці триває захоплення: спершу зупиніть його, потім повторіть спробу"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Дані hCaptcha не виявлено (тайм-аут 60 с)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Оригінал (англійською)"
+  },
+  "ruleOriginalHint": {
+    "message": "Інші мови перекладають цей текст: якщо змінити його, вони показуватимуть його без перекладу, доки його не перекладуть знову."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Незбережені налаштування"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Зміна мови перезавантажить розширення. Спершу зберегти зміни налаштувань?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Перекласти зміни"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Тексти, змінені мовою {0}: {1}. Інші мови досі показують старий текст."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Перекладає написане англійською (оригінал) та іншими мовами вбудованим перекладачем браузера. Перевірте перед збереженням."
   }
 }

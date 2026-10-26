@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Žádné dokončené skenování"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Tuto stránku nelze prohledat"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Otevřete běžný web pro zjištění ochran. Stránky prohlížeče a rozšíření nelze prohledávat."
+  },
   "detectionRetryScanDesc": {
     "message": "Skenování se nedokončilo. Načtěte stránku znovu a zkuste to znovu."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Toto pravidlo se nepodařilo uložit. Vaše změny tu zůstaly; zkuste to znovu."
+  },
+  "advToolScriptsHint": {
+    "message": "Zobrazit ochranné skripty, které tato stránka načetla"
   },
   "advToolReloadScriptsHint": {
     "message": "Načtěte stránku znovu pro analýzu skriptů ochrany"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Historie"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Historie zachycení"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filtrujte, prohlížejte a exportujte shromážděná zachycení"
-  },
   "advancedFilterSite": {
     "message": "Web"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Aktuální web"
-  },
-  "advancedFilterModule": {
-    "message": "Modul"
-  },
-  "advancedFilterAllModules": {
-    "message": "Všechny moduly"
   },
   "advancedFilterSearch": {
     "message": "Hledat"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Chyba při načítání zachycení: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Aktuální web ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Zkuste upravit filtry nebo hledaný dotaz, abyste našli zachycení."
-  },
-  "advPanelNoUrl": {
-    "message": "Bez URL"
   },
   "advPanelView": {
     "message": "Zobrazit"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Obnovit"
-  },
-  "advancedFilterTool": {
-    "message": "Nástroj"
-  },
-  "advancedFilterAllTools": {
-    "message": "Všechny nástroje"
   },
   "advFilterKindCapture": {
     "message": "Zachycení"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Test se nepodařilo spustit."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Změnu se nepodařilo uložit. Zkuste to znovu."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Pro přidání webu na něm otevřete okno rozšíření."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Zahodit vaše změny?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Toto pravidlo má změny, které ještě nejsou uložené."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Zahodit"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analýza zastavena: karta přešla na jinou stránku před jejím dokončením"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Vypršel časový limit analýzy: stránka se včas znovu nenačetla"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Na této kartě běží zachytávání: nejprve ho zastavte a pak to zkuste znovu"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Nezjištěna žádná data hCaptcha (časový limit 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Originál (anglicky)"
+  },
+  "ruleOriginalHint": {
+    "message": "Ostatní jazyky tento text překládají: když ho změníte, zobrazí ho nepřeložený, dokud se znovu nepřeloží."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Neuložená nastavení"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Změna jazyka znovu načte rozšíření. Uložit nejdřív změny nastavení?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Přeložit změny"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Texty změněné v jazyce {0}: {1}. Ostatní jazyky stále zobrazují starý text."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Přeloží, co jste napsali, do angličtiny (originál) a do ostatních jazyků pomocí překladače v prohlížeči. Před uložením je zkontrolujte."
   }
 }

@@ -71,6 +71,29 @@ ImpervaAdvanced.prototype.extractScripts = async function() {
 
             Logger.network('[IMPERVA-EXTRACT] Tab found:', { id: tab.id, url: tab.url, title: tab.title });
 
+            // First the scripts the page already loaded: no cookie deleted and no reload, so the popup stays open and
+            // shows the result at once (saved to History by the window). Only a page where no Imperva script is
+            // listed has its cookies reset and is reloaded
+            const loaded = await this.loadedPageResult();
+            if (loaded) {
+                this.displayExtractionResults(loaded);
+                return { awaitingResult: false };
+            }
+
+            // Ask for extraction mode first: a capture running on this tab refuses it,
+            // and then no cookie should be deleted
+            const response = await chrome.runtime.sendMessage({
+                type: 'IMPERVA_EXTRACT_SCRIPTS',
+                tabId: tab.id
+            });
+            if (response && response.status === 'capture_running') {
+                NotificationHelper.error(AdvancedUtils.notifications.captureRunning());
+                return { awaitingResult: false };
+            }
+            if (!response || response.status !== 'success') {
+                throw new Error(response?.error || ImpervaAdvanced.tr('advImpervaEnableExtractionFailed', 'Failed to enable extraction mode. Check background console for details.'));
+            }
+
             // Delete Imperva-related cookies to force regeneration
             const cookiesToDelete = ['reese84', '___utmvc', 'incap_ses', 'nlbi', 'visid_incap'];
             let deletedCount = 0;
@@ -96,11 +119,6 @@ ImpervaAdvanced.prototype.extractScripts = async function() {
 
             Logger.network(`[IMPERVA-EXTRACT] Deleted ${deletedCount} cookies total`);
 
-            // Send message to start extraction mode
-            const response = await chrome.runtime.sendMessage({
-                type: 'IMPERVA_EXTRACT_SCRIPTS',
-                tabId: tab.id
-            });
             Logger.network('[IMPERVA-EXTRACT] Background response received:', response);
             Logger.network('[IMPERVA-EXTRACT] Response type:', typeof response);
             Logger.network('[IMPERVA-EXTRACT] Response status:', response?.status);

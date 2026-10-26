@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Tamamlanmış tarama yok"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Bu sayfa taranamaz"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Korumaları tespit etmek için normal bir web sitesi açın. Tarayıcı ve uzantı sayfaları taranamaz."
+  },
   "detectionRetryScanDesc": {
     "message": "Tarama tamamlanmadı. Yeniden denemek için sayfayı yeniden yükleyin."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Bu kural kaydedilemedi. Değişiklikleriniz burada duruyor; yeniden deneyin."
+  },
+  "advToolScriptsHint": {
+    "message": "Bu sayfanın yüklediği koruma script'lerini göster"
   },
   "advToolReloadScriptsHint": {
     "message": "Koruma komut dosyalarını analiz etmek için sayfayı yeniden yükleyin"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Geçmiş"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Yakalama geçmişi"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Toplanan yakalamaları filtreleyin, inceleyin ve dışa aktarın"
-  },
   "advancedFilterSite": {
     "message": "Site"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Geçerli site"
-  },
-  "advancedFilterModule": {
-    "message": "Modül"
-  },
-  "advancedFilterAllModules": {
-    "message": "Tüm modüller"
   },
   "advancedFilterSearch": {
     "message": "Ara"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Yakalamalar yüklenirken hata oluştu: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Geçerli site ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Yakalamaları bulmak için filtrelerinizi veya arama sorgunuzu değiştirmeyi deneyin."
-  },
-  "advPanelNoUrl": {
-    "message": "URL yok"
   },
   "advPanelView": {
     "message": "Görüntüle"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Geri yükle"
-  },
-  "advancedFilterTool": {
-    "message": "Araç"
-  },
-  "advancedFilterAllTools": {
-    "message": "Tüm araçlar"
   },
   "advFilterKindCapture": {
     "message": "Yakalamalar"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Test çalıştırılamadı."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Değişiklik kaydedilemedi. Yeniden deneyin."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Eklemek için açılır pencereyi bir web sitesinde açın."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Değişiklikleriniz silinsin mi?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Bu kuralda henüz kaydedilmemiş değişiklikler var."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Sil"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analiz durduruldu: sekme, analiz bitmeden başka bir sayfaya geçti"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Analiz zaman aşımına uğradı: sayfa zamanında yeniden yüklenmedi"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Bu sekmede bir yakalama çalışıyor: önce durdurun, sonra yeniden deneyin"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "hCaptcha verisi algılanmadı (60 sn zaman aşımı)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Orijinal (İngilizce)"
+  },
+  "ruleOriginalHint": {
+    "message": "Diğer diller bu metni çevirir: değiştirirsen yeniden çevrilene kadar çevrilmeden gösterilir."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Kaydedilmemiş ayarlar"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Dili değiştirmek uzantıyı yeniden yükler. Önce ayarlardaki değişiklikler kaydedilsin mi?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Değişiklikleri çevir"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "{0} dilinde değiştirdiğin metinler: {1}. Diğer diller hâlâ eski metni gösteriyor."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Yazdığını tarayıcının cihazdaki çevirmeniyle İngilizceye (orijinal) ve diğer dillere çevirir. Kaydetmeden önce kontrol et."
   }
 }

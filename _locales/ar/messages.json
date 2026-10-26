@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "لا يوجد فحص مكتمل"
   },
+  "detectionUnsupportedTitle": {
+    "message": "لا يمكن فحص هذه الصفحة"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "افتح موقع ويب عاديًا للكشف عن وسائل الحماية. لا يمكن فحص صفحات المتصفح وصفحات الإضافات."
+  },
   "detectionRetryScanDesc": {
     "message": "لم يكتمل الفحص. أعد تحميل الصفحة للمحاولة مجددًا."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "تعذر حفظ هذه القاعدة. تغييراتك محفوظة؛ حاول مجددًا."
+  },
+  "advToolScriptsHint": {
+    "message": "عرض سكربتات الحماية التي حمّلتها هذه الصفحة"
   },
   "advToolReloadScriptsHint": {
     "message": "إعادة تحميل الصفحة لتحليل نصوص الحماية البرمجية"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "السجل"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "سجل الالتقاطات"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "تصفية الالتقاطات المجمعة وفحصها وتصديرها"
-  },
   "advancedFilterSite": {
     "message": "الموقع"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "الموقع الحالي"
-  },
-  "advancedFilterModule": {
-    "message": "الوحدة"
-  },
-  "advancedFilterAllModules": {
-    "message": "جميع الوحدات"
   },
   "advancedFilterSearch": {
     "message": "بحث"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "خطأ في تحميل الالتقاطات: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "الموقع الحالي ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "حاول تعديل عوامل التصفية أو استعلام البحث للعثور على الالتقاطات."
-  },
-  "advPanelNoUrl": {
-    "message": "لا يوجد عنوان URL"
   },
   "advPanelView": {
     "message": "عرض"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "استعادة"
-  },
-  "advancedFilterTool": {
-    "message": "الأداة"
-  },
-  "advancedFilterAllTools": {
-    "message": "كل الأدوات"
   },
   "advFilterKindCapture": {
     "message": "الالتقاطات"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "تعذّر تشغيل الاختبار."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "تعذّر حفظ التغيير. حاول مجددًا."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "افتح النافذة المنبثقة على موقع ويب لإضافته."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "هل تريد تجاهل تغييراتك؟"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "في هذه القاعدة تغييرات لم تُحفظ بعد."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "تجاهل"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "توقّف التحليل: انتقلت علامة التبويب إلى صفحة أخرى قبل اكتماله"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "انتهت مهلة التحليل: لم يُعَد تحميل الصفحة في الوقت المحدد"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "يوجد التقاط قيد التشغيل في علامة التبويب هذه: أوقفه أولًا ثم حاول مجددًا"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "لم تُكتشف بيانات hCaptcha (المهلة 60 ثانية)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "الأصل (بالإنجليزية)"
+  },
+  "ruleOriginalHint": {
+    "message": "تترجم اللغات الأخرى هذا النص: إذا غيّرته فستعرضه دون ترجمة إلى أن يُترجم من جديد."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "إعدادات غير محفوظة"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "يؤدي تغيير اللغة إلى إعادة تحميل الإضافة. هل تريد حفظ تغييرات الإعدادات أولاً؟"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "ترجمة التغييرات"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "النصوص التي غيّرتها بـ{0}: {1}. لا تزال اللغات الأخرى تعرض النص القديم."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "يترجم ما كتبته إلى الإنجليزية (الأصل) وإلى اللغات الأخرى بمترجم المتصفح على الجهاز. راجعها قبل الحفظ."
   }
 }

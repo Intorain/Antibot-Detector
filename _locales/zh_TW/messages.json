@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "尚無完成的掃描"
   },
+  "detectionUnsupportedTitle": {
+    "message": "無法掃描此頁面"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "請開啟一般網站以偵測防護措施。瀏覽器頁面和擴充功能頁面無法掃描。"
+  },
   "detectionRetryScanDesc": {
     "message": "掃描未完成。請重新載入網頁後再試一次。"
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "無法儲存此規則。您的變更仍保留在此，請再試一次。"
+  },
+  "advToolScriptsHint": {
+    "message": "顯示此頁面載入的防護指令碼"
   },
   "advToolReloadScriptsHint": {
     "message": "重新載入網頁以分析防護指令碼"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "歷史記錄"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "擷取歷史記錄"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "篩選、檢查和匯出已收集的擷取項目"
-  },
   "advancedFilterSite": {
     "message": "網站"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "目前網站"
-  },
-  "advancedFilterModule": {
-    "message": "模組"
-  },
-  "advancedFilterAllModules": {
-    "message": "所有模組"
   },
   "advancedFilterSearch": {
     "message": "搜尋"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "載入擷取項目時發生錯誤：{0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "目前網站（{0}）"
-  },
   "advPanelNoResultsText": {
     "message": "請嘗試調整篩選條件或搜尋字詞，以找到擷取項目。"
-  },
-  "advPanelNoUrl": {
-    "message": "無 URL"
   },
   "advPanelView": {
     "message": "檢視"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "還原"
-  },
-  "advancedFilterTool": {
-    "message": "工具"
-  },
-  "advancedFilterAllTools": {
-    "message": "所有工具"
   },
   "advFilterKindCapture": {
     "message": "擷取"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "無法執行測試。"
+  },
+  "rulesToggleSaveFailed": {
+    "message": "無法儲存變更。請再試一次。"
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "請在網站上開啟彈出式視窗以新增該網站。"
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "要捨棄您的變更嗎？"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "此規則有尚未儲存的變更。"
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "捨棄"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "分析已停止：分頁在完成前已前往其他網頁"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "分析逾時：網頁未及時重新載入"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "此分頁正在擷取：請先停止，然後再試一次"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "未偵測到 hCaptcha 資料（60 秒逾時）"
+  },
+  "ruleOriginalEnglish": {
+    "message": "原文（英文）"
+  },
+  "ruleOriginalHint": {
+    "message": "其他語言會翻譯此文字：修改後，在重新翻譯之前會顯示未翻譯的文字。"
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "設定尚未儲存"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "變更語言會重新載入擴充功能。要先儲存對設定的變更嗎？"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "翻譯變更"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "你用{0}修改的文字：{1}。其他語言仍顯示舊文字。"
+  },
+  "ruleTranslateChangesHint": {
+    "message": "使用瀏覽器內建的翻譯功能，將你寫的內容翻譯成英文（原文）和其他語言。儲存前請檢查。"
   }
 }

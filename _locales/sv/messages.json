@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Ingen slutförd skanning"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Den här sidan kan inte skannas"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Öppna en vanlig webbplats för att identifiera skydd. Webbläsarens och tilläggens sidor kan inte skannas."
+  },
   "detectionRetryScanDesc": {
     "message": "Skanningen slutfördes inte. Läs in sidan igen och försök på nytt."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Det gick inte att spara regeln. Dina ändringar finns kvar här; försök igen."
+  },
+  "advToolScriptsHint": {
+    "message": "Visa skyddsskripten som den här sidan läste in"
   },
   "advToolReloadScriptsHint": {
     "message": "Läs in sidan igen för att analysera skyddets skript"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Historik"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Insamlingshistorik"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filtrera, granska och exportera insamlade data"
-  },
   "advancedFilterSite": {
     "message": "Webbplats"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Aktuell webbplats"
-  },
-  "advancedFilterModule": {
-    "message": "Modul"
-  },
-  "advancedFilterAllModules": {
-    "message": "Alla moduler"
   },
   "advancedFilterSearch": {
     "message": "Sök"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Fel vid inläsning av insamlingar: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Aktuell webbplats ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Försök justera filtren eller sökfrågan för att hitta insamlingar."
-  },
-  "advPanelNoUrl": {
-    "message": "Ingen URL"
   },
   "advPanelView": {
     "message": "Visa"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Återställ"
-  },
-  "advancedFilterTool": {
-    "message": "Verktyg"
-  },
-  "advancedFilterAllTools": {
-    "message": "Alla verktyg"
   },
   "advFilterKindCapture": {
     "message": "Insamlingar"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Testet kunde inte köras."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Det gick inte att spara ändringen. Försök igen."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Öppna popupen på en webbplats för att lägga till den."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Förkasta dina ändringar?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Den här regeln har ändringar som inte har sparats än."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Förkasta"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analysen stoppades: fliken gick till en annan sida innan den var klar"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Tidsgränsen för analysen nåddes: sidan lästes inte in igen i tid"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "En insamling pågår på den här fliken: stoppa den först och försök sedan igen"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Inga hCaptcha-data upptäcktes (tidsgräns 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Original (engelska)"
+  },
+  "ruleOriginalHint": {
+    "message": "De andra språken översätter den här texten: ändrar du den visas den oöversatt tills den översätts igen."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Osparade inställningar"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Byte av språk läser in tillägget igen. Spara ändringarna i inställningarna först?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Översätt ändringarna"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Texter du ändrade på {0}: {1}. De andra språken visar fortfarande den gamla texten."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Översätter det du skrev till engelska (originalet) och de andra språken med webbläsarens inbyggda översättare. Kontrollera dem innan du sparar."
   }
 }

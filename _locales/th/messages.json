@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "ไม่มีการสแกนที่เสร็จสมบูรณ์"
   },
+  "detectionUnsupportedTitle": {
+    "message": "ไม่สามารถสแกนหน้านี้ได้"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "เปิดเว็บไซต์ทั่วไปเพื่อตรวจหาการป้องกัน ไม่สามารถสแกนหน้าของเบราว์เซอร์และส่วนขยายได้"
+  },
   "detectionRetryScanDesc": {
     "message": "การสแกนไม่เสร็จสิ้น โหลดหน้าซ้ำเพื่อลองอีกครั้ง"
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "บันทึกกฎนี้ไม่สำเร็จ การเปลี่ยนแปลงของคุณยังอยู่ที่นี่ ลองอีกครั้ง"
+  },
+  "advToolScriptsHint": {
+    "message": "แสดงสคริปต์ป้องกันที่หน้านี้โหลด"
   },
   "advToolReloadScriptsHint": {
     "message": "โหลดหน้าซ้ำเพื่อวิเคราะห์สคริปต์ของระบบป้องกัน"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "ประวัติ"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "ประวัติการจับข้อมูล"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "กรอง ตรวจสอบ และส่งออกข้อมูลที่จับได้"
-  },
   "advancedFilterSite": {
     "message": "ไซต์"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "ไซต์ปัจจุบัน"
-  },
-  "advancedFilterModule": {
-    "message": "โมดูล"
-  },
-  "advancedFilterAllModules": {
-    "message": "ทุกโมดูล"
   },
   "advancedFilterSearch": {
     "message": "ค้นหา"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "โหลดข้อมูลที่จับไม่สำเร็จ: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "ไซต์ปัจจุบัน ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "ลองปรับตัวกรองหรือคำค้นหาเพื่อหาข้อมูลที่จับ"
-  },
-  "advPanelNoUrl": {
-    "message": "ไม่มี URL"
   },
   "advPanelView": {
     "message": "ดู"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "คืนค่า"
-  },
-  "advancedFilterTool": {
-    "message": "เครื่องมือ"
-  },
-  "advancedFilterAllTools": {
-    "message": "ทุกเครื่องมือ"
   },
   "advFilterKindCapture": {
     "message": "ข้อมูลที่จับ"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "เรียกใช้การทดสอบไม่ได้"
+  },
+  "rulesToggleSaveFailed": {
+    "message": "บันทึกการเปลี่ยนแปลงไม่สำเร็จ ลองอีกครั้ง"
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "เปิดป๊อปอัปบนเว็บไซต์เพื่อเพิ่มไซต์นั้น"
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "ละทิ้งการเปลี่ยนแปลงหรือไม่"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "กฎนี้มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก"
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "ละทิ้ง"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "หยุดการวิเคราะห์: แท็บไปยังหน้าอื่นก่อนวิเคราะห์เสร็จ"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "การวิเคราะห์หมดเวลา: หน้าไม่โหลดซ้ำทันเวลา"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "มีการจับข้อมูลทำงานอยู่ในแท็บนี้: หยุดก่อนแล้วลองอีกครั้ง"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "ไม่พบข้อมูล hCaptcha (หมดเวลาใน 60 วินาที)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "ต้นฉบับ (ภาษาอังกฤษ)"
+  },
+  "ruleOriginalHint": {
+    "message": "ภาษาอื่นแปลข้อความนี้: หากแก้ไข ภาษาเหล่านั้นจะแสดงข้อความโดยไม่แปลจนกว่าจะแปลใหม่"
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "การตั้งค่าที่ยังไม่ได้บันทึก"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "การเปลี่ยนภาษาจะโหลดส่วนขยายใหม่ บันทึกการเปลี่ยนแปลงการตั้งค่าก่อนไหม"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "แปลการเปลี่ยนแปลง"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "ข้อความที่คุณเปลี่ยนเป็นภาษา{0}: {1} ภาษาอื่นยังแสดงข้อความเดิม"
+  },
+  "ruleTranslateChangesHint": {
+    "message": "แปลสิ่งที่คุณเขียนเป็นภาษาอังกฤษ (ต้นฉบับ) และภาษาอื่นด้วยตัวแปลในเบราว์เซอร์ ตรวจสอบก่อนบันทึก"
   }
 }

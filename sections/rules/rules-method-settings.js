@@ -679,6 +679,8 @@ Rules.prototype.saveMethodSettings = function() {
     if (typeof this.collectDescriptionTranslations === 'function') {
       const translations = this.collectDescriptionTranslations();
       this.currentMethodItem.dataset.descriptionI18n = Object.keys(translations).length ? JSON.stringify(translations) : '';
+      // Written in the UI language: the other languages still say the old text (Translate the changes)
+      if (document.querySelector('#methodDescriptionLocal')?.dataset.edited) this.currentMethodItem.dataset.localEdited = '1';
     }
 
     // Get values from modal
@@ -724,6 +726,9 @@ Rules.prototype.saveMethodSettings = function() {
         payloadMethods = selectedRadio.value;
       }
     }
+    // The dialog picks one method: a rule listing several keeps its list while its first one stays picked
+    const storedMethods = this.currentMethodItem.dataset.payloadMethods || '';
+    if (storedMethods.includes(',') && payloadMethods === storedMethods.split(',')[0]) payloadMethods = storedMethods;
 
     // Save to data attributes
     this.currentMethodItem.dataset.confidence = confidence;

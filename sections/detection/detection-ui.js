@@ -228,10 +228,12 @@ DetectionUI.applyEmptyStateCopy = function(options = {}) {
         emptyStateTitle.textContent = options.title;
         emptyStateTitle.removeAttribute('data-i18n');
       } else {
-        const titleKey = options.outcome === 'failed' ? 'detectionFailedTitle'
+        const titleKey = options.outcome === 'unsupported' ? 'detectionUnsupportedTitle'
+          : options.outcome === 'failed' ? 'detectionFailedTitle'
           : options.outcome === 'interrupted' ? 'detectionInterruptedTitle'
           : options.noCache ? 'detectionUnscannedTitle' : 'detectionEmptyTitle';
-        const titleFallback = options.outcome === 'failed' ? 'Scan failed'
+        const titleFallback = options.outcome === 'unsupported' ? 'This page cannot be scanned'
+          : options.outcome === 'failed' ? 'Scan failed'
           : options.outcome === 'interrupted' ? 'Scan interrupted'
           : options.noCache ? 'No completed scan' : 'Nothing Detected';
         emptyStateTitle.setAttribute('data-i18n', titleKey);
@@ -244,9 +246,12 @@ DetectionUI.applyEmptyStateCopy = function(options = {}) {
         emptyStateText.textContent = options.description;
         emptyStateText.removeAttribute('data-i18n');
       } else {
-        const descKey = options.outcome === 'failed' || options.outcome === 'interrupted'
+        const descKey = options.outcome === 'unsupported' ? 'detectionUnsupportedDesc'
+          : options.outcome === 'failed' || options.outcome === 'interrupted'
           ? 'detectionRetryScanDesc' : options.noCache ? 'detectionNoCachedDataDesc' : 'detectionNoDetectionsDesc';
-        const descFallback = options.outcome === 'failed' || options.outcome === 'interrupted'
+        const descFallback = options.outcome === 'unsupported'
+          ? 'Open a regular website to scan for protections. Browser pages and extension pages cannot be scanned.'
+          : options.outcome === 'failed' || options.outcome === 'interrupted'
           ? 'The scan did not finish. Reload the page to try again.' : options.noCache
           ? 'No cached detection data is available for this page. Reload the page to run a fresh scan.'
           : 'No matching antibot, CAPTCHA, or fingerprinting signals were found on this page.';
@@ -321,6 +326,9 @@ DetectionUI.syncHooksOffNote = async function() {
 DetectionUI.showEmptyState = function(options = {}) {
     if (DetectionUI.showUnavailableState.call(this)) return;
 
+    if (typeof this.viewedTabUrl === 'string' && !Utils.isValidContentScriptUrl(this.viewedTabUrl)) {
+      options = { ...options, outcome: 'unsupported' };
+    }
     if (options.outcome) options = { ...options, noCache: true, showBadges: false };
     this.scanOutcome = options.outcome || (options.noCache ? 'unscanned' : 'complete');
     if (this.uiStateMachine) {
@@ -901,14 +909,18 @@ DetectionUI.copyCopyableValue = async function(element) {
 DetectionUI.handleCopyableValueClick = function(event) {
     const eventTarget = event.target instanceof Element ? event.target : event.target?.parentElement;
     const target = eventTarget?.closest('[data-copy-value]');
-    const container = document.querySelector('#detectionResults');
-    if (!target || !container || !container.contains(target)) {
+    if (!target || !DetectionUI.inCopyArea(target)) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
     this.copyCopyableValue(target);
+};
+
+/** Copyable values live in the results header and in the details dialog's evidence rows. */
+DetectionUI.inCopyArea = function(element) {
+    return ['#detectionResults', '#detectionDetailModal'].some((selector) => document.querySelector(selector)?.contains(element));
 };
 
 DetectionUI.handleCopyableValueKeyDown = function(event) {
@@ -918,8 +930,7 @@ DetectionUI.handleCopyableValueKeyDown = function(event) {
 
     const eventTarget = event.target instanceof Element ? event.target : event.target?.parentElement;
     const target = eventTarget?.closest('[data-copy-value]');
-    const container = document.querySelector('#detectionResults');
-    if (!target || !container || !container.contains(target)) {
+    if (!target || !DetectionUI.inCopyArea(target)) {
       return;
     }
 
@@ -1000,7 +1011,7 @@ DetectionUI.buildDetectionCardHtml = function(detection, index, isSingleResult =
     const evidenceIcons = DetectionUI.evidenceIconsHtml.call(this, matchList, combos.length > 0);
 
     return `
-      <div class="detection-card ${isSingleResult ? 'single-result' : ''}" data-detection-index="${globalIndex}" style="--conf:${sure}%;--cat-color:${categoryColor}">
+      <div class="detection-card ${isSingleResult ? 'single-result' : ''}" data-detection-index="${globalIndex}" role="button" tabindex="0" aria-haspopup="dialog" style="--conf:${sure}%;--cat-color:${categoryColor}">
         <div class="card-header">
           <div class="card-icon-section">
             ${detectorIcon}
@@ -1174,6 +1185,12 @@ DetectionUI.renderDetectionsPage = function(detections) {
           if (!Number.isNaN(parsedIndex)) {
             this.openDetectionModal(parsedIndex);
           }
+        });
+        // Keyboard: Enter or Space opens the card like a click (keys on its own buttons stay theirs)
+        card.addEventListener('keydown', (e) => {
+          if (e.target !== card || (e.key !== 'Enter' && e.key !== ' ')) return;
+          e.preventDefault();
+          card.click();
         });
       });
     };
@@ -1465,12 +1482,16 @@ DetectionUI.getMethodBadges = function(matches) {
       const methodClass = matchType.replace(/_/g, '-').replace(/s$/, ''); // js_hooks -> js-hooks, cookies -> cookie
 
       const safeDisplayValue = FormatUtils.escapeHtml(displayValue);
-      const safeFullValue = FormatUtils.escapeHtml(copyValue);
+      // The value is a button: a click (or Enter) copies the whole of it, like the site address above
+      const copyText = DetectionUI.copyLabelText('value', copyValue);
+      const copyable = copyValue && copyValue !== unknownValue;
 
       return `
         <div class="method-item-card method-${methodClass}" data-method-type="${methodType}">
           <span class="method-type-badge" ${badgeStyle}>${FormatUtils.escapeHtml(DetectionUI.getMethodLabel(matchType || 'unknown'))}</span>
-          <span class="method-value-btn" dir="ltr" title="${safeFullValue}">${safeDisplayValue}</span>
+          ${copyable
+            ? `<button type="button" class="method-value-btn copyable-value" dir="ltr" data-copy-value="${FormatUtils.escapeAttr(copyValue)}" data-copy-label="value" title="${FormatUtils.escapeAttr(copyText.withValue)}" aria-label="${FormatUtils.escapeAttr(copyText.action)}">${safeDisplayValue}</button>`
+            : `<span class="method-value-btn" dir="ltr">${safeDisplayValue}</span>`}
           ${FormatUtils.confidenceHtml(confidence, 'method-confidence')}
         </div>
       `;

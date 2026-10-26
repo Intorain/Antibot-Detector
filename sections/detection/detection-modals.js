@@ -120,6 +120,12 @@ DetectionModals.initializeModalElements = function() {
 
     const closeHandler = () => this.closeDetectionModal();
 
+    // Evidence values copy on click or Enter (the rows are re-rendered for each detection: one delegated listener)
+    if (this.modalElements.methods) {
+      this.modalElements.methods.addEventListener('click', (e) => DetectionUI.handleCopyableValueClick.call(this, e));
+      this.modalElements.methods.addEventListener('keydown', (e) => DetectionUI.handleCopyableValueKeyDown.call(this, e));
+    }
+
     if (overlay) {
       overlay.addEventListener('click', closeHandler);
     }
@@ -168,6 +174,11 @@ DetectionModals.openDetectionModal = function(index) {
     requestAnimationFrame(() => {
       this.modalElements.modal.classList.add('is-open');
     });
+    // Keyboard: focus moves into the dialog, Tab stays in it, Escape closes it and focus goes back to the card
+    const dialog = this.modalElements.modal.querySelector('.detection-modal-container');
+    if (dialog && typeof ModalFocus !== 'undefined' && !this.releaseModalFocus) {
+      this.releaseModalFocus = ModalFocus.activate(dialog, { onClose: () => this.closeDetectionModal(), initialFocus: this.modalElements.closeBtn || undefined });
+    }
 };
 
 DetectionModals.closeDetectionModal = function() {
@@ -178,6 +189,9 @@ DetectionModals.closeDetectionModal = function() {
     this.modalElements.modal.classList.remove('is-open');
     this.modalElements.modal.style.display = 'none';
     this.activeModalIndex = null;
+    const release = this.releaseModalFocus;
+    this.releaseModalFocus = null;
+    if (release) release();
 };
 
 DetectionModals.renderDetectionModalContent = function(detection) {

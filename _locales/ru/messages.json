@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Нет завершённого сканирования"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Эту страницу нельзя просканировать"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Откройте обычный сайт для поиска защит. Страницы браузера и расширений нельзя сканировать."
+  },
   "detectionRetryScanDesc": {
     "message": "Сканирование не завершилось. Перезагрузите страницу, чтобы повторить попытку."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Не удалось сохранить правило. Ваши изменения не потеряны; попробуйте снова."
+  },
+  "advToolScriptsHint": {
+    "message": "Показать защитные скрипты, загруженные этой страницей"
   },
   "advToolReloadScriptsHint": {
     "message": "Перезагрузить страницу для анализа скриптов защиты"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "История"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "История захватов"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Фильтруйте, просматривайте и экспортируйте собранные захваты"
-  },
   "advancedFilterSite": {
     "message": "Сайт"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Текущий сайт"
-  },
-  "advancedFilterModule": {
-    "message": "Модуль"
-  },
-  "advancedFilterAllModules": {
-    "message": "Все модули"
   },
   "advancedFilterSearch": {
     "message": "Поиск"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Ошибка загрузки захватов: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Текущий сайт ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Попробуйте изменить фильтры или поисковый запрос, чтобы найти захваты."
-  },
-  "advPanelNoUrl": {
-    "message": "Нет URL"
   },
   "advPanelView": {
     "message": "Просмотр"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Восстановить"
-  },
-  "advancedFilterTool": {
-    "message": "Инструмент"
-  },
-  "advancedFilterAllTools": {
-    "message": "Все инструменты"
   },
   "advFilterKindCapture": {
     "message": "Захваты"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Не удалось выполнить проверку."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Не удалось сохранить изменение. Попробуйте снова."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Откройте окно расширения на сайте, чтобы добавить его."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Отменить изменения?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "В этом правиле есть несохранённые изменения."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Отменить"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Анализ остановлен: вкладка перешла на другую страницу до его завершения"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Время анализа истекло: страница не перезагрузилась вовремя"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "На этой вкладке идёт захват: сначала остановите его, затем повторите попытку"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Данные hCaptcha не обнаружены (тайм-аут 60 с)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Оригинал (английский)"
+  },
+  "ruleOriginalHint": {
+    "message": "Другие языки переводят этот текст: если изменить его, они будут показывать его без перевода, пока он не будет переведён заново."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Несохранённые настройки"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Смена языка перезагрузит расширение. Сначала сохранить изменения настроек?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Перевести изменения"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Тексты, изменённые на языке {0}: {1}. Другие языки пока показывают старый текст."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Переводит написанное на английский (оригинал) и другие языки встроенным переводчиком браузера. Проверьте перед сохранением."
   }
 }

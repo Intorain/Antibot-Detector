@@ -389,7 +389,36 @@ SettingsUI._openLanguagePicker = function() {
 
 
 
+/**
+ * Before the language change reloads the popup: true to go on. With unsaved Settings changes it asks to save them
+ * (and goes on only if the save worked), drop them, or stay (false).
+ */
+SettingsUI._settleUnsavedBeforeReload = async function() {
+  const owner = typeof window !== 'undefined' && window.popupInstance ? window.popupInstance.settings : null;
+  if (!owner || !owner.settingsBaseline || JSON.stringify(owner.settings) === JSON.stringify(owner.settingsBaseline)) return true;
+  if (typeof NotificationHelper === 'undefined' || typeof NotificationHelper.choose !== 'function') return true;
+  const tr = (key, fallback) => ((typeof I18n !== 'undefined') && I18n.get(key)) || fallback;
+  const answer = await NotificationHelper.choose({
+    title: tr('settingsLanguageUnsavedTitle', 'Unsaved settings'),
+    message: tr('settingsLanguageUnsavedMessage', 'Changing the language reloads the extension. Save your changes to the settings first?'),
+    cancelText: tr('btnCancel', 'Cancel'),
+    tone: 'warning',
+    actions: [
+      { value: 'discard', text: tr('ruleEditorDiscardConfirm', 'Discard') },
+      { value: 'save', text: tr('btnSave', 'Save'), primary: true }
+    ],
+    defaultValue: 'save'
+  });
+  if (answer === 'save') return (await owner.saveSettings({ notify: false })) !== false;
+  return answer === 'discard';
+};
+
 SettingsUI._applyLanguageChoice = async function(choice, { persist = true } = {}) {
+  // The popup reloads in the new language: unsaved Settings changes are saved or dropped first, as the person chooses
+  if (persist && !(await SettingsUI._settleUnsavedBeforeReload())) {
+    SettingsUI._closeLanguagePicker();
+    return false;
+  }
   try {
     if (persist) await chrome.storage.local.set({ scrapfly_language_override: choice });
   } catch (err) {
@@ -457,7 +486,7 @@ SettingsUI.initLanguagePicker = function() {
 
     const label = SettingsUI._languageOptionLabel(option);
 
-    return `<li class="language-picker-option" role="option" data-value="${option.value}" aria-selected="false">
+    return `<li class="language-picker-option" role="option" tabindex="-1" data-value="${option.value}" aria-selected="false">
 
       ${SettingsUI._languageFlagMarkup(option)}
 
@@ -517,9 +546,57 @@ SettingsUI.initLanguagePicker = function() {
 
 
 
+  // Escape closes only the list (Settings stays open with its unsaved changes): capture phase, before Settings' own key handler
+
   document.addEventListener('keydown', (e) => {
 
-    if (e.key === 'Escape') {
+    if (e.key !== 'Escape' || !picker.classList.contains('open')) return;
+
+    e.preventDefault();
+
+    e.stopImmediatePropagation();
+
+    SettingsUI._closeLanguagePicker();
+
+    trigger.focus();
+
+  }, true);
+
+  // Keyboard: arrows (and Home/End) move through the languages, Enter or Space picks one, Tab leaves the list
+
+  trigger.addEventListener('keydown', (e) => {
+
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+
+    e.preventDefault();
+
+    SettingsUI._openLanguagePicker();
+
+    (menu.querySelector('[aria-selected="true"]') || menu.querySelector('.language-picker-option'))?.focus();
+
+  });
+
+  menu.addEventListener('keydown', (e) => {
+
+    const options = Array.from(menu.querySelectorAll('.language-picker-option'));
+
+    const current = options.indexOf(document.activeElement);
+
+    const move = { ArrowDown: current + 1, ArrowUp: current - 1, Home: 0, End: options.length - 1 }[e.key];
+
+    if (move !== undefined) {
+
+      e.preventDefault();
+
+      options[Math.max(0, Math.min(options.length - 1, move))]?.focus();
+
+    } else if ((e.key === 'Enter' || e.key === ' ') && current >= 0) {
+
+      e.preventDefault();
+
+      SettingsUI._applyLanguageChoice(options[current].dataset.value || 'auto');
+
+    } else if (e.key === 'Tab') {
 
       SettingsUI._closeLanguagePicker();
 

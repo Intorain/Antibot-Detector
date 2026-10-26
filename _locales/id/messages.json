@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Belum ada pemindaian selesai"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Halaman ini tidak dapat dipindai"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Buka situs web biasa untuk mendeteksi perlindungan. Halaman browser dan ekstensi tidak dapat dipindai."
+  },
   "detectionRetryScanDesc": {
     "message": "Pemindaian tidak selesai. Muat ulang halaman untuk mencoba lagi."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Tidak dapat menyimpan aturan ini. Perubahan Anda masih ada; coba lagi."
+  },
+  "advToolScriptsHint": {
+    "message": "Tampilkan script perlindungan yang dimuat halaman ini"
   },
   "advToolReloadScriptsHint": {
     "message": "Muat ulang halaman untuk menganalisis script proteksi"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Riwayat"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Riwayat rekaman"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filter, periksa, dan ekspor rekaman yang terkumpul"
-  },
   "advancedFilterSite": {
     "message": "Situs"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Situs saat ini"
-  },
-  "advancedFilterModule": {
-    "message": "Modul"
-  },
-  "advancedFilterAllModules": {
-    "message": "Semua modul"
   },
   "advancedFilterSearch": {
     "message": "Cari"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Kesalahan saat memuat rekaman: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Situs saat ini ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Coba sesuaikan filter atau kueri pencarian untuk menemukan rekaman."
-  },
-  "advPanelNoUrl": {
-    "message": "Tanpa URL"
   },
   "advPanelView": {
     "message": "Lihat"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Pulihkan"
-  },
-  "advancedFilterTool": {
-    "message": "Alat"
-  },
-  "advancedFilterAllTools": {
-    "message": "Semua alat"
   },
   "advFilterKindCapture": {
     "message": "Rekaman"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Pengujian tidak dapat dijalankan."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Tidak dapat menyimpan perubahan. Coba lagi."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Buka popup di situs web untuk menambahkannya."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Buang perubahan Anda?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Aturan ini memiliki perubahan yang belum disimpan."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Buang"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analisis dihentikan: tab berpindah ke halaman lain sebelum selesai"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Waktu analisis habis: halaman tidak dimuat ulang tepat waktu"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Perekaman sedang berjalan di tab ini: hentikan dulu, lalu coba lagi"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Tidak ada data hCaptcha yang terdeteksi (batas waktu 60 dtk)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Asli (bahasa Inggris)"
+  },
+  "ruleOriginalHint": {
+    "message": "Bahasa lain menerjemahkan teks ini: jika diubah, teks ditampilkan tanpa terjemahan sampai diterjemahkan lagi."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Pengaturan belum disimpan"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Mengganti bahasa akan memuat ulang ekstensi. Simpan perubahan pengaturan terlebih dahulu?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Terjemahkan perubahan"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Teks yang Anda ubah dalam {0}: {1}. Bahasa lain masih menampilkan teks lama."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Menerjemahkan yang Anda tulis ke bahasa Inggris (aslinya) dan ke bahasa lain dengan penerjemah bawaan browser. Periksa sebelum menyimpan."
   }
 }

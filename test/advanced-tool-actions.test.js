@@ -253,7 +253,9 @@ test('Akamai override retains recording after a failed stop and clears it only a
 
 test('all method semantics disclose reloads, cookie resets and capture state without relying on translated labels', () => {
   const { context } = fixture();
-  const resetsScripts = new Set(['awswaf', 'imperva']);
+  // Analyze Scripts first lists what the page already loaded (no reload), for every vendor: none says it reloads
+  const resetsScripts = new Set();
+  const reloadsScripts = new Set();
   const reloadVersions = new Set(['hcaptcha', 'geetest']);
   let count = 0;
   for (const [folder, className, suffixes] of modules) {
@@ -264,8 +266,9 @@ test('all method semantics disclose reloads, cookie resets and capture state wit
       assert.ok(hint.length > 0, `${folder}${suffix} has an honest hint`);
       if (suffix.includes('Analyze')) {
         assert.equal(action, 'scripts');
-        assert.match(hint, /reload/i);
+        assert.equal(/reload/i.test(hint), reloadsScripts.has(folder), `${folder}: ${hint}`);
         assert.equal(/Reset protection/.test(hint), resetsScripts.has(folder));
+        assert.equal(hint, 'Show the protection scripts this page loaded', `${folder}: the loaded-page hint`);
       } else if (suffix.includes('Version')) {
         assert.equal(action, 'version');
         assert.equal(/reload/i.test(hint), reloadVersions.has(folder));

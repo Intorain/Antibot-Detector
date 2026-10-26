@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Nenhuma análise concluída"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Esta página não pode ser analisada"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Abra um site comum para detectar proteções. Páginas do navegador e de extensões não podem ser analisadas."
+  },
   "detectionRetryScanDesc": {
     "message": "A análise não terminou. Recarregue a página para tentar novamente."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Não foi possível salvar esta regra. Suas alterações continuam aqui; tente novamente."
+  },
+  "advToolScriptsHint": {
+    "message": "Mostrar os scripts de proteção que esta página carregou"
   },
   "advToolReloadScriptsHint": {
     "message": "Recarregar a página para analisar os scripts de proteção"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Histórico"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Histórico de capturas"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filtre, inspecione e exporte as capturas coletadas"
-  },
   "advancedFilterSite": {
     "message": "Site"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Site atual"
-  },
-  "advancedFilterModule": {
-    "message": "Módulo"
-  },
-  "advancedFilterAllModules": {
-    "message": "Todos os módulos"
   },
   "advancedFilterSearch": {
     "message": "Buscar"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Erro ao carregar as capturas: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Site atual ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Tente ajustar os filtros ou a busca para encontrar capturas."
-  },
-  "advPanelNoUrl": {
-    "message": "Sem URL"
   },
   "advPanelView": {
     "message": "Ver"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Restaurar"
-  },
-  "advancedFilterTool": {
-    "message": "Ferramenta"
-  },
-  "advancedFilterAllTools": {
-    "message": "Todas as ferramentas"
   },
   "advFilterKindCapture": {
     "message": "Capturas"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Não foi possível executar o teste."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Não foi possível salvar a alteração. Tente novamente."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Abra o pop-up em um site para adicioná-lo."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Descartar suas alterações?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Esta regra tem alterações que ainda não foram salvas."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Descartar"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Análise interrompida: a aba foi para outra página antes de terminar"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Tempo da análise esgotado: a página não recarregou a tempo"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Há uma captura em andamento nesta aba: pare-a primeiro e tente novamente"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Nenhum dado do hCaptcha detectado (tempo limite de 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Original (inglês)"
+  },
+  "ruleOriginalHint": {
+    "message": "Os outros idiomas traduzem este texto: se você alterá-lo, eles o mostrarão sem tradução até que seja traduzido de novo."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Configurações não salvas"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Mudar o idioma recarrega a extensão. Salvar primeiro as alterações nas configurações?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Traduzir as alterações"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Textos que você alterou em {0}: {1}. Os outros idiomas ainda mostram o texto antigo."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Traduz o que você escreveu para o inglês (o original) e para os outros idiomas com o tradutor integrado do navegador. Revise antes de salvar."
   }
 }

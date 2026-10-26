@@ -94,7 +94,7 @@ const STAND_IN = `(() => {
     // 1. An official rule is translated into every language already
     await openEditor();
     await sleep(800);
-    assert.equal((await bar()).hidden, true, 'a shipped rule misses no translation');
+    assert.equal((await bar()).hidden, true, 'a shipped rule misses no translation: nothing to do, no bar');
     console.log('PASS Official rule: every text of CHEQ has its translations, so the bar stays hidden');
 
     // 2. New texts are noticed as they are written

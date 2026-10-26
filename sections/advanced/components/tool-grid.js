@@ -25,7 +25,7 @@ class AdvancedToolGrid {
     getToolHint(action, stopping = false) {
         const hints = {
             cookies: ['advToolCookiesHint', 'Inspect cookies used by this protection'],
-            scripts: ['advToolReloadScriptsHint', 'Reload the page to analyze protection scripts'],
+            scripts: ['advToolScriptsHint', 'Show the protection scripts this page loaded'],
             version: ['advToolVersionHint', 'Read available version information'],
             sitekey: ['advToolSiteKeyHint', 'Find the CAPTCHA site key on this page'],
             selector: ['advToolSelectorHint', 'Find a selector for the CAPTCHA widget'],
@@ -36,9 +36,8 @@ class AdvancedToolGrid {
                 ? ['advToolStopCaptureHint', 'Stop recording data from this page']
                 : ['advToolCaptureHint', 'Record data from this page']
         };
-        if (action === 'scripts' && ['awswaf', 'imperva'].includes(this.moduleName)) {
-            hints.scripts = ['advToolResetScriptsHint', 'Reset protection cookies and reload to analyze scripts'];
-        }
+        // Analyze Scripts lists what the page already loaded first, for every vendor (components/script-results.js and
+        // each vendor's loadedPageResult); it reloads only when nothing is found
         if (action === 'version' && ['hcaptcha', 'geetest'].includes(this.moduleName)) {
             hints.version = ['advToolReloadVersionHint', 'Reload the page to detect the protection version'];
         }

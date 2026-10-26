@@ -54,6 +54,14 @@ SettingsUI.showSettings = function() {
       settingsModal.classList.add('is-open');
       this.isModalVisible = true;
       this.loadSettings();
+      // Keyboard: focus moves into Settings, Tab stays in it (and in the dialogs it opens), Escape closes it and
+      // focus goes back to the settings button
+      const content = settingsModal.querySelector('.base-modal-content');
+      if (content && typeof ModalFocus !== 'undefined' && !this.releaseSettingsFocus) {
+        content.setAttribute('role', 'dialog');
+        content.setAttribute('aria-modal', 'true');
+        this.releaseSettingsFocus = ModalFocus.activate(content, { onClose: () => this.hideSettings() });
+      }
       requestAnimationFrame(() => {
         const activeBtn = document.querySelector('.settings-tab-btn.active');
         if (activeBtn) {
@@ -70,6 +78,9 @@ SettingsUI.hideSettings = function() {
       settingsModal.classList.remove('is-open');
       this.isModalVisible = false;
     }
+    const release = this.releaseSettingsFocus;
+    this.releaseSettingsFocus = null;
+    if (release) release();
 };
 
 SettingsUI.switchTab = function(tabName) {
@@ -208,6 +219,8 @@ SettingsUI.saveSettings = async function(options = {}) {
         UrlUtils.clearUrlHashCache();
         notifyWorker(WorkerMessages.CACHE_SCOPE_CHANGED);
         notifyWorker(WorkerMessages.DETECTION_CLEAR_CACHE);
+        // That message reaches other extension pages, never this popup: its Detection tab refreshes here
+        window.popupInstance?.detection?.refreshAfterCacheChange?.();
       }
       notifyWorker(WorkerMessages.SETTINGS_UPDATED);
       notifyWorker(WorkerMessages.SYNC_CATEGORY_COLORS);
@@ -852,6 +865,11 @@ SettingsUI.setupEventListeners = function() {
 
           const url = new URL(tab.url);
           const domain = url.hostname;
+          // Only websites: not chrome://extensions ("extensions"), a new tab, about:blank or this extension's own page
+          if (!/^https?:$/.test(url.protocol) || !domain) {
+            NotificationHelper.error(_tr2('addCurrentDomainNotWebPage', 'Open the popup on a website to add it.'));
+            return;
+          }
 
           if (!this.settings.detection) {
             this.settings.detection = { blacklistedDomains: [], allowedDomains: [] };

@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Geen voltooide scan"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Deze pagina kan niet worden gescand"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Open een gewone website om beveiligingen te detecteren. Browserpagina’s en extensiepagina’s kunnen niet worden gescand."
+  },
   "detectionRetryScanDesc": {
     "message": "De scan is niet voltooid. Laad de pagina opnieuw om het nog eens te proberen."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Kan deze regel niet opslaan. Je wijzigingen staan er nog; probeer het opnieuw."
+  },
+  "advToolScriptsHint": {
+    "message": "De beveiligingsscripts tonen die deze pagina heeft geladen"
   },
   "advToolReloadScriptsHint": {
     "message": "Laad de pagina opnieuw om beveiligingsscripts te analyseren"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Geschiedenis"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Opnamegeschiedenis"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filter, bekijk en exporteer verzamelde opnamen"
-  },
   "advancedFilterSite": {
     "message": "Site"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Huidige site"
-  },
-  "advancedFilterModule": {
-    "message": "Module"
-  },
-  "advancedFilterAllModules": {
-    "message": "Alle modules"
   },
   "advancedFilterSearch": {
     "message": "Zoeken"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Fout bij het laden van opnamen: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Huidige site ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Pas je filters of zoekopdracht aan om opnamen te vinden."
-  },
-  "advPanelNoUrl": {
-    "message": "Geen URL"
   },
   "advPanelView": {
     "message": "Bekijken"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Herstellen"
-  },
-  "advancedFilterTool": {
-    "message": "Tool"
-  },
-  "advancedFilterAllTools": {
-    "message": "Alle tools"
   },
   "advFilterKindCapture": {
     "message": "Opnamen"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "De test kon niet worden uitgevoerd."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Kan de wijziging niet opslaan. Probeer het opnieuw."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Open de pop-up op een website om die toe te voegen."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Wijzigingen negeren?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Deze regel heeft wijzigingen die nog niet zijn opgeslagen."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Negeren"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analyse gestopt: het tabblad ging naar een andere pagina voordat ze klaar was"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Time-out van de analyse: de pagina is niet op tijd opnieuw geladen"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Er loopt een opname op dit tabblad: stop die eerst en probeer het dan opnieuw"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Geen hCaptcha-gegevens gedetecteerd (time-out na 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Origineel (Engels)"
+  },
+  "ruleOriginalHint": {
+    "message": "De andere talen vertalen deze tekst: als je hem wijzigt, tonen ze hem onvertaald tot hij opnieuw is vertaald."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Niet-opgeslagen instellingen"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Een andere taal kiezen laadt de extensie opnieuw. Eerst je wijzigingen in de instellingen opslaan?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Wijzigingen vertalen"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Teksten die je in het {0} hebt gewijzigd: {1}. De andere talen tonen nog de oude tekst."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Vertaalt wat je schreef naar het Engels (het origineel) en de andere talen, met de vertaler van de browser op je apparaat. Controleer ze voor het opslaan."
   }
 }

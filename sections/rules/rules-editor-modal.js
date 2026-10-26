@@ -30,6 +30,7 @@ Rules.prototype.openEditModal = function(detector, category, detectorName, isNew
     const modal = document.querySelector('#editRuleModal');
 
     if (!modal) return;
+    this.ruleEditorEdited = false;
 
     // Ensure detector has detection property before storing
     const detectorWithDetection = {
@@ -234,10 +235,10 @@ Rules.prototype.populateModalData = function(detector) {
       };
 
       // Check for custom icon first
-      if (detector.customIcon) {
+      if (typeof detector.customIcon === 'string' && detector.customIcon) {
         iconImg.src = detector.customIcon;
         iconSourceType = 'custom';
-      } else if (!detector.icon || detector.icon === 'default') {
+      } else if (typeof detector.icon !== 'string' || !detector.icon || detector.icon === 'default') {
         // Use Scrapfly icon for default or when no icon is set
         iconImg.src = scrapflyIcon;
         iconSourceType = 'default';

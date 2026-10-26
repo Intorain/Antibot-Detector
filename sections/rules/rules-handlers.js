@@ -71,7 +71,7 @@ Rules.prototype.handleExport = function() {
   // Create download link
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const timestamp = new Date().toISOString().split('T')[0];
+  const timestamp = FormatUtils.localDay(Date.now());
   a.href = url;
   a.download = `scrapfly-detectors-${timestamp}.json`;
   a.click();
@@ -134,7 +134,7 @@ Rules.prototype.handleExportDetector = function(category, detectorName, displayN
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `scrapfly-detector-${String(detectorName).replace(/[^\w.-]+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `scrapfly-detector-${String(detectorName).replace(/[^\w.-]+/g, '-')}-${FormatUtils.localDay(Date.now())}.json`;
   a.click();
   URL.revokeObjectURL(url);
   NotificationHelper.success(FormatUtils.t('detectorExportedFmt', 'Exported {0}', displayName));
@@ -633,6 +633,17 @@ Rules.prototype.handleSearch = function(query) {
 
       return false;
     });
+    // The rule whose name is the search comes first, then names that start with it, then names that contain it:
+    // "Cap" also matches every CAPTCHA by its category and would put Cap on a later page
+    const rank = ({ detector }) => {
+      const names = [detector.displayName, detector.name].filter(Boolean).map(name => String(name).toLowerCase());
+      if (names.some(name => name === searchTerm)) return 0;
+      if (names.some(name => name.startsWith(searchTerm))) return 1;
+      return names.some(name => name.includes(searchTerm)) ? 2 : 3;
+    };
+    this.filteredDetectors = this.filteredDetectors.map((entry, index) => ({ entry, index, rank: rank(entry) }))
+      .sort((a, b) => a.rank - b.rank || a.index - b.index)
+      .map(({ entry }) => entry);
   }
 
   // Update pagination with filtered results

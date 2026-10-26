@@ -148,10 +148,13 @@ async function handleShapeSecurityStartCapture(message, sender, sendResponse) {
     const requestHeaderListener = (details) => {
         if (details.tabId === tabId && details.requestHeaders) {
             const captureState = shapesecurityCaptureStateRef.get(tabId);
-            if (captureState) {
+            if (captureState && !captureState.stopping) {
                 // Pattern: x-[8 random chars]-[single letter]
                 const headerPattern = /^x-[a-z0-9]{8}-[a-z]$/i;
+                let added = false;
 
+                // One request carries all of Shape's headers: collect every one of them
+                // first, then decide once whether the capture is complete.
                 for (const header of details.requestHeaders) {
                     if (headerPattern.test(header.name.toLowerCase())) {
                         // Check if not already captured
@@ -161,19 +164,20 @@ async function handleShapeSecurityStartCapture(message, sender, sendResponse) {
                                 value: header.value,
                                 timestamp: Date.now()
                             });
+                            added = true;
                             Logger.network('[ShapeSecurity] Captured header:', header.name);
-
-                            // Auto-stop based on version (only V2 needs headers):
-                            // V1: Headers not required, won't auto-stop here
-                            // V2: Needs both cookie AND headers
-                            if (captureState.version === 'v2' && captureState.cookie && captureState.headers.length > 0) {
-                                Logger.network('[ShapeSecurity] V2 - both cookie and headers captured! Auto-stopping');
-                                autoStopCapture(tabId, 'complete');
-                            } else if (captureState.version === 'v1') {
-                                Logger.network('[ShapeSecurity] V1 - headers captured but not required for V1');
-                            }
                         }
                     }
+                }
+
+                // Auto-stop based on version (only V2 needs headers):
+                // V1: Headers not required, won't auto-stop here
+                // V2: Needs both cookie AND headers
+                if (added && captureState.version === 'v2' && captureState.cookie && captureState.headers.length > 0) {
+                    Logger.network('[ShapeSecurity] V2 - both cookie and headers captured! Auto-stopping');
+                    autoStopCapture(tabId, 'complete');
+                } else if (added && captureState.version === 'v1') {
+                    Logger.network('[ShapeSecurity] V1 - headers captured but not required for V1');
                 }
             }
         }
@@ -348,6 +352,10 @@ async function autoStopCapture(tabId, reason = 'complete') {
         Logger.network('[ShapeSecurity] No active capture state found');
         return;
     }
+    // A stop is already saving this capture: the state stays until after the save,
+    // so a second trigger (another header, the cookie, the timer) must not save it again.
+    if (captureState.stopping) return;
+    captureState.stopping = true;
 
     // Clear timeout if exists
     if (typeof clearCaptureTimeout === 'function') {
@@ -445,6 +453,11 @@ async function autoStopCapture(tabId, reason = 'complete') {
         }
     } catch (error) {
         Logger.error('NETWORK', '[ShapeSecurity] Failed to save capture data:', error);
+        // The listeners are gone: drop the state so the next Start is not refused.
+        if (shapesecurityCaptureStateRef.get(tabId) === captureState) {
+            if (typeof removeCaptureState === 'function') removeCaptureState(shapesecurityCaptureStateRef, tabId);
+            else shapesecurityCaptureStateRef.delete(tabId);
+        }
     }
 }
 
@@ -463,6 +476,12 @@ function handleShapeSecurityStopCapture(message, sender, sendResponse) {
         sendResponse({ status: 'not_capturing' });
         return;
     }
+    // An automatic stop is already saving this capture: do not save it a second time.
+    if (captureState.stopping) {
+        sendResponse({ status: 'not_capturing' });
+        return;
+    }
+    captureState.stopping = true;
 
     // Remove listeners
     if (captureState.setCookieListener) {
@@ -605,28 +624,7 @@ function handleShapeSecurityStartExtraction(message, sender, sendResponse) {
                 try {
                     const [result] = await chrome.scripting.executeScript({
                         target: { tabId: tabId },
-                        func: () => {
-                            const scripts = [];
-                            const scriptElements = document.querySelectorAll('script[src]');
-
-                            scriptElements.forEach(script => {
-                                const src = script.src;
-                                if (src.includes('seed=') || src.includes('shape') || src.includes('/init.js') || src.includes('vendor2.js') || src.includes('?async')) {
-                                    scripts.push({ url: src });
-                                }
-                            });
-
-                            // Also check performance entries
-                            const resources = performance.getEntriesByType('resource');
-                            resources.forEach(resource => {
-                                if ((resource.name.includes('seed=') || resource.name.includes('shape') || resource.name.includes('/init.js') || resource.name.includes('vendor2.js') || resource.name.includes('?async')) &&
-                                    !scripts.some(s => s.url === resource.name)) {
-                                    scripts.push({ url: resource.name });
-                                }
-                            });
-
-                            return scripts;
-                        }
+                        func: shapeSecurityPageScripts
                     });
 
                     const scripts = result.result || [];
@@ -698,7 +696,62 @@ async function handleShapeSecurityExtractionCompleted(message, sender, sendRespo
     // Analyze the captured scripts from message
     const scripts = message.scripts || [];
     Logger.network('[ShapeSecurity-EXTRACT] Analyzing', scripts.length, 'scripts');
+    const extractedData = shapeSecurityExtractedData(scripts);
 
+    Logger.network('[ShapeSecurity-EXTRACT] Extracted data:', extractedData);
+
+    // Send result to popup
+    try {
+        await chrome.runtime.sendMessage({
+            type: 'SHAPESECURITY_EXTRACTION_RESULT',
+            tabId,
+            extractedData: extractedData
+        });
+        Logger.network('[ShapeSecurity-EXTRACT] Result sent to popup');
+    } catch (error) {
+        Logger.network('[ShapeSecurity-EXTRACT] Popup not available:', error.message);
+    }
+
+    // Clean up extraction state
+    shapeSecurityExtractionStateRef.delete(tabId);
+    Logger.network('[ShapeSecurity-EXTRACT] Extraction state cleaned up');
+
+    sendResponse({ status: 'success' });
+}
+
+/**
+ * Shape's script URLs the page lists now (runs in the page): script tags and Resource Timing entries whose URL
+ * looks like Shape's loader (seed=, /init.js, vendor2.js, ?async). Self-contained: chrome.scripting serializes it.
+ * @returns {Array<{url: string}>}
+ */
+function shapeSecurityPageScripts() {
+    const scripts = [];
+    const scriptElements = document.querySelectorAll('script[src]');
+
+    scriptElements.forEach(script => {
+        const src = script.src;
+        if (src.includes('seed=') || src.includes('shape') || src.includes('/init.js') || src.includes('vendor2.js') || src.includes('?async')) {
+            scripts.push({ url: src });
+        }
+    });
+
+    // Also check performance entries
+    const resources = performance.getEntriesByType('resource');
+    resources.forEach(resource => {
+        if ((resource.name.includes('seed=') || resource.name.includes('shape') || resource.name.includes('/init.js') || resource.name.includes('vendor2.js') || resource.name.includes('?async')) &&
+            !scripts.some(s => s.url === resource.name)) {
+            scripts.push({ url: resource.name });
+        }
+    });
+
+    return scripts;
+}
+
+/**
+ * The extraction result from the collected script URLs: init scripts, seed scripts and all of them.
+ * @param {Array<{url: string}>} scripts
+ */
+function shapeSecurityExtractedData(scripts) {
     const initJsUrls = [];
     const seedUrls = [];
     const allScripts = [];
@@ -733,32 +786,26 @@ async function handleShapeSecurityExtractionCompleted(message, sender, sendRespo
         }
     });
 
-    const extractedData = {
+    return {
         initJsUrls,
         seedUrls,
         allScripts,
         timestamp: Date.now()
     };
+}
 
-    Logger.network('[ShapeSecurity-EXTRACT] Extracted data:', extractedData);
-
-    // Send result to popup
-    try {
-        await chrome.runtime.sendMessage({
-            type: 'SHAPESECURITY_EXTRACTION_RESULT',
-            tabId,
-            extractedData: extractedData
-        });
-        Logger.network('[ShapeSecurity-EXTRACT] Result sent to popup');
-    } catch (error) {
-        Logger.network('[ShapeSecurity-EXTRACT] Popup not available:', error.message);
-    }
-
-    // Clean up extraction state
-    shapeSecurityExtractionStateRef.delete(tabId);
-    Logger.network('[ShapeSecurity-EXTRACT] Extraction state cleaned up');
-
-    sendResponse({ status: 'success' });
+/**
+ * Analyze Scripts on the page as already loaded: the same collection the reload flow makes once the reloaded page
+ * has loaded, without the reload, so the popup stays open. found is false unless one of Shape's own loaders is
+ * listed (a seed= script, an init.js, ssx.mod.js or an X-xxxxxxxx--z=q URL): a page's own app.js?async is not one,
+ * and then only a reload can tell.
+ * @returns {Promise<{data: object, found: boolean}>}
+ */
+async function shapeSecurityFromLoadedPage(tabId) {
+    const [result] = await chrome.scripting.executeScript({ target: { tabId }, func: shapeSecurityPageScripts });
+    const data = shapeSecurityExtractedData((result && Array.isArray(result.result)) ? result.result : []);
+    const found = data.allScripts.some(url => /[?&]seed=|\/init\.js(?:[?#]|$)|\/ssx\.mod\.js(?:[?#]|$)|[?&]X-[A-Za-z0-9]{6,10}--z=q/.test(url));
+    return { data, found };
 }
 
 Logger.network('[ShapeSecurityInterceptor] Loaded');

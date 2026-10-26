@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Chưa có lần quét hoàn tất"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Không thể quét trang này"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Mở một trang web thông thường để phát hiện các biện pháp bảo vệ. Không thể quét trang của trình duyệt và tiện ích mở rộng."
+  },
   "detectionRetryScanDesc": {
     "message": "Quá trình quét chưa hoàn tất. Hãy tải lại trang để thử lại."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Không thể lưu quy tắc này. Các thay đổi của bạn vẫn còn ở đây; hãy thử lại."
+  },
+  "advToolScriptsHint": {
+    "message": "Hiển thị các script bảo vệ mà trang này đã tải"
   },
   "advToolReloadScriptsHint": {
     "message": "Tải lại trang để phân tích các script bảo vệ"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Lịch sử"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Lịch sử bản ghi"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Lọc, kiểm tra và xuất các bản ghi đã thu thập"
-  },
   "advancedFilterSite": {
     "message": "Trang web"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Trang web hiện tại"
-  },
-  "advancedFilterModule": {
-    "message": "Mô-đun"
-  },
-  "advancedFilterAllModules": {
-    "message": "Tất cả mô-đun"
   },
   "advancedFilterSearch": {
     "message": "Tìm kiếm"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Lỗi khi tải bản ghi: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Trang web hiện tại ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm để tìm bản ghi."
-  },
-  "advPanelNoUrl": {
-    "message": "Không có URL"
   },
   "advPanelView": {
     "message": "Xem"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Khôi phục"
-  },
-  "advancedFilterTool": {
-    "message": "Công cụ"
-  },
-  "advancedFilterAllTools": {
-    "message": "Tất cả công cụ"
   },
   "advFilterKindCapture": {
     "message": "Bản ghi"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Không thể chạy kiểm tra."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Không thể lưu thay đổi. Hãy thử lại."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Hãy mở cửa sổ bật lên trên một trang web để thêm trang đó."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Bỏ các thay đổi?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Quy tắc này có thay đổi chưa được lưu."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Bỏ"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Đã dừng phân tích: thẻ đã chuyển sang trang khác trước khi hoàn tất"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Phân tích hết thời gian: trang không tải lại kịp"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Đang ghi dữ liệu trên thẻ này: hãy dừng trước rồi thử lại"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Không phát hiện dữ liệu hCaptcha (hết thời gian sau 60 giây)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Bản gốc (tiếng Anh)"
+  },
+  "ruleOriginalHint": {
+    "message": "Các ngôn ngữ khác dịch văn bản này: nếu bạn thay đổi, văn bản sẽ hiển thị chưa dịch cho đến khi được dịch lại."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Cài đặt chưa lưu"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Đổi ngôn ngữ sẽ tải lại tiện ích. Lưu các thay đổi cài đặt trước?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Dịch các thay đổi"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Văn bản bạn đã đổi bằng {0}: {1}. Các ngôn ngữ khác vẫn hiển thị văn bản cũ."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Dịch nội dung bạn viết sang tiếng Anh (bản gốc) và các ngôn ngữ khác bằng trình dịch tích hợp của trình duyệt. Hãy kiểm tra trước khi lưu."
   }
 }

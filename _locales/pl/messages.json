@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Brak ukończonego skanowania"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Nie można przeskanować tej strony"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Otwórz zwykłą stronę internetową, aby wykryć zabezpieczenia. Stron przeglądarki i rozszerzeń nie można skanować."
+  },
   "detectionRetryScanDesc": {
     "message": "Skanowanie nie zostało ukończone. Odśwież stronę, aby spróbować ponownie."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Nie udało się zapisać tej reguły. Twoje zmiany nadal tu są; spróbuj ponownie."
+  },
+  "advToolScriptsHint": {
+    "message": "Pokaż skrypty ochrony wczytane przez tę stronę"
   },
   "advToolReloadScriptsHint": {
     "message": "Odśwież stronę, aby przeanalizować skrypty ochrony"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Historia"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Historia przechwytywania"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filtruj, sprawdzaj i eksportuj zebrane przechwycenia"
-  },
   "advancedFilterSite": {
     "message": "Witryna"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Bieżąca witryna"
-  },
-  "advancedFilterModule": {
-    "message": "Moduł"
-  },
-  "advancedFilterAllModules": {
-    "message": "Wszystkie moduły"
   },
   "advancedFilterSearch": {
     "message": "Szukaj"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Błąd ładowania przechwyceń: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Bieżąca witryna ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Spróbuj zmienić filtry lub zapytanie wyszukiwania, aby znaleźć przechwycenia."
-  },
-  "advPanelNoUrl": {
-    "message": "Brak URL"
   },
   "advPanelView": {
     "message": "Wyświetl"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Przywróć"
-  },
-  "advancedFilterTool": {
-    "message": "Narzędzie"
-  },
-  "advancedFilterAllTools": {
-    "message": "Wszystkie narzędzia"
   },
   "advFilterKindCapture": {
     "message": "Przechwycenia"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Nie udało się uruchomić testu."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Nie udało się zapisać zmiany. Spróbuj ponownie."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Otwórz okienko rozszerzenia w witrynie, aby ją dodać."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Odrzucić zmiany?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Ta reguła ma jeszcze niezapisane zmiany."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Odrzuć"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analiza zatrzymana: karta przeszła na inną stronę przed jej ukończeniem"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Przekroczono limit czasu analizy: strona nie odświeżyła się na czas"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "Na tej karcie trwa przechwytywanie: najpierw je zatrzymaj, potem spróbuj ponownie"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Nie wykryto danych hCaptcha (limit czasu 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Oryginał (angielski)"
+  },
+  "ruleOriginalHint": {
+    "message": "Pozostałe języki tłumaczą ten tekst: jeśli go zmienisz, będą go pokazywać bez tłumaczenia, dopóki nie zostanie przetłumaczony ponownie."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Niezapisane ustawienia"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Zmiana języka przeładuje rozszerzenie. Zapisać najpierw zmiany w ustawieniach?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Przetłumacz zmiany"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Teksty zmienione w języku {0}: {1}. Pozostałe języki nadal pokazują stary tekst."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Tłumaczy to, co napisałeś, na angielski (oryginał) i pozostałe języki za pomocą wbudowanego tłumacza przeglądarki. Sprawdź je przed zapisaniem."
   }
 }

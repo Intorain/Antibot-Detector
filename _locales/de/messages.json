@@ -8,6 +8,12 @@
   "detectionUnscannedTitle": {
     "message": "Kein abgeschlossener Scan"
   },
+  "detectionUnsupportedTitle": {
+    "message": "Diese Seite kann nicht geprüft werden"
+  },
+  "detectionUnsupportedDesc": {
+    "message": "Öffne eine normale Website, um Schutzmaßnahmen zu erkennen. Browserseiten und Erweiterungsseiten können nicht geprüft werden."
+  },
   "detectionRetryScanDesc": {
     "message": "Der Scan wurde nicht abgeschlossen. Lade die Seite neu, um es erneut zu versuchen."
   },
@@ -34,6 +40,9 @@
   },
   "rulesUiSaveFailed": {
     "message": "Diese Regel konnte nicht gespeichert werden. Deine Änderungen bleiben erhalten; versuche es erneut."
+  },
+  "advToolScriptsHint": {
+    "message": "Schutzskripte anzeigen, die diese Seite geladen hat"
   },
   "advToolReloadScriptsHint": {
     "message": "Seite neu laden, um Schutzskripte zu analysieren"
@@ -569,12 +578,6 @@
   "advancedSubtabHistory": {
     "message": "Verlauf"
   },
-  "advancedCaptureHistoryTitle": {
-    "message": "Erfassungsverlauf"
-  },
-  "advancedCaptureHistorySubtitle": {
-    "message": "Filtere, untersuche und exportiere gesammelte Erfassungen"
-  },
   "advancedFilterSite": {
     "message": "Website"
   },
@@ -583,12 +586,6 @@
   },
   "advancedFilterCurrentSite": {
     "message": "Aktuelle Site"
-  },
-  "advancedFilterModule": {
-    "message": "Modul"
-  },
-  "advancedFilterAllModules": {
-    "message": "Alle Module"
   },
   "advancedFilterSearch": {
     "message": "Suche"
@@ -3357,14 +3354,8 @@
   "advPanelErrorLoadingCapturesFmt": {
     "message": "Fehler beim Laden der Erfassungen: {0}"
   },
-  "advPanelCurrentSiteFmt": {
-    "message": "Aktuelle Site ({0})"
-  },
   "advPanelNoResultsText": {
     "message": "Passen Sie die Filter oder die Suchanfrage an, um Erfassungen zu finden."
-  },
-  "advPanelNoUrl": {
-    "message": "Keine URL"
   },
   "advPanelView": {
     "message": "Anzeigen"
@@ -4340,12 +4331,6 @@
   },
   "restoreOfficialDetectorsConfirmBtn": {
     "message": "Wiederherstellen"
-  },
-  "advancedFilterTool": {
-    "message": "Werkzeug"
-  },
-  "advancedFilterAllTools": {
-    "message": "Alle Werkzeuge"
   },
   "advFilterKindCapture": {
     "message": "Aufzeichnungen"
@@ -6592,5 +6577,53 @@
   },
   "ruleLiveTestError": {
     "message": "Der Test konnte nicht ausgeführt werden."
+  },
+  "rulesToggleSaveFailed": {
+    "message": "Die Änderung konnte nicht gespeichert werden. Versuche es erneut."
+  },
+  "addCurrentDomainNotWebPage": {
+    "message": "Öffne das Popup auf einer Website, um sie hinzuzufügen."
+  },
+  "ruleEditorDiscardTitle": {
+    "message": "Änderungen verwerfen?"
+  },
+  "ruleEditorDiscardMessage": {
+    "message": "Diese Regel hat Änderungen, die noch nicht gespeichert sind."
+  },
+  "ruleEditorDiscardConfirm": {
+    "message": "Verwerfen"
+  },
+  "advCommonAnalysisCancelled": {
+    "message": "Analyse abgebrochen: Der Tab hat vor dem Ende zu einer anderen Seite gewechselt"
+  },
+  "advCommonAnalysisTimedOut": {
+    "message": "Zeitüberschreitung der Analyse: Die Seite wurde nicht rechtzeitig neu geladen"
+  },
+  "advCommonStopCaptureFirst": {
+    "message": "In diesem Tab läuft eine Erfassung: Beende sie zuerst und versuche es dann erneut"
+  },
+  "advHcaptchaNoDataTimeout": {
+    "message": "Keine hCaptcha-Daten erkannt (Zeitlimit 60 s)"
+  },
+  "ruleOriginalEnglish": {
+    "message": "Original (Englisch)"
+  },
+  "ruleOriginalHint": {
+    "message": "Die anderen Sprachen übersetzen diesen Text: Wenn du ihn änderst, zeigen sie ihn unübersetzt, bis er neu übersetzt ist."
+  },
+  "settingsLanguageUnsavedTitle": {
+    "message": "Nicht gespeicherte Einstellungen"
+  },
+  "settingsLanguageUnsavedMessage": {
+    "message": "Ein Sprachwechsel lädt die Erweiterung neu. Zuerst deine Änderungen an den Einstellungen speichern?"
+  },
+  "ruleTranslateChangesBtn": {
+    "message": "Änderungen übersetzen"
+  },
+  "ruleTranslateChangedFmt": {
+    "message": "Auf {0} geänderte Texte: {1}. Die anderen Sprachen zeigen noch den alten Text."
+  },
+  "ruleTranslateChangesHint": {
+    "message": "Übersetzt, was du geschrieben hast, ins Englische (das Original) und in die anderen Sprachen, mit dem Übersetzer des Browsers auf dem Gerät. Vor dem Speichern prüfen."
   }
 }

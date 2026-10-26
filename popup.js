@@ -296,6 +296,12 @@ class ScrapflyPopup {
         return;
       }
 
+      this.detection.blacklistedDomain = null;
+      if (!Utils.isValidContentScriptTab(tab)) {
+        this.detection.showEmptyState({ outcome: 'unsupported' });
+        return;
+      }
+
       // Check if URL is blacklisted
       if (await Utils.isUrlBlacklisted(tab.url)) {
         if (!this.isDetectionViewRequestCurrent(requestId)) return;
@@ -382,8 +388,10 @@ class ScrapflyPopup {
       badgeTrimmed === '?' ||
       badgeTrimmed === '\u2715';
 
+    // Without a finished scan the page is never shown as "Nothing Detected": that green card is for a scan that
+    // ran and found nothing (its result comes with data). A reload mark means the scan was cut short or cleared.
     if (isReloadBadge) {
-      this.detection.showEmptyState();
+      this.detection.showEmptyState({ outcome: 'unscanned' });
       return false;
     }
 
@@ -393,9 +401,9 @@ class ScrapflyPopup {
     if (!this.isDetectionViewRequestCurrent(requestId)) {
       return false;
     }
-    const showEmptyOrScanning = () => (tabLoading
+    const showEmptyOrScanning = (outcome) => (tabLoading
       ? this.detection.showAnalyzingState()
-      : this.detection.showEmptyState());
+      : this.detection.showEmptyState({ outcome }));
 
     if (!response) {
       if (isLoadingBadgeText(badgeTrimmed)) {
@@ -403,7 +411,7 @@ class ScrapflyPopup {
       } else if (hasVisibleResults) {
         return true;
       } else {
-        showEmptyOrScanning();
+        showEmptyOrScanning('unscanned');
       }
       return false;
     }
@@ -417,7 +425,7 @@ class ScrapflyPopup {
     }
 
     if (response.status === 'interrupted') {
-      showEmptyOrScanning();
+      showEmptyOrScanning('interrupted');
       return false;
     }
 
@@ -428,7 +436,7 @@ class ScrapflyPopup {
       } else if (hasVisibleResults) {
         return true;
       } else {
-        showEmptyOrScanning();
+        showEmptyOrScanning('failed');
       }
       return false;
     }
@@ -450,7 +458,7 @@ class ScrapflyPopup {
     } else if (hasVisibleResults) {
       return true;
     } else {
-      showEmptyOrScanning();
+      showEmptyOrScanning('unscanned');
     }
     return false;
   }
@@ -594,6 +602,9 @@ class ScrapflyPopup {
 
         default:
           Logger.debug('UI', 'Popup: Unknown message type:', request.type);
+          // A worker request can reach every open popup. Only its owner may
+          // answer; an acknowledgment here wins the race against the worker.
+          return false;
       }
 
       sendResponse({ status: 'received' });
