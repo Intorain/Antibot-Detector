@@ -1,11 +1,5 @@
 {
  "detect-akamai": {
-  "abck-cookie-name": {
-   "cookie": [
-    "_abck",
-    "truncated"
-   ]
-  },
   "abck-sensor-cookie": {
    "cookie": [
     "_abck",
@@ -89,6 +83,15 @@
     "url": "https://www.walmart.com/akam/13/26dcf39b",
     "data": "{\"sensor_data\":\"3;0;1;0;3290164;...\"}"
    }
+  },
+  "sec-cpt-cookie": {
+   "cookie": [
+    "sec_cpt",
+    "FAKE0123456789ABCDEF0123456789AB~3~FAKE0123456789ABCDEF0123456789AB~"
+   ]
+  },
+  "cp-challenge-path": {
+   "url": "https://www.example.com/_sec/cp_challenge/verify"
   }
  },
  "detect-aws-waf": {
@@ -256,6 +259,12 @@
   },
   "jsd-oneshot": {
    "url": "https://auth.openai.com/cdn-cgi/challenge-platform/h/b/jsd/oneshot/d2d3316b729e/0.2576:1792062023:x/a4ae8"
+  },
+  "cf-chl-rc-cookie": {
+   "cookie": [
+    "cf_chl_rc_ni",
+    "1"
+   ]
   }
  },
  "detect-datadome": {
@@ -334,6 +343,12 @@
    "cookie": [
     "TS4a8b2c1d",
     "08abcdef"
+   ]
+  },
+  "tspd-cookie": {
+   "cookie": [
+    "TSPD_101_DID",
+    "08fake0123456789abcdef0123456789abcdef"
    ]
   }
  },
@@ -775,13 +790,13 @@
    "url": "https://fpcdn.io/v4/abc123DEF456"
   },
   "openfpcdn-oss-script": {
-   "url": "https://openfpcdn.io/fingerprintjs/v3/iife.min.js"
+   "url": "https://openfpcdn.io/fingerprintjs/v5"
   },
   "fp-esm-bundle": {
    "url": "https://fingerprint.com/_astro/fp.esm.igOf38FS.js?dpl=dpl_Gvyz2LLeSchmoL49X6HbJAy6nLEj"
   },
   "oss-npm-monitoring": {
-   "url": "https://m1.openfpcdn.io/fingerprintjs/v3/npm-monitoring"
+   "url": "https://m1.openfpcdn.io/fingerprintjs/v5.3.0/npm-monitoring"
   },
   "fpjs-proxy-endpoint": {
    "url": "https://example.test/fpjs/api?token=abc123"
@@ -803,17 +818,17 @@
   },
   "fpjs-pvid": {
    "runtimeType": "string"
+  },
+  "botd-cdn-script": {
+   "url": "https://openfpcdn.io/botd/v2"
+  },
+  "botd-npm-monitoring": {
+   "url": "https://m1.openfpcdn.io/botd/v2.0.0/npm-monitoring"
   }
  },
  "detect-netacea": {
-  "mitata-request-cookie": {
+  "mitata-cookie": {
    "cookie": [
-    "_mitata",
-    "c3RhcnRfdGltZV9zdGFtcA=="
-   ]
-  },
-  "mitata-response-cookie": {
-   "setCookie": [
     "_mitata",
     "c3RhcnRfdGltZV9zdGFtcA=="
    ]
@@ -1410,6 +1425,69 @@
   },
   "seon-webpack-chunk": {
    "runtimeType": "object"
+  }
+ },
+ "detect-fastly": {
+  "fastly-challenge-script": {
+   "url": "https://www.example.com/_fs-ch-1T1wmsGaOgGaSxcX/challenge.js"
+  },
+  "fastly-detection-script": {
+   "url": "https://www.example.com/_fs-ch-1T1wmsGaOgGaSxcX/assets/script.js"
+  },
+  "fastly-challenge-start-cookie": {
+   "cookie": [
+    "_fs_ch_st_FAKE0a1b2c3d",
+    "fake0000000000000000"
+   ]
+  },
+  "fastly-challenge-complete-cookie": {
+   "cookie": [
+    "_fs_ch_cp_FAKE0a1b2c3d",
+    "fake0000000000000000"
+   ]
+  },
+  "fastly-detection-cookie": {
+   "cookie": [
+    "_fs_cd_cp_FAKE0a1b2c3d",
+    "fake0000000000000000"
+   ]
+  },
+  "fastly-challenge-widget": {
+   "dom": {
+    "tagName": "div",
+    "attributes": {
+     "class": "fastly-challenge",
+     "data-challenge-status": "started"
+    }
+   }
+  }
+ },
+ "detect-kount": {
+  "kount-collector-sdk": {
+   "url": "https://ssl.kaptcha.com/collect/sdk?m=123456&s=abcdefg12345abababab123456789012"
+  },
+  "kount-collector-endpoint": {
+   "url": "https://ssl.kaptcha.com/cs/config?m=123456&s=abcdefg12345abababab123456789012"
+  },
+  "kount-kaxsdc-reference": {
+   "source": "var client = new ka.ClientSDK(); client.autoLoadEvents(); // body class='kaxsdc' data-event='load'"
+  },
+  "kount-client-sdk": {
+   "runtimeType": "function"
+  }
+ },
+ "detect-riskified": {
+  "riskified-beacon-script": {
+   "url": "https://beacon.riskified.com?shop=shop.example.com&sid=fake0123456789"
+  },
+  "riskified-collector": {
+   "url": "https://img.riskified.com/img/image-l.gif?t=1700000000&c=fake"
+  },
+  "riskified-riskx-go": {
+   "runtimeType": "function"
+  },
+  "riskified-riskx-setsid": {
+   "runtimeType": "function"
   }
  }
 }

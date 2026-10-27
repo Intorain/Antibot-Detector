@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Historie nahrazena. Počet položek: {0}"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Exportována 1 položka historie"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Sloučena 1 nová položka historie"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Historie nahrazena 1 položkou"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Historii se nepodařilo importovat: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Nenalezeno"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "nastaveno {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "změněno jednou"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "počet změn: {0}"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "poslední změna {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "vyprší {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "relační cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "odstraněno {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "vypršelo {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Časová osa"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Nastaveno"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Změněno"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Odstraněno"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Vypršelo"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Záznam začne, jakmile stránka nastaví cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Zaznamenáno dříve"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Krátký otisk hodnoty: rozliší hodnoty, nikdy hodnotu neukládá"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Obnovit oficiální detektory?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Texty dosud nepřeložené do všech jazyků: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Přeložit pravidlo"
-  },
   "ruleTranslateRuleHint": {
     "message": "Vyplní chybějící překlady popisu, vzorů a kombinací pomocí překladače Chrome přímo v zařízení. Před uložením je zkontrolujte."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Přeložit"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Přeložit změny"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Přeloženo"
+  },
+  "ruleTranslateBusy": {
+    "message": "Překládání…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Všechny texty tohoto pravidla jsou přeloženy do všech {0} jazyků."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{0} z {1} změněných textů se zde nepodařilo přeložit do všech jazyků (prohlížeč je možná ještě stahuje). Nic se neztratilo: tyto texty zůstaly beze změny. Zkuste to za chvíli znovu."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Staženo: {0}. Připraveno {1} z {2} jazyků. Prohlížeč stahuje každý jazyk jen jednou, jeden na kliknutí: pro další klikněte znovu na Přeložit."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Překlad textů: {0}…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Příkaz curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Otevřete webovou stránku, abyste ji mohli zkopírovat jako kód"
   },
   "detectionMdHeadingFmt": {
     "message": "Ochrany na {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Testuje se…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Otevřete okno rozšíření na webu, abyste z něj vytvořili pravidlo."
+  },
+  "suggestRuleExactName": {
+    "message": "Hledá se podle přesného názvu"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Názvy začínající na {0}: zbytek vypadá náhodně"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Adresy skriptů, které to obsahují: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Už zjišťuje {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Čtení stránky…"
+  },
+  "suggestRuleError": {
+    "message": "Stránku se nepodařilo přečíst. Načtěte ji znovu a zkuste to ještě jednou."
+  },
+  "suggestRuleOutdated": {
+    "message": "Rozšíření bylo aktualizováno, ale jeho část na pozadí stále běží ve staré verzi. Znovu načtěte rozšíření na stránce Rozšíření v prohlížeči a zkuste to znovu."
+  },
+  "pagePickButton": {
+    "message": "Z této stránky"
+  },
+  "pagePickAddFmt": {
+    "message": "Přidat {0}"
+  },
+  "pagePickInRule": {
+    "message": "už v pravidle"
+  },
+  "suggestRuleFilter": {
+    "message": "Filtrovat"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Už rozpoznáno: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "začíná na"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Stránka nemá žádné cookies."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Žádné skripty z jiných webů."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Žádné hlavičky odpovědi: načtěte stránku znovu, abyste je zachytili."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Pravidlo se shoduje na {0} (spolehlivost {1} %)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Změna jazyka znovu načte rozšíření. Uložit nejdřív změny nastavení?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Přeložit změny"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Texty změněné v jazyce {0}: {1}. Ostatní jazyky stále zobrazují starý text."
   },
   "ruleTranslateChangesHint": {
     "message": "Přeloží, co jste napsali, do angličtiny (originál) a do ostatních jazyků pomocí překladače v prohlížeči. Před uložením je zkontrolujte."
+  },
+  "combinationOneCount": {
+    "message": "1 kombinace"
+  },
+  "combinationsCountFmt": {
+    "message": "Kombinace: {0}"
+  },
+  "historyBulkScan": {
+    "message": "Hromadné skenování"
+  },
+  "bulkTitle": {
+    "message": "Hromadné skenování"
+  },
+  "bulkSubtitle": {
+    "message": "Skenuje seznam stránek jednu po druhé v kartě na pozadí. Každá stránka je skutečná návštěva se soubory cookie vašeho prohlížeče a to, co se najde, se jako obvykle přidá do historie."
+  },
+  "bulkInputLabel": {
+    "message": "Stránky ke skenování"
+  },
+  "bulkInputHint": {
+    "message": "Jedna adresa na řádek. Adresa mapy webu (.xml) přidá stránky, které obsahuje. Duplicity se odstraní a skenují se jen stránky http a https."
+  },
+  "bulkUpload": {
+    "message": "Nahrát .txt nebo .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Adresy: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Stránek na běh (nejvýše {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Časový limit na stránku v sekundách"
+  },
+  "bulkStart": {
+    "message": "Spustit"
+  },
+  "bulkPause": {
+    "message": "Pozastavit"
+  },
+  "bulkResume": {
+    "message": "Pokračovat"
+  },
+  "bulkStop": {
+    "message": "Zastavit"
+  },
+  "bulkScanWaiting": {
+    "message": "Skenovat stránky, které stále čekají"
+  },
+  "bulkNewList": {
+    "message": "Nový seznam"
+  },
+  "bulkResults": {
+    "message": "Výsledky"
+  },
+  "bulkColAddress": {
+    "message": "Adresa"
+  },
+  "bulkStatusWaiting": {
+    "message": "Čeká"
+  },
+  "bulkStatusScanning": {
+    "message": "Skenuje se"
+  },
+  "bulkStatusDone": {
+    "message": "Hotovo"
+  },
+  "bulkStatusFailed": {
+    "message": "Selhalo"
+  },
+  "bulkStatusSkipped": {
+    "message": "Přeskočeno"
+  },
+  "bulkReasonInvalid": {
+    "message": "Neplatná adresa"
+  },
+  "bulkReasonScheme": {
+    "message": "Skenují se jen stránky http a https"
+  },
+  "bulkReasonScope": {
+    "message": "Přeskočeno podle Nastavení → Detekce → Weby ke skenování"
+  },
+  "bulkReasonSitemap": {
+    "message": "Mapu webu se nepodařilo načíst. Načíst lze jen mapy https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Žádný výsledek v časovém limitu"
+  },
+  "bulkReasonLoad": {
+    "message": "Stránka se nenačetla"
+  },
+  "bulkReasonError": {
+    "message": "Skenování selhalo"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Skončila na {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Nenalezena žádná ochrana"
+  },
+  "bulkRunRunning": {
+    "message": "Probíhá"
+  },
+  "bulkRunPaused": {
+    "message": "Pozastaveno"
+  },
+  "bulkRunStopped": {
+    "message": "Zastaveno"
+  },
+  "bulkRunDone": {
+    "message": "Dokončeno"
+  },
+  "bulkProgressFmt": {
+    "message": "Hotovo {0} z {1}"
+  },
+  "bulkCountsFmt": {
+    "message": "Hotovo: {0} · S ochranou: {1} · Selhalo: {2} · Přeskočeno: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Rozšíření se během běhu restartovalo, proto se zastavil. Stránky, které stále čekaly, se nenaskenovaly."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Nebylo otevřené žádné okno prohlížeče, ve kterém by se stránky skenovaly."
+  },
+  "bulkStoppedOff": {
+    "message": "Rozšíření je vypnuté."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Odstraněné duplicity: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Vynecháno nad limit: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Další vynechané řádky: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Historie je pozastavená: stránky se skenují, ale neukládají."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Načítají se mapy webu…"
+  },
+  "bulkNothingToScan": {
+    "message": "V tomto seznamu není žádná adresa ke skenování."
+  },
+  "bulkErrBusy": {
+    "message": "Hromadné skenování už probíhá."
+  },
+  "bulkErrStart": {
+    "message": "Hromadné skenování se nepodařilo spustit."
+  },
+  "bulkErrFile": {
+    "message": "Soubor se nepodařilo přečíst."
+  },
+  "bulkEmpty": {
+    "message": "Vložte adresy nebo nahrajte soubor a pak zvolte Spustit."
   }
 }

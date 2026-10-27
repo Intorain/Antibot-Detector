@@ -224,6 +224,9 @@ test('startup initialization and an early event reuse one detector load', async 
   h.ctx.HistoryRetention = { init() {} };
   h.ctx.HistoryBackup = { init() {} };
   h.ctx.HistoryWatch = { init() {} };
+  h.ctx.CookieTimelineRecorder = { init() {} };
+  h.ctx.BackgroundTabScan = { init() {} };
+  h.ctx.BulkScanRunner = { init() {} };
   h.ctx.SettingsRuntime = { initWebhookRetries() {} };
   h.ctx.DetectionCacheRetention = { init() {} };
   h.ctx.HistoryStore = { setQuotaRelief() {}, setBudget() {} };
@@ -348,6 +351,29 @@ test('a webhook step that throws never fails the scan', async () => {
   assert.equal(h.calls.popup.length, 1, 'the popup was told');
 });
 
+test('a private-window page is not sent to the webhook', async () => {
+  const h = harness();
+  const sent = [];
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  h.ctx.HistoryRecorder.isIncognitoTab = async (tabId) => tabId === 7;
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.deepEqual(sent, []);
+  assert.equal(h.ctx.detectionStates.has(7), false, 'the scan still finished');
+  h.ctx.HistoryRecorder.isIncognitoTab = async () => false;
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.equal(sent.length, 1, 'a regular window\'s page still is');
+});
+
+test('a webhook that never answers does not hold the scan', async () => {
+  const h = harness();
+  let started = 0;
+  h.ctx.Settings.sendWebhookIfEnabled = () => { started++; return new Promise(() => {}); };
+  const state = h.begin();
+  await h.ctx.finalizeDetection(7, state);
+  assert.equal(started, 1, 'the delivery was started');
+  assert.equal(h.ctx.detectionStates.has(7), false, 'the scan finished without waiting for it');
+});
+
 test('a scan replaced before the webhook step sends nothing', async () => {
   const h = harness();
   const gate = deferred(), arrived = deferred(), sent = [];
@@ -365,7 +391,7 @@ test('a scan replaced before the webhook step sends nothing', async () => {
 test('a scan of a watchlist tab hands its finished results to the check, and leaves no History entry and no webhook delivery', async () => {
   const h = harness();
   const finished = [], sent = [];
-  h.ctx.HistoryWatch = { isWatchTab: id => id === 7, scanFinished: (...args) => finished.push(JSON.parse(JSON.stringify(args))) };
+  h.ctx.BackgroundTabScan = { isScanTab: id => id === 7, isQuiet: id => id === 7, scanFinished: (...args) => finished.push(JSON.parse(JSON.stringify(args))) };
   h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
   const state = h.begin();
   await h.ctx.finalizeDetection(7, state);
@@ -379,12 +405,36 @@ test('a scan of a watchlist tab hands its finished results to the check, and lea
 test('every other tab is recorded and sent as before, with the watchlist loaded', async () => {
   const h = harness();
   const finished = [], sent = [];
-  h.ctx.HistoryWatch = { isWatchTab: () => false, scanFinished: (...args) => finished.push(args) };
+  h.ctx.BackgroundTabScan = { isScanTab: () => false, isQuiet: () => false, scanFinished: (...args) => finished.push(args) };
   h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
   await h.ctx.finalizeDetection(7, h.begin());
   assert.deepEqual(finished, []);
   assert.equal(h.calls.history.length, 1);
   assert.equal(sent.length, 1);
+});
+
+test('a scan of a Bulk scan tab is recorded in History and sent like any page, and the run gets its results after History has them', async () => {
+  const h = harness();
+  const finished = [], sent = [];
+  h.ctx.BackgroundTabScan = { isScanTab: id => id === 7, isQuiet: () => false, scanFinished: (...args) => finished.push({ args: JSON.parse(JSON.stringify(args)), historyBefore: h.calls.history.length }) };
+  h.ctx.Settings.sendWebhookIfEnabled = async (...args) => { sent.push(args); };
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.equal(h.calls.history.length, 1, 'recorded the normal way');
+  assert.equal(sent.length, 1);
+  assert.equal(finished.length, 1);
+  assert.equal(finished[0].historyBefore, 1, 'handed over once the History step is done (the run closes the tab next)');
+  assert.deepEqual(finished[0].args[2].map(result => result.detector.id), ['detect-demo']);
+});
+
+test('a Bulk scan page that ended on a skipped site is handed over as excluded, and keeps nothing', async () => {
+  const h = harness();
+  const finished = [];
+  h.ctx.BackgroundTabScan = { isScanTab: () => true, isQuiet: () => false, scanFinished: (...args) => finished.push(JSON.parse(JSON.stringify(args))) };
+  h.ctx.Utils.isUrlBlacklisted = async () => true;
+  await h.ctx.finalizeDetection(7, h.begin());
+  assert.equal(h.calls.history.length, 0);
+  assert.equal(finished.length, 1);
+  assert.deepEqual([finished[0][2], finished[0][3]], [[], { excluded: true }]);
 });
 
 test('a finished scan leaves the page\'s headers and requests for a later scan of the same page', async () => {

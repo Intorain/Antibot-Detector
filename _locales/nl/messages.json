@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Geschiedenis vervangen. Items: {0}"
   },
+  "notificationHistoryExportedOne": {
+    "message": "1 geschiedenisitem geëxporteerd"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "1 nieuw geschiedenisitem samengevoegd"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Geschiedenis vervangen door 1 item"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Geschiedenis importeren mislukt: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Niet gevonden"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "ingesteld {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "één keer gewijzigd"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "{0} keer gewijzigd"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "laatste wijziging {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "verloopt {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "sessiecookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "verwijderd {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "verlopen {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Tijdlijn"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Ingesteld"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Gewijzigd"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Verwijderd"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Verlopen"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "De registratie begint wanneer de pagina de cookie instelt"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Eerder geregistreerd"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Korte vingerafdruk van de waarde: onderscheidt waarden, slaat de waarde nooit op"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Officiële detectors herstellen?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Teksten die nog niet in elke taal zijn vertaald: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Regel vertalen"
-  },
   "ruleTranslateRuleHint": {
     "message": "Vult de ontbrekende vertalingen van de beschrijving, de patronen en de combinaties aan met de vertaler op het apparaat van Chrome. Controleer ze voordat je opslaat."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Vertalen"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Wijzigingen vertalen"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Vertaald"
+  },
+  "ruleTranslateBusy": {
+    "message": "Vertalen…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Alle teksten van deze regel zijn vertaald in alle {0} talen."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{0} van de {1} gewijzigde teksten konden hier niet in elke taal worden vertaald (de browser downloadt ze misschien nog). Er is niets verloren: die teksten zijn zoals ze waren. Probeer het zo meteen opnieuw."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Gedownload: {0}. {1} van {2} talen klaar. De browser downloadt elke taal één keer, één per klik: klik opnieuw op Vertalen voor de volgende."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "{0} teksten vertalen…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl-opdracht"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Open een webpagina om die als code te kopiëren"
   },
   "detectionMdHeadingFmt": {
     "message": "Beveiligingen op {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Testen…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Open de pop-up op een website om er een regel van te maken."
+  },
+  "suggestRuleExactName": {
+    "message": "Gezocht op de exacte naam"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Namen die beginnen met {0}: de rest lijkt willekeurig"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Scriptadressen die dit bevatten: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Al herkend door {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Pagina wordt gelezen…"
+  },
+  "suggestRuleError": {
+    "message": "De pagina kon niet worden gelezen. Laad hem opnieuw en probeer het nog eens."
+  },
+  "suggestRuleOutdated": {
+    "message": "De extensie is bijgewerkt, maar het achtergronddeel draait nog de oude versie. Laad de extensie opnieuw op de pagina Extensies van de browser en probeer het nog eens."
+  },
+  "pagePickButton": {
+    "message": "Van deze pagina"
+  },
+  "pagePickAddFmt": {
+    "message": "{0} toevoegen"
+  },
+  "pagePickInRule": {
+    "message": "al in de regel"
+  },
+  "suggestRuleFilter": {
+    "message": "Filteren"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Al gedetecteerd: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "begint met"
+  },
+  "suggestRuleNoCookies": {
+    "message": "De pagina heeft geen cookies."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Geen scripts van andere sites."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Geen responsheaders: laad de pagina opnieuw om ze vast te leggen."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "De regel komt overeen met {0} (zekerheid {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Een andere taal kiezen laadt de extensie opnieuw. Eerst je wijzigingen in de instellingen opslaan?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Wijzigingen vertalen"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Teksten die je in het {0} hebt gewijzigd: {1}. De andere talen tonen nog de oude tekst."
   },
   "ruleTranslateChangesHint": {
     "message": "Vertaalt wat je schreef naar het Engels (het origineel) en de andere talen, met de vertaler van de browser op je apparaat. Controleer ze voor het opslaan."
+  },
+  "combinationOneCount": {
+    "message": "1 combinatie"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} combinaties"
+  },
+  "historyBulkScan": {
+    "message": "Bulkscan"
+  },
+  "bulkTitle": {
+    "message": "Bulkscan"
+  },
+  "bulkSubtitle": {
+    "message": "Scant een lijst met pagina's een voor een in een tabblad op de achtergrond. Elke pagina is een echt bezoek met de cookies van je browser, en wat er gevonden wordt komt zoals gewoonlijk in de geschiedenis."
+  },
+  "bulkInputLabel": {
+    "message": "Te scannen pagina's"
+  },
+  "bulkInputHint": {
+    "message": "Eén adres per regel. Een sitemapadres (.xml) voegt de pagina's toe die erin staan. Dubbele adressen worden verwijderd en alleen http- en https-pagina's worden gescand."
+  },
+  "bulkUpload": {
+    "message": ".txt of .csv uploaden"
+  },
+  "bulkCountFmt": {
+    "message": "Adressen: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Pagina's per ronde (tot {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Tijdslimiet per pagina, in seconden"
+  },
+  "bulkStart": {
+    "message": "Starten"
+  },
+  "bulkPause": {
+    "message": "Pauzeren"
+  },
+  "bulkResume": {
+    "message": "Hervatten"
+  },
+  "bulkStop": {
+    "message": "Stoppen"
+  },
+  "bulkScanWaiting": {
+    "message": "De pagina's scannen die nog wachten"
+  },
+  "bulkNewList": {
+    "message": "Nieuwe lijst"
+  },
+  "bulkResults": {
+    "message": "Resultaten"
+  },
+  "bulkColAddress": {
+    "message": "Adres"
+  },
+  "bulkStatusWaiting": {
+    "message": "Wacht"
+  },
+  "bulkStatusScanning": {
+    "message": "Bezig met scannen"
+  },
+  "bulkStatusDone": {
+    "message": "Klaar"
+  },
+  "bulkStatusFailed": {
+    "message": "Mislukt"
+  },
+  "bulkStatusSkipped": {
+    "message": "Overgeslagen"
+  },
+  "bulkReasonInvalid": {
+    "message": "Geen geldig adres"
+  },
+  "bulkReasonScheme": {
+    "message": "Alleen http- en https-pagina's worden gescand"
+  },
+  "bulkReasonScope": {
+    "message": "Overgeslagen door Instellingen → Detectie → Te scannen sites"
+  },
+  "bulkReasonSitemap": {
+    "message": "De sitemap kon niet worden gelezen. Alleen https-sitemaps kunnen worden gelezen."
+  },
+  "bulkReasonTimeout": {
+    "message": "Geen resultaat binnen de tijdslimiet"
+  },
+  "bulkReasonLoad": {
+    "message": "De pagina is niet geladen"
+  },
+  "bulkReasonError": {
+    "message": "De scan is mislukt"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Geëindigd op {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Geen beveiliging gevonden"
+  },
+  "bulkRunRunning": {
+    "message": "Bezig"
+  },
+  "bulkRunPaused": {
+    "message": "Gepauzeerd"
+  },
+  "bulkRunStopped": {
+    "message": "Gestopt"
+  },
+  "bulkRunDone": {
+    "message": "Voltooid"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} van {1} klaar"
+  },
+  "bulkCountsFmt": {
+    "message": "Klaar: {0} · Met beveiliging: {1} · Mislukt: {2} · Overgeslagen: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "De extensie is tijdens de ronde opnieuw gestart, dus is die gestopt. De pagina's die nog wachtten zijn niet gescand."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Er was geen browservenster open om pagina's in te scannen."
+  },
+  "bulkStoppedOff": {
+    "message": "De extensie staat uit."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Dubbele adressen verwijderd: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Weggelaten boven de limiet: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Andere weggelaten regels: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "De geschiedenis is gepauzeerd: de pagina's worden gescand maar niet vastgelegd."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Sitemaps lezen…"
+  },
+  "bulkNothingToScan": {
+    "message": "Deze lijst bevat geen adres om te scannen."
+  },
+  "bulkErrBusy": {
+    "message": "Er loopt al een bulkscan."
+  },
+  "bulkErrStart": {
+    "message": "De bulkscan kon niet starten."
+  },
+  "bulkErrFile": {
+    "message": "Het bestand kon niet worden gelezen."
+  },
+  "bulkEmpty": {
+    "message": "Plak adressen of upload een bestand en kies dan Starten."
   }
 }

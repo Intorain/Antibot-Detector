@@ -113,9 +113,9 @@ Rules.prototype.renderWindowConditionMenu = function(selectedValue) {
     const customLabel = FormatUtils.escapeHtml((_t && _t.get('rhCustomChip')) || 'Custom');
 
     const renderOption = (value) => {
-      const safeValue = FormatUtils.escapeHtml(value);
+      const safeValue = FormatUtils.escapeAttr(value); // also in data-value="..."
       const isSelected = value === selected;
-      return `<div class="condition-option${isSelected ? ' selected' : ''}" data-value="${safeValue}">${safeValue}</div>`;
+      return `<div class="condition-option${isSelected ? ' selected' : ''}" role="option" tabindex="0" aria-selected="${isSelected}" data-value="${safeValue}">${safeValue}</div>`;
     };
 
     const renderedGroups = groups.map((group) => {
@@ -153,18 +153,18 @@ Rules.prototype.renderWindowConditionMenu = function(selectedValue) {
 
 Rules.prototype.renderInlineConditionDropdown = function(conditionValue, methodKey, itemIndex) {
     const selected = (conditionValue || 'exists').trim() || 'exists';
-    const safeSelected = FormatUtils.escapeHtml(selected);
+    const safeSelected = FormatUtils.escapeAttr(selected); // also in value="..."
     const menu = this.renderWindowConditionMenu(selected);
 
     return `
       <div class="condition-dropdown inline-condition-dropdown" data-condition-dropdown="window" data-condition-value="${safeSelected}">
-        <button type="button" class="condition-dropdown-trigger" aria-expanded="false">
+        <button type="button" class="condition-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">
           <span class="condition-selected-text">${safeSelected}</span>
           <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
             <path d="M6 8L1 3h10z"/>
           </svg>
         </button>
-        <div class="condition-dropdown-menu">
+        <div class="condition-dropdown-menu" role="listbox">
           ${menu}
         </div>
         <input type="hidden" class="method-input method-value" value="${safeSelected}" data-method-key="${methodKey}" data-item-index="${itemIndex}">

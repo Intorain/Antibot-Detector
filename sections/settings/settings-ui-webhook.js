@@ -8,7 +8,12 @@ SettingsUI.setupWebhookMethodRadios = function() {
     const customContainer = document.querySelector('#webhookCustomMethodContainer');
     const customInput = document.querySelector('#webhookCustomMethod');
 
+    // Called on every populate (open, import, preset, reset): each control is wired once, or one click ran its
+    // handler once per populate so far
+    const bound = SettingsUI._webhookMethodBound || (SettingsUI._webhookMethodBound = new WeakSet());
     radios.forEach(radio => {
+      if (bound.has(radio)) return;
+      bound.add(radio);
       radio.addEventListener('change', (e) => {
         radios.forEach(r => {
           const badge = r.closest('.http-method-badge');
@@ -28,7 +33,8 @@ SettingsUI.setupWebhookMethodRadios = function() {
       });
     });
 
-    if (customInput) {
+    if (customInput && !bound.has(customInput)) {
+      bound.add(customInput);
       customInput.addEventListener('input', () => {
         const customValue = customInput.value.trim().toUpperCase();
         if (customValue && webhookMethodInput) {
@@ -54,8 +60,8 @@ SettingsUI.renderWebhookHeadersUI = function() {
     const removeLabel = this.escapeHtml(SettingsUI._whTr('webhookRemoveHeader', 'Remove header'));
     container.innerHTML = headers.map((header, index) => `
       <div class="webhook-header-item" data-index="${index}" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
-        <input type="text" class="webhook-header-name input-field" placeholder="${nameLabel}" aria-label="${nameLabel}" value="${this.escapeHtml(header.name || '')}" style="flex: 1; font-size: 13px; padding: 8px;">
-        <input type="text" class="webhook-header-value input-field" placeholder="${valueLabel}" aria-label="${valueLabel}" value="${this.escapeHtml(header.value || '')}" style="flex: 2; font-size: 13px; padding: 8px;">
+        <input type="text" class="webhook-header-name input-field" placeholder="${nameLabel}" aria-label="${nameLabel}" value="${FormatUtils.escapeAttr(header.name || '')}" style="flex: 1; font-size: 13px; padding: 8px;">
+        <input type="text" class="webhook-header-value input-field" placeholder="${valueLabel}" aria-label="${valueLabel}" value="${FormatUtils.escapeAttr(header.value || '')}" style="flex: 2; font-size: 13px; padding: 8px;">
         <button type="button" class="remove-webhook-header-btn" data-index="${index}" title="${removeLabel}" aria-label="${removeLabel}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
@@ -401,7 +407,7 @@ SettingsUI.setupWebhookContentType = function(savedValue) {
 
     select.innerHTML = WebhookBody.CONTENT_TYPES.map(t => {
       const label = t.value === WebhookBody.CUSTOM ? SettingsUI._whTr('webhookCtCustom', 'Custom') : t.value;
-      return `<option value="${this.escapeHtml(t.value)}">${this.escapeHtml(label)}</option>`;
+      return `<option value="${FormatUtils.escapeAttr(t.value)}">${this.escapeHtml(label)}</option>`;
     }).join('');
 
     const resolved = WebhookBody.resolveContentType(savedValue);
@@ -476,7 +482,7 @@ SettingsUI.setupWebhookPayloadUI = function() {
       const insertFmt = SettingsUI._whTr('webhookVarsInsertFmt', 'Insert {0}');
       chips.innerHTML = WebhookBody.VARIABLES.map(v => {
         const label = this.escapeHtml(insertFmt.split('{0}').join(v.token));
-        return `<button type="button" class="webhook-var-chip" data-token="${this.escapeHtml(v.token)}" title="${label}" aria-label="${label}">${this.escapeHtml(v.token)}</button>`;
+        return `<button type="button" class="webhook-var-chip" data-token="${FormatUtils.escapeAttr(v.token)}" title="${label}" aria-label="${label}">${this.escapeHtml(v.token)}</button>`;
       }).join('');
     }
 
@@ -695,7 +701,10 @@ SettingsUI.openWebhookVariablesHelp = async function() {
     const host = document.querySelector('#settingsModal .base-modal-content') || document.body;
     const opener = document.querySelector('#webhookVariablesHelpBtn');
     const existing = document.querySelector('#webhookVariablesModal');
-    if (existing) existing.remove();
+    if (existing) {
+      if (typeof SettingsUI._closeWebhookVariablesHelp === 'function') SettingsUI._closeWebhookVariablesHelp();
+      existing.remove();
+    }
 
     const ctx = await SettingsUI.webhookExampleContext();
     const copyFmt = SettingsUI._whTr('webhookVarsCopyFmt', 'Copy {0}');
@@ -710,9 +719,9 @@ SettingsUI.openWebhookVariablesHelp = async function() {
               <code class="webhook-var-chip webhook-var-chip--static">${this.escapeHtml(v.token)}</code>
               <span class="webhook-vars-desc">${this.escapeHtml(SettingsUI._whTr(v.descKey, v.desc))}</span>
             </div>
-            <span class="webhook-vars-example" title="${this.escapeHtml(example.slice(0, 400))}"><span class="webhook-vars-example-label">${exampleLabel}:</span> ${this.escapeHtml(example)}</span>
+            <span class="webhook-vars-example" title="${FormatUtils.escapeAttr(example.slice(0, 400))}"><span class="webhook-vars-example-label">${exampleLabel}:</span> ${this.escapeHtml(example)}</span>
           </div>
-          <button type="button" class="webhook-vars-copy" data-token="${this.escapeHtml(v.token)}" title="${copyLabel}" aria-label="${copyLabel}">
+          <button type="button" class="webhook-vars-copy" data-token="${FormatUtils.escapeAttr(v.token)}" title="${copyLabel}" aria-label="${copyLabel}">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="2"/></svg>
           </button>
         </li>`;
@@ -734,9 +743,16 @@ SettingsUI.openWebhookVariablesHelp = async function() {
       </div>`;
     host.appendChild(overlay);
 
+    // Its own focus scope above Settings': Escape closes this window only (Settings' scope stands aside while this
+    // one is on top), and Tab stays in it
+    const card = overlay.querySelector('.webhook-vars-card');
+    let releaseFocus = null;
     const close = () => {
       overlay.remove();
-      if (opener) opener.focus();
+      const release = releaseFocus;
+      releaseFocus = null;
+      if (release) release();
+      if (opener && opener.isConnected) opener.focus();
     };
     overlay.addEventListener('click', async (e) => {
       if (e.target === overlay || e.target.closest('.webhook-vars-close')) { close(); return; }
@@ -749,19 +765,12 @@ SettingsUI.openWebhookVariablesHelp = async function() {
         Logger.warn('UI', 'Copy webhook variable failed', { error: error.message });
       }
     });
-    overlay.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        close();
-      } else if (e.key === 'Tab') {
-        const items = [...overlay.querySelectorAll('button')];
-        const i = items.indexOf(document.activeElement);
-        const next = items[(i + (e.shiftKey ? -1 : 1) + items.length) % items.length];
-        if (next) { e.preventDefault(); next.focus(); }
-      }
-    });
-    overlay.querySelector('.webhook-vars-close')?.focus();
+    SettingsUI._closeWebhookVariablesHelp = close;
+    if (typeof ModalFocus !== 'undefined' && card) {
+      releaseFocus = ModalFocus.activate(card, { onClose: close, initialFocus: overlay.querySelector('.webhook-vars-close') || undefined });
+    } else {
+      overlay.querySelector('.webhook-vars-close')?.focus();
+    }
 };
 
 SettingsUI._setupWebhookListeners = function() {

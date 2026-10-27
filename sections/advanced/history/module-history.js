@@ -43,7 +43,7 @@ class AdvancedModuleHistory {
                     <div class="header-right">
                         <span class="history-count">${BaseAdvancedModule._fmt('advPanelCaptureCountFmt', `Captures: ${history.length}`, history.length)}</span>
                         ${history.length > 0 ? `
-                            <button class="clear-history-btn" id="clear${this.moduleName.charAt(0).toUpperCase() + this.moduleName.slice(1)}History" title="${FormatUtils.escapeHtml(BaseAdvancedModule._tr('advPanelClearCapturedDataTitle', 'Clear all captured data'))}" aria-label="${FormatUtils.escapeHtml(BaseAdvancedModule._tr('advPanelClearCapturedDataTitle', 'Clear all captured data'))}">
+                            <button class="clear-history-btn" id="clear${this.moduleName.charAt(0).toUpperCase() + this.moduleName.slice(1)}History" title="${FormatUtils.escapeAttr(BaseAdvancedModule._tr('advPanelClearCapturedDataTitle', 'Clear all captured data'))}" aria-label="${FormatUtils.escapeAttr(BaseAdvancedModule._tr('advPanelClearCapturedDataTitle', 'Clear all captured data'))}">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                             </button>
                         ` : ''}
@@ -56,14 +56,14 @@ class AdvancedModuleHistory {
                     <div id="${this.moduleName}HistoryPagination" class="pagination">
                         <div class="pagination-info">${BaseAdvancedModule._fmt('paginationShowingFmt', `Showing 1-3 of ${history.length}`, 1, 3, history.length)}</div>
                         <div class="pagination-controls">
-                            <button class="pagination-btn pagination-btn-prev" disabled>
-                                <svg width="16" height="16" viewBox="0 0 24 24">
+                            <button type="button" class="pagination-btn pagination-btn-prev" aria-label="${FormatUtils.escapeAttr(BaseAdvancedModule._tr('paginationPrev', 'Previous page'))}" disabled>
+                                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12Z" fill="currentColor"/>
                                 </svg>
                             </button>
                             <div class="page-numbers"></div>
-                            <button class="pagination-btn pagination-btn-next">
-                                <svg width="16" height="16" viewBox="0 0 24 24">
+                            <button type="button" class="pagination-btn pagination-btn-next" aria-label="${FormatUtils.escapeAttr(BaseAdvancedModule._tr('paginationNext', 'Next page'))}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M10 6L8.59 7.41L13.17 12L8.59 16.59L10 18L16 12Z" fill="currentColor"/>
                                 </svg>
                             </button>

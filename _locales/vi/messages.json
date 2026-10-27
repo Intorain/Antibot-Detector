@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Đã thay lịch sử bằng {0} mục"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Đã xuất 1 mục lịch sử"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Đã gộp 1 mục lịch sử mới"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Đã thay lịch sử bằng 1 mục"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Không thể nhập lịch sử: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Không tìm thấy"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "đặt {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "đã đổi một lần"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "đã đổi {0} lần"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "lần đổi cuối {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "hết hạn {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "cookie phiên"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "đã xóa {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "đã hết hạn {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Dòng thời gian"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Đã đặt"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Đã đổi"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Đã xóa"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Đã hết hạn"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Việc ghi bắt đầu khi trang đặt cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Đã ghi trước đó"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Dấu vân tay ngắn của giá trị: phân biệt các giá trị, không bao giờ lưu giá trị"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Khôi phục trình phát hiện chính thức?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Số văn bản chưa được dịch sang mọi ngôn ngữ: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Dịch quy tắc"
-  },
   "ruleTranslateRuleHint": {
     "message": "Điền các bản dịch còn thiếu của mô tả, các mẫu và các tổ hợp bằng trình dịch trên thiết bị của Chrome. Hãy kiểm tra trước khi lưu."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Dịch"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Dịch thay đổi"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Đã dịch"
+  },
+  "ruleTranslateBusy": {
+    "message": "Đang dịch…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Mọi văn bản của quy tắc này đã được dịch sang cả {0} ngôn ngữ."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "Không dịch được {0} trong {1} văn bản đã đổi sang mọi ngôn ngữ ở đây (trình duyệt có thể vẫn đang tải chúng). Không mất gì: các văn bản đó vẫn như cũ. Hãy thử lại sau giây lát."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Đã tải: {0}. Sẵn sàng {1}/{2} ngôn ngữ. Trình duyệt tải mỗi ngôn ngữ một lần, mỗi lần nhấp một ngôn ngữ: nhấp Dịch lần nữa để tải ngôn ngữ tiếp theo."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Đang dịch {0} văn bản…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Lệnh curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Mở một trang web để sao chép nó dưới dạng mã"
   },
   "detectionMdHeadingFmt": {
     "message": "Biện pháp bảo vệ trên {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Đang kiểm tra…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Hãy mở cửa sổ bật lên trên một trang web để tạo quy tắc từ trang đó."
+  },
+  "suggestRuleExactName": {
+    "message": "Tìm theo đúng tên"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Tên bắt đầu bằng {0}: phần còn lại trông ngẫu nhiên"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Địa chỉ tập lệnh chứa chuỗi này: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Đã được {0} phát hiện"
+  },
+  "suggestRuleLoading": {
+    "message": "Đang đọc trang…"
+  },
+  "suggestRuleError": {
+    "message": "Không đọc được trang. Hãy tải lại trang và thử lại."
+  },
+  "suggestRuleOutdated": {
+    "message": "Tiện ích đã được cập nhật nhưng phần chạy nền vẫn dùng phiên bản cũ. Hãy tải lại tiện ích trong trang Tiện ích của trình duyệt rồi thử lại."
+  },
+  "pagePickButton": {
+    "message": "Từ trang này"
+  },
+  "pagePickAddFmt": {
+    "message": "Thêm {0}"
+  },
+  "pagePickInRule": {
+    "message": "đã có trong quy tắc"
+  },
+  "suggestRuleFilter": {
+    "message": "Lọc"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Đã phát hiện: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "bắt đầu bằng"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Trang không có cookie."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Không có tập lệnh từ trang web khác."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Không có tiêu đề phản hồi: hãy tải lại trang để ghi nhận chúng."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Quy tắc khớp với {0} (độ tin cậy {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Đổi ngôn ngữ sẽ tải lại tiện ích. Lưu các thay đổi cài đặt trước?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Dịch các thay đổi"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Văn bản bạn đã đổi bằng {0}: {1}. Các ngôn ngữ khác vẫn hiển thị văn bản cũ."
   },
   "ruleTranslateChangesHint": {
     "message": "Dịch nội dung bạn viết sang tiếng Anh (bản gốc) và các ngôn ngữ khác bằng trình dịch tích hợp của trình duyệt. Hãy kiểm tra trước khi lưu."
+  },
+  "combinationOneCount": {
+    "message": "1 tổ hợp"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} tổ hợp"
+  },
+  "historyBulkScan": {
+    "message": "Quét hàng loạt"
+  },
+  "bulkTitle": {
+    "message": "Quét hàng loạt"
+  },
+  "bulkSubtitle": {
+    "message": "Quét một danh sách trang lần lượt từng trang trong một tab chạy nền. Mỗi trang là một lượt truy cập thật bằng cookie của trình duyệt, và những gì tìm thấy được thêm vào Lịch sử như thường lệ."
+  },
+  "bulkInputLabel": {
+    "message": "Các trang cần quét"
+  },
+  "bulkInputHint": {
+    "message": "Mỗi dòng một địa chỉ. Địa chỉ sơ đồ trang web (.xml) thêm các trang mà nó liệt kê. Địa chỉ trùng được loại bỏ, và chỉ quét trang http và https."
+  },
+  "bulkUpload": {
+    "message": "Tải lên .txt hoặc .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Địa chỉ: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Số trang mỗi lượt chạy (tối đa {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Giới hạn thời gian mỗi trang, tính bằng giây"
+  },
+  "bulkStart": {
+    "message": "Bắt đầu"
+  },
+  "bulkPause": {
+    "message": "Tạm dừng"
+  },
+  "bulkResume": {
+    "message": "Tiếp tục"
+  },
+  "bulkStop": {
+    "message": "Dừng"
+  },
+  "bulkScanWaiting": {
+    "message": "Quét các trang vẫn đang chờ"
+  },
+  "bulkNewList": {
+    "message": "Danh sách mới"
+  },
+  "bulkResults": {
+    "message": "Kết quả"
+  },
+  "bulkColAddress": {
+    "message": "Địa chỉ"
+  },
+  "bulkStatusWaiting": {
+    "message": "Đang chờ"
+  },
+  "bulkStatusScanning": {
+    "message": "Đang quét"
+  },
+  "bulkStatusDone": {
+    "message": "Xong"
+  },
+  "bulkStatusFailed": {
+    "message": "Thất bại"
+  },
+  "bulkStatusSkipped": {
+    "message": "Đã bỏ qua"
+  },
+  "bulkReasonInvalid": {
+    "message": "Không phải địa chỉ hợp lệ"
+  },
+  "bulkReasonScheme": {
+    "message": "Chỉ quét trang http và https"
+  },
+  "bulkReasonScope": {
+    "message": "Bị bỏ qua theo Cài đặt → Phát hiện → Trang web cần quét"
+  },
+  "bulkReasonSitemap": {
+    "message": "Không đọc được sơ đồ trang web. Chỉ đọc được sơ đồ trang web https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Không có kết quả trong giới hạn thời gian"
+  },
+  "bulkReasonLoad": {
+    "message": "Trang không tải được"
+  },
+  "bulkReasonError": {
+    "message": "Quét thất bại"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Kết thúc tại {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Không tìm thấy lớp bảo vệ nào"
+  },
+  "bulkRunRunning": {
+    "message": "Đang chạy"
+  },
+  "bulkRunPaused": {
+    "message": "Đã tạm dừng"
+  },
+  "bulkRunStopped": {
+    "message": "Đã dừng"
+  },
+  "bulkRunDone": {
+    "message": "Đã hoàn tất"
+  },
+  "bulkProgressFmt": {
+    "message": "Đã xong {0}/{1}"
+  },
+  "bulkCountsFmt": {
+    "message": "Xong: {0} · Có bảo vệ: {1} · Thất bại: {2} · Bỏ qua: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Tiện ích đã khởi động lại trong lúc chạy nên lượt chạy đã dừng. Các trang vẫn đang chờ chưa được quét."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Không có cửa sổ trình duyệt nào đang mở để quét trang."
+  },
+  "bulkStoppedOff": {
+    "message": "Tiện ích đang tắt."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Đã loại bỏ địa chỉ trùng: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Bị bỏ ra vì vượt giới hạn: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Các dòng khác bị bỏ ra: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Lịch sử đang tạm dừng: các trang vẫn được quét nhưng không được ghi lại."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Đang đọc sơ đồ trang web…"
+  },
+  "bulkNothingToScan": {
+    "message": "Danh sách này không có địa chỉ nào để quét."
+  },
+  "bulkErrBusy": {
+    "message": "Đang có một lượt quét hàng loạt chạy."
+  },
+  "bulkErrStart": {
+    "message": "Không thể bắt đầu quét hàng loạt."
+  },
+  "bulkErrFile": {
+    "message": "Không đọc được tệp."
+  },
+  "bulkEmpty": {
+    "message": "Dán địa chỉ hoặc tải lên một tệp, rồi chọn Bắt đầu."
   }
 }

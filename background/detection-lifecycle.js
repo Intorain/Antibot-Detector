@@ -403,11 +403,14 @@ async function finalizeDetection(tabId, state) {
 
     // A site that is skipped, or left out in "only these sites" mode, keeps nothing from a scan (one that began
     // before it was excluded, or a request that got past the checks): no cache entry, History, webhook or page
-    // event, and its badge says it is paused. A watchlist check only opens pages that pass the same test.
-    const watchTab = typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId);
-    if (!watchTab && await Utils.isUrlBlacklisted(state.url)) {
+    // event, and its badge says it is paused. A watchlist check only opens pages that pass the same test; a Bulk scan
+    // page that ended on such a site is told so (it is listed as skipped).
+    const scanTab = typeof BackgroundTabScan !== 'undefined' && BackgroundTabScan.isScanTab(tabId);
+    const quietTab = scanTab && BackgroundTabScan.isQuiet(tabId);
+    if (!quietTab && await Utils.isUrlBlacklisted(state.url)) {
         if (!DetectionSessionStore.isCurrent(tabId, state)) return;
         Logger.detection(`${Logger.hostOf(state.url)}: excluded domain, scan results not kept`);
+        if (scanTab) BackgroundTabScan.scanFinished(tabId, state.url, [], { excluded: true });
         await setBadgeForDetections(tabId, state.url, [], () => DetectionSessionStore.isCurrent(tabId, state));
         if (DetectionSessionStore.isCurrent(tabId, state)) DetectionSessionStore.finish(tabId, state);
         return;
@@ -432,8 +435,8 @@ async function finalizeDetection(tabId, state) {
 
     // A watchlist check is waiting for this scan: it gets the finished results, and the scan leaves no History entry
     // of its own (the check updates the page it watches) and sends nothing to the webhook
-    const watching = typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId);
-    if (watching) HistoryWatch.scanFinished(tabId, state.url, finalResults);
+    const watching = quietTab;
+    if (watching) BackgroundTabScan.scanFinished(tabId, state.url, finalResults);
 
     // Update state with expiry info for immediate popup queries
     if (storedDataWithExpiry) {
@@ -508,19 +511,27 @@ async function finalizeDetection(tabId, state) {
     }
 
     // The webhook gets the finished results (hooks, fingerprints and late requests included) of a page scanned just now
-    // (whatever happens to the webhook never fails the scan)
+    // (whatever happens to the webhook never fails the scan, and a slow server never holds it: the delivery runs on its own)
+    // A private-window page is never sent anywhere (History leaves it out too)
     if (finalResults.length > 0 && !preservedExistingCache && !watching && DetectionSessionStore.isCurrent(tabId, state)) {
         try {
-            await Settings.sendWebhookIfEnabled({
+            const privateWindow = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function' &&
+                await HistoryRecorder.isIncognitoTab(tabId, chrome);
+            if (!privateWindow && DetectionSessionStore.isCurrent(tabId, state)) Promise.resolve(Settings.sendWebhookIfEnabled({
                 url: state.url,
                 hostname: UrlUtils.getHostnameFromUrl(state.url),
                 title: state.tabTitle,
                 favicon: UrlUtils.normalizeFaviconForStorage(state.favicon, state.url)
-            }, finalResults, { trigger: 'scan' });
+            }, finalResults, { trigger: 'scan' })).catch((error) => {
+                Logger.warn('NETWORK', 'The webhook step failed', error);
+            });
         } catch (error) {
             Logger.warn('NETWORK', 'The webhook step failed', error);
         }
     }
+
+    // A Bulk scan is waiting for this page: it gets the results once History has them (its tab closes right after)
+    if (scanTab && !watching) BackgroundTabScan.scanFinished(tabId, state.url, finalResults);
 
     // Requests the page makes from now on still add URL evidence to this result (applyLateNetworkUrls)
     if (!watching && DetectionSessionStore.isCurrent(tabId, state)) rememberFinishedPage(tabId, state, finalResults);
@@ -532,6 +543,19 @@ async function finalizeDetection(tabId, state) {
     } finally {
         state.finalizing = false;
         if (!state.failed && !DetectionSessionStore.isCurrent(tabId, state)) DetectionSessionStore.finish(tabId, state);
+    }
+}
+
+/**
+ * Whether what webRequest captured for the tab (headers, Set-Cookie) came from the page's own host. A substring
+ * test also took a capture from evil.example/?u=shop.example, or from sub.shop.example, for shop.example.
+ */
+function capturedForHost(captured, hostname) {
+    if (!captured || typeof captured.url !== 'string' || !hostname) return false;
+    try {
+        return new URL(captured.url).hostname.toLowerCase() === String(hostname).toLowerCase();
+    } catch (_) {
+        return false;
     }
 }
 
@@ -579,7 +603,7 @@ async function processDetectionData(message, sender) {
         const headerData = headersStore.get(tabId);
 
         // Only use headers if they're from the same URL (or close enough)
-        if (headerData.url.includes(pageData.hostname)) {
+        if (capturedForHost(headerData, pageData.hostname)) {
             pageData.headers = headerData.headers; // Response headers (backward compatibility)
             pageData.responseHeaders = headerData.headers; // Also store explicitly as responseHeaders
         }
@@ -589,7 +613,7 @@ async function processDetectionData(message, sender) {
     if (requestHeadersStore.has(tabId)) {
         const requestHeaderData = requestHeadersStore.get(tabId);
 
-        if (requestHeaderData.url.includes(pageData.hostname)) {
+        if (capturedForHost(requestHeaderData, pageData.hostname)) {
             pageData.requestHeaders = requestHeaderData.headers;
         }
     }
@@ -598,7 +622,7 @@ async function processDetectionData(message, sender) {
     if (responseCookiesStore.has(tabId)) {
         const responseCookieData = responseCookiesStore.get(tabId);
 
-        if (responseCookieData.url.includes(pageData.hostname)) {
+        if (capturedForHost(responseCookieData, pageData.hostname)) {
             pageData.responseCookies = responseCookieData.cookies;
         }
     }

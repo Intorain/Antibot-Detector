@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Verlauf durch {0} Einträge ersetzt"
   },
+  "notificationHistoryExportedOne": {
+    "message": "1 Verlaufseintrag exportiert"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "1 neuer Verlaufseintrag zusammengeführt"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Verlauf durch 1 Eintrag ersetzt"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Verlauf konnte nicht importiert werden: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Nicht gefunden"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "gesetzt {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "einmal geändert"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "{0}-mal geändert"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "letzte Änderung {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "läuft ab {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "Sitzungscookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "entfernt {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "abgelaufen {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Verlauf"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Gesetzt"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Geändert"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Entfernt"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Abgelaufen"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Die Aufzeichnung beginnt, wenn die Seite das Cookie setzt"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Früher aufgezeichnet"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Kurzer Fingerabdruck des Werts: unterscheidet Werte, speichert nie den Wert"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Offizielle Detektoren wiederherstellen?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Texte, die noch nicht in jede Sprache übersetzt sind: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Regel übersetzen"
-  },
   "ruleTranslateRuleHint": {
     "message": "Füllt die fehlenden Übersetzungen von Beschreibung, Mustern und Kombinationen mit dem geräteinternen Übersetzer von Chrome aus. Prüfe sie vor dem Speichern."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Übersetzen"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Änderungen übersetzen"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Übersetzt"
+  },
+  "ruleTranslateBusy": {
+    "message": "Wird übersetzt…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Alle Texte dieser Regel sind in alle {0} Sprachen übersetzt."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{0} von {1} geänderten Texten konnten hier nicht in alle Sprachen übersetzt werden (der Browser lädt sie vielleicht noch herunter). Nichts ging verloren: Diese Texte sind unverändert. Versuche es gleich noch einmal."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Heruntergeladen: {0}. {1} von {2} Sprachen bereit. Der Browser lädt jede Sprache einmal herunter, eine pro Klick: Klicke für die nächste erneut auf Übersetzen."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "{0} Texte werden übersetzt…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl-Befehl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Öffnen Sie eine Webseite, um sie als Code zu kopieren"
   },
   "detectionMdHeadingFmt": {
     "message": "Schutzmaßnahmen auf {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Wird getestet…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Öffne das Popup auf einer Website, um daraus eine Regel zu erstellen."
+  },
+  "suggestRuleExactName": {
+    "message": "Wird über den genauen Namen gefunden"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Namen, die mit {0} beginnen: der Rest wirkt zufällig"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Skriptadressen, die das enthalten: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Bereits erkannt von {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Seite wird gelesen…"
+  },
+  "suggestRuleError": {
+    "message": "Die Seite konnte nicht gelesen werden. Lade sie neu und versuche es erneut."
+  },
+  "suggestRuleOutdated": {
+    "message": "Die Erweiterung wurde aktualisiert, ihr Hintergrundteil läuft aber noch mit der alten Version. Lade die Erweiterung auf der Erweiterungsseite des Browsers neu und versuche es erneut."
+  },
+  "pagePickButton": {
+    "message": "Von dieser Seite"
+  },
+  "pagePickAddFmt": {
+    "message": "{0} hinzufügen"
+  },
+  "pagePickInRule": {
+    "message": "schon in der Regel"
+  },
+  "suggestRuleFilter": {
+    "message": "Filtern"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Bereits erkannt: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "beginnt mit"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Die Seite hat keine Cookies."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Keine Skripte von anderen Websites."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Keine Antwort-Header: Lade die Seite neu, um sie zu erfassen."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Die Regel trifft auf {0} zu (Konfidenz {1} %)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Ein Sprachwechsel lädt die Erweiterung neu. Zuerst deine Änderungen an den Einstellungen speichern?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Änderungen übersetzen"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Auf {0} geänderte Texte: {1}. Die anderen Sprachen zeigen noch den alten Text."
   },
   "ruleTranslateChangesHint": {
     "message": "Übersetzt, was du geschrieben hast, ins Englische (das Original) und in die anderen Sprachen, mit dem Übersetzer des Browsers auf dem Gerät. Vor dem Speichern prüfen."
+  },
+  "combinationOneCount": {
+    "message": "1 Kombination"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} Kombinationen"
+  },
+  "historyBulkScan": {
+    "message": "Massenscan"
+  },
+  "bulkTitle": {
+    "message": "Massenscan"
+  },
+  "bulkSubtitle": {
+    "message": "Scannt eine Liste von Seiten nacheinander in einem Hintergrund-Tab. Jede Seite ist ein echter Besuch mit den Cookies Ihres Browsers, und was dabei gefunden wird, landet wie gewohnt im Verlauf."
+  },
+  "bulkInputLabel": {
+    "message": "Zu scannende Seiten"
+  },
+  "bulkInputHint": {
+    "message": "Eine Adresse pro Zeile. Eine Sitemap-Adresse (.xml) fügt die darin aufgeführten Seiten hinzu. Duplikate werden entfernt, und nur http- und https-Seiten werden gescannt."
+  },
+  "bulkUpload": {
+    "message": ".txt oder .csv hochladen"
+  },
+  "bulkCountFmt": {
+    "message": "Adressen: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Seiten pro Durchlauf (bis zu {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Zeitlimit pro Seite in Sekunden"
+  },
+  "bulkStart": {
+    "message": "Starten"
+  },
+  "bulkPause": {
+    "message": "Pausieren"
+  },
+  "bulkResume": {
+    "message": "Fortsetzen"
+  },
+  "bulkStop": {
+    "message": "Stoppen"
+  },
+  "bulkScanWaiting": {
+    "message": "Die noch wartenden Seiten scannen"
+  },
+  "bulkNewList": {
+    "message": "Neue Liste"
+  },
+  "bulkResults": {
+    "message": "Ergebnisse"
+  },
+  "bulkColAddress": {
+    "message": "Adresse"
+  },
+  "bulkStatusWaiting": {
+    "message": "Wartet"
+  },
+  "bulkStatusScanning": {
+    "message": "Wird gescannt"
+  },
+  "bulkStatusDone": {
+    "message": "Fertig"
+  },
+  "bulkStatusFailed": {
+    "message": "Fehlgeschlagen"
+  },
+  "bulkStatusSkipped": {
+    "message": "Übersprungen"
+  },
+  "bulkReasonInvalid": {
+    "message": "Keine gültige Adresse"
+  },
+  "bulkReasonScheme": {
+    "message": "Nur http- und https-Seiten werden gescannt"
+  },
+  "bulkReasonScope": {
+    "message": "Übersprungen wegen Einstellungen → Erkennung → Zu scannende Sites"
+  },
+  "bulkReasonSitemap": {
+    "message": "Die Sitemap konnte nicht gelesen werden. Nur https-Sitemaps können gelesen werden."
+  },
+  "bulkReasonTimeout": {
+    "message": "Kein Ergebnis innerhalb des Zeitlimits"
+  },
+  "bulkReasonLoad": {
+    "message": "Die Seite wurde nicht geladen"
+  },
+  "bulkReasonError": {
+    "message": "Der Scan ist fehlgeschlagen"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Endete auf {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Kein Schutz gefunden"
+  },
+  "bulkRunRunning": {
+    "message": "Läuft"
+  },
+  "bulkRunPaused": {
+    "message": "Pausiert"
+  },
+  "bulkRunStopped": {
+    "message": "Gestoppt"
+  },
+  "bulkRunDone": {
+    "message": "Abgeschlossen"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} von {1} fertig"
+  },
+  "bulkCountsFmt": {
+    "message": "Fertig: {0} · Mit Schutz: {1} · Fehlgeschlagen: {2} · Übersprungen: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Die Erweiterung wurde während des Durchlaufs neu gestartet, daher wurde er gestoppt. Die noch wartenden Seiten wurden nicht gescannt."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Es war kein Browserfenster geöffnet, in dem Seiten gescannt werden konnten."
+  },
+  "bulkStoppedOff": {
+    "message": "Die Erweiterung ist ausgeschaltet."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Entfernte Duplikate: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Über dem Limit ausgelassen: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Weitere ausgelassene Zeilen: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Der Verlauf ist pausiert: Die Seiten werden gescannt, aber nicht gespeichert."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Sitemaps werden gelesen…"
+  },
+  "bulkNothingToScan": {
+    "message": "In dieser Liste gibt es keine Adresse zum Scannen."
+  },
+  "bulkErrBusy": {
+    "message": "Es läuft bereits ein Massenscan."
+  },
+  "bulkErrStart": {
+    "message": "Der Massenscan konnte nicht gestartet werden."
+  },
+  "bulkErrFile": {
+    "message": "Die Datei konnte nicht gelesen werden."
+  },
+  "bulkEmpty": {
+    "message": "Fügen Sie Adressen ein oder laden Sie eine Datei hoch und wählen Sie dann Starten."
   }
 }

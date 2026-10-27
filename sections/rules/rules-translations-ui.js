@@ -100,9 +100,8 @@ Rules.withLocalEdit = function(english, own, locale, typed) {
 
 /**
  * Set up a description that has a field in the UI language (detector or pattern description): in English the
- * original is edited as before; in another language the localized field shows the text in that language, the
- * original and the other languages fold under "Original (English)", and the language's own row of the Translations
- * panel is hidden (the localized field writes it).
+ * original is edited as before; in another language the localized field shows the text in that language (it writes
+ * that language's row of the Translations panel), the English original is hidden and the Translations panel stays.
  * @param {HTMLTextAreaElement} local the field in the UI language (data-local-english, -scope, -original)
  */
 Rules.prototype.setupLocalField = function(local) {
@@ -112,8 +111,13 @@ Rules.prototype.setupLocalField = function(local) {
   const original = document.getElementById(local.dataset.localOriginal);
   const locale = Rules.uiLocale();
   local.hidden = !locale;
-  original?.classList.toggle('is-plain', !locale);
-  if (original) original.open = !locale;
+  // In another language the text is edited in that language, so the English original is not shown; its Translations
+  // panel (Translate automatically, the other languages) stays, as in English
+  if (original) {
+    original.classList.toggle('is-plain', !locale);
+    original.classList.toggle('is-local', !!locale);
+    original.open = true;
+  }
   const label = local.closest('.form-group, .modal-card')?.querySelector(`label[for="${local.dataset.localEnglish}"], label[for="${local.id}"]`);
   if (label) label.htmlFor = locale ? local.id : local.dataset.localEnglish;
   scope?.querySelectorAll('.rule-translation-row').forEach((row) => {
@@ -128,6 +132,8 @@ Rules.prototype.setupLocalField = function(local) {
     if (local.dataset.edited) return;
     const own = Rules.collectTranslations(scope);
     local.value = Rules.shownText(english?.value || '', own, locale);
+    // What it says before any edit: typing it back is no change (collectChangedTexts)
+    local.dataset.initial = local.value;
     this.updateOriginalPreview(local);
   };
   show();
@@ -253,8 +259,13 @@ Rules.prototype.updateAutoTranslateButton = function(scope = methodTranslationsS
  * @param {{needsText?: string, onFill?: Function, onStatus?: Function}} [options]
  *   onFill(locale, text) for each translation, onStatus(text, busy) for the progress
  */
-Rules.prototype.autoTranslateFields = function(getScope, sourceText, { needsText, onFill, onStatus } = {}) {
+Rules.prototype.autoTranslateFields = function(getScope, sourceText, { needsText, onFill, onStatus, followsMethodItem = false } = {}) {
   const source = ruleTranslationClean(sourceText);
+  // A translation that comes back after the editor closed, another rule opened, or (for a pattern's description)
+  // Method Settings moved to another pattern belongs to what is no longer on screen: dropped
+  const editing = this.currentEditDetector;
+  const methodItem = this.currentMethodItem;
+  const stale = () => this.currentEditDetector !== editing || (followsMethodItem && this.currentMethodItem !== methodItem);
   const say = (text, busy) => {
     const scope = getScope();
     const status = scope?.querySelector('.rule-translations-status');
@@ -288,6 +299,7 @@ Rules.prototype.autoTranslateFields = function(getScope, sourceText, { needsText
       const translator = await created;
       const text = translator ? (await translator.translate(source)).trim() : source;
       if (translator && typeof translator.destroy === 'function') translator.destroy();
+      if (stale()) return;
       const input = getScope()?.querySelector(`.rule-translation-input[data-locale="${locale}"]`);
       if (input) input.value = text;
       if (onFill) onFill(locale, text);
@@ -298,6 +310,7 @@ Rules.prototype.autoTranslateFields = function(getScope, sourceText, { needsText
     }
     this.updateTranslationsCount(getScope());
   })).then(() => {
+    if (stale()) return;
     this.updateTranslationsCount(getScope());
     this.refreshLocalFields();
     say(failed
@@ -350,7 +363,7 @@ Rules.prototype.autoTranslateDetectorDescription = function() {
 
 /** Pattern settings → Description → Translations → Translate automatically. */
 Rules.prototype.autoTranslateDescription = function() {
-  return this.autoTranslateFields(methodTranslationsScope, document.querySelector('#methodDescriptionInput')?.value || '');
+  return this.autoTranslateFields(methodTranslationsScope, document.querySelector('#methodDescriptionInput')?.value || '', { followsMethodItem: true });
 };
 
 /** The greyed shipped translations follow the description as it is edited (they are looked up by its text). */

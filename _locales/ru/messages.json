@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "История заменена записями: {0}"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Экспортирована 1 запись истории"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Объединена 1 новая запись истории"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "История заменена 1 записью"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Не удалось импортировать историю: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Не найдены"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "установлен: {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "изменён один раз"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "изменений: {0}"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "последнее изменение: {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "истекает: {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "сеансовый cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "удалён: {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "истёк: {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Хронология"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Установлен"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Изменён"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Удалён"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Истёк"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Запись начнётся, когда страница установит cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Записанные ранее"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Короткий отпечаток значения: различает значения, само значение не сохраняется"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Восстановить официальные детекторы?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Тексты, ещё не переведённые на все языки: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Перевести правило"
-  },
   "ruleTranslateRuleHint": {
     "message": "Заполняет недостающие переводы описания, шаблонов и комбинаций с помощью переводчика Chrome на устройстве. Проверьте их перед сохранением."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Перевести"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Перевести изменения"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Переведено"
+  },
+  "ruleTranslateBusy": {
+    "message": "Перевод…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Все тексты этого правила переведены на все {0} языка."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "Не удалось перевести здесь {0} из {1} изменённых текстов на все языки (возможно, браузер ещё скачивает их). Ничего не потеряно: эти тексты остались как были. Попробуйте ещё раз через минуту."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Загружено: {0}. Готово языков: {1} из {2}. Браузер загружает каждый язык один раз, по одному за щелчок: нажмите «Перевести» ещё раз для следующего."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Перевод текстов: {0}…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Команда curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Откройте веб-страницу, чтобы скопировать её как код"
   },
   "detectionMdHeadingFmt": {
     "message": "Защиты на {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Проверка…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Откройте окно расширения на сайте, чтобы создать по нему правило."
+  },
+  "suggestRuleExactName": {
+    "message": "Ищется по точному имени"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Имена, начинающиеся с {0}: остальное похоже на случайный набор"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Адреса скриптов, которые это содержат: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Уже обнаруживается правилом {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Чтение страницы…"
+  },
+  "suggestRuleError": {
+    "message": "Не удалось прочитать страницу. Перезагрузите её и попробуйте снова."
+  },
+  "suggestRuleOutdated": {
+    "message": "Расширение обновлено, но его фоновая часть всё ещё работает в старой версии. Перезагрузите расширение на странице «Расширения» в браузере и попробуйте снова."
+  },
+  "pagePickButton": {
+    "message": "С этой страницы"
+  },
+  "pagePickAddFmt": {
+    "message": "Добавить {0}"
+  },
+  "pagePickInRule": {
+    "message": "уже в правиле"
+  },
+  "suggestRuleFilter": {
+    "message": "Фильтр"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Уже обнаружено: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "начинается с"
+  },
+  "suggestRuleNoCookies": {
+    "message": "У страницы нет файлов cookie."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Нет скриптов с других сайтов."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Нет заголовков ответа: перезагрузите страницу, чтобы их получить."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Правило находит совпадения на {0} (достоверность {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Смена языка перезагрузит расширение. Сначала сохранить изменения настроек?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Перевести изменения"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Тексты, изменённые на языке {0}: {1}. Другие языки пока показывают старый текст."
   },
   "ruleTranslateChangesHint": {
     "message": "Переводит написанное на английский (оригинал) и другие языки встроенным переводчиком браузера. Проверьте перед сохранением."
+  },
+  "combinationOneCount": {
+    "message": "1 комбинация"
+  },
+  "combinationsCountFmt": {
+    "message": "Комбинаций: {0}"
+  },
+  "historyBulkScan": {
+    "message": "Массовое сканирование"
+  },
+  "bulkTitle": {
+    "message": "Массовое сканирование"
+  },
+  "bulkSubtitle": {
+    "message": "Сканирует список страниц по одной в фоновой вкладке. Каждая страница — настоящее посещение с файлами cookie вашего браузера, а найденное, как обычно, попадает в историю."
+  },
+  "bulkInputLabel": {
+    "message": "Страницы для сканирования"
+  },
+  "bulkInputHint": {
+    "message": "Один адрес в строке. Адрес карты сайта (.xml) добавляет перечисленные в ней страницы. Дубликаты удаляются, сканируются только страницы http и https."
+  },
+  "bulkUpload": {
+    "message": "Загрузить .txt или .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Адресов: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Страниц за запуск (не больше {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Лимит времени на страницу, в секундах"
+  },
+  "bulkStart": {
+    "message": "Запустить"
+  },
+  "bulkPause": {
+    "message": "Приостановить"
+  },
+  "bulkResume": {
+    "message": "Продолжить"
+  },
+  "bulkStop": {
+    "message": "Остановить"
+  },
+  "bulkScanWaiting": {
+    "message": "Сканировать страницы, которые ещё ждут"
+  },
+  "bulkNewList": {
+    "message": "Новый список"
+  },
+  "bulkResults": {
+    "message": "Результаты"
+  },
+  "bulkColAddress": {
+    "message": "Адрес"
+  },
+  "bulkStatusWaiting": {
+    "message": "Ожидает"
+  },
+  "bulkStatusScanning": {
+    "message": "Сканируется"
+  },
+  "bulkStatusDone": {
+    "message": "Готово"
+  },
+  "bulkStatusFailed": {
+    "message": "Сбой"
+  },
+  "bulkStatusSkipped": {
+    "message": "Пропущена"
+  },
+  "bulkReasonInvalid": {
+    "message": "Недопустимый адрес"
+  },
+  "bulkReasonScheme": {
+    "message": "Сканируются только страницы http и https"
+  },
+  "bulkReasonScope": {
+    "message": "Пропущена по настройке Настройки → Обнаружение → Сайты для сканирования"
+  },
+  "bulkReasonSitemap": {
+    "message": "Не удалось прочитать карту сайта. Читаются только карты сайта по https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Нет результата за отведённое время"
+  },
+  "bulkReasonLoad": {
+    "message": "Страница не загрузилась"
+  },
+  "bulkReasonError": {
+    "message": "Сканирование не удалось"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Завершилась на {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Защита не найдена"
+  },
+  "bulkRunRunning": {
+    "message": "Выполняется"
+  },
+  "bulkRunPaused": {
+    "message": "Приостановлено"
+  },
+  "bulkRunStopped": {
+    "message": "Остановлено"
+  },
+  "bulkRunDone": {
+    "message": "Завершено"
+  },
+  "bulkProgressFmt": {
+    "message": "Готово {0} из {1}"
+  },
+  "bulkCountsFmt": {
+    "message": "Готово: {0} · С защитой: {1} · Сбой: {2} · Пропущено: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Расширение перезапустилось во время запуска, поэтому он остановлен. Страницы, которые ещё ждали, не просканированы."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Не было открытого окна браузера, в котором можно сканировать страницы."
+  },
+  "bulkStoppedOff": {
+    "message": "Расширение выключено."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Удалено дубликатов: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Не вошло сверх лимита: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Других пропущенных строк: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "История приостановлена: страницы сканируются, но не записываются."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Чтение карт сайта…"
+  },
+  "bulkNothingToScan": {
+    "message": "В этом списке нет адресов для сканирования."
+  },
+  "bulkErrBusy": {
+    "message": "Массовое сканирование уже выполняется."
+  },
+  "bulkErrStart": {
+    "message": "Не удалось запустить массовое сканирование."
+  },
+  "bulkErrFile": {
+    "message": "Не удалось прочитать файл."
+  },
+  "bulkEmpty": {
+    "message": "Вставьте адреса или загрузите файл, затем нажмите «Запустить»."
   }
 }

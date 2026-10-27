@@ -1,0 +1,301 @@
+/* ============================================
+   Rules editor → Cookies, Headers and Url: "From this page"
+   (rules-suggest-ui.js). A button beside Add Pattern and, under it,
+   a folded list of the page's items to tick and add as patterns.
+   Logical properties only, so it mirrors in right-to-left languages.
+   ============================================ */
+
+/* The row's button: a quiet icon like settings and delete, green on hover (it brings something in) */
+#editRuleModal .method-action-btn.page-pick-btn {
+  color: var(--success-light);
+}
+
+#editRuleModal .method-action-btn.page-pick-btn:hover:not([aria-disabled="true"]),
+#editRuleModal .method-action-btn.page-pick-btn[aria-expanded="true"] {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+#editRuleModal .method-action-btn.page-pick-btn:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 1px;
+}
+
+/* Focusable, so its title still says why: a page the extension cannot read */
+#editRuleModal .method-action-btn.page-pick-btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.method-section.collapsed .page-pick-panel {
+  display: none;
+}
+
+/* The list's own tokens (the rule editor is not a .rh-modal) */
+.page-pick-panel {
+  --rh-border: var(--border);
+  --rh-border-hover: var(--g-5c5c5c);
+  --rh-field-bg: var(--g-262626);
+  --rh-card-hover: var(--g-383838);
+  --rh-text: var(--g-e0e0e0);
+  --rh-text-dim: var(--g-b3b3b3);
+  --rh-text-muted: var(--g-8f8f8f);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  border-radius: 8px;
+}
+
+.page-pick-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.page-pick-message {
+  margin: 0;
+  padding: 4px 2px;
+  font-size: 11.5px;
+  line-height: 16px;
+  color: var(--rh-text-dim);
+}
+
+.page-pick-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.page-pick-actions button {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.page-pick-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.page-pick-cancel:hover {
+  border-color: var(--g-5c5c5c);
+  color: var(--text-primary);
+}
+
+.page-pick-add {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: white;
+}
+
+.page-pick-add:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.page-pick-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sr-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--rh-field-bg);
+  border: 1px solid var(--rh-border);
+  border-radius: 6px;
+  color: var(--rh-text);
+  font-size: 12px;
+  outline: none;
+}
+
+.sr-input:hover:not(:focus) {
+  border-color: var(--rh-border-hover);
+}
+
+.sr-input:focus {
+  border-color: var(--accent);
+}
+
+.sr-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.sr-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding-inline-start: 30px;
+  background: var(--rh-field-bg) no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238f8f8f' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4.5 4.5'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-position: left 10px center;
+}
+
+[dir="rtl"] .sr-filter {
+  background-position: right 10px center;
+}
+
+.sr-filter::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+/* One bordered block per group, rows split by a hairline */
+.sr-group {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rh-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--rh-field-bg);
+}
+
+.sr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 10px;
+  text-align: start;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.sr-row + .sr-row {
+  border-top: 1px solid var(--rh-border);
+}
+
+.sr-row[hidden] {
+  display: none;
+}
+
+.sr-row:hover {
+  background: var(--rh-card-hover);
+}
+
+/* A tick box drawn like the rest of the interface (as History's), not the browser's square */
+.sr-check {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  background: transparent center / 11px no-repeat;
+  border: 1px solid var(--g-5c5c5c);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.sr-row:hover .sr-check {
+  border-color: var(--accent);
+}
+
+.sr-check:checked {
+  background-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E");
+  border-color: var(--accent);
+}
+
+.sr-check:focus-visible {
+  outline: none;
+}
+
+.sr-row:has(.sr-check:checked) {
+  background: rgba(59, 130, 246, 0.14);
+}
+
+.sr-row:has(.sr-check:focus-visible) {
+  outline: 2px solid var(--accent-light);
+  outline-offset: -2px;
+}
+
+.sr-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--rh-text);
+}
+
+.sr-tag {
+  flex-shrink: 1;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px 6px;
+  border: 1px solid var(--rh-border);
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--rh-text-dim);
+}
+
+.sr-tag.is-known {
+  border-color: transparent;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success-light);
+}
+
+/* Already detected by an installed rule: folded, quieter */
+.sr-known {
+  margin-top: 6px;
+}
+
+.sr-known > summary {
+  width: fit-content;
+  padding: 2px 1px;
+  font-size: 11px;
+  color: var(--rh-text-muted);
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.sr-known > summary:hover {
+  color: var(--rh-text-dim);
+}
+
+.sr-known > summary:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.sr-known[open] > summary {
+  margin-bottom: 6px;
+}
+
+.sr-row.is-known:not(:has(.sr-check:checked)) .sr-name {
+  color: var(--rh-text-dim);
+}
+
+/* Already a pattern of this rule: shown, not offered again */
+.sr-row.is-in-rule {
+  cursor: default;
+}
+
+.sr-row.is-in-rule .sr-check {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.sr-tag.is-in-rule {
+  border-color: transparent;
+  background: rgba(59, 130, 246, 0.14);
+  color: var(--accent-light);
+}

@@ -5,6 +5,47 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.6] - 2026-10-26
+
+### Added
+
+- New protections: Fastly Bot Management (anti-bot), Kount and Riskified (fraud scripts, filed under anti-bot) and Lemin Cropped Captcha.
+- Advanced → Check Cookies: a timeline per protection cookie shows when it was set, how often it changed and when it expires (kept in memory only).
+- Detection → Copy: curl command and Python (requests) that request the page again with this browser's headers and cookies, naming the protection cookies.
+- Rules editor: each Cookies, Headers and Url pattern has a From this page button listing the open page's cookies, response headers or scripts to fill it, marking what a rule already detects.
+- Bulk scan (History → ⋯ menu): scan a pasted list, a file or a sitemap of up to 200 pages in a background tab, with live results, CSV/JSON export and History recording.
+- Akamai recognises its crypto challenge, Cloudflare its challenge cookies, F5 its client-side challenge cookie, and FingerprintJS now also spots BotD and its current script addresses.
+
+### Changed
+
+- Rules editor: the folded Combinations card says how many combinations the rule has ("4 combinations"), like the patterns card.
+- Rules editor: a Translate button in the header, always there, counts the description, pattern and combination texts left to translate and fills them; it replaces the bar above the editor and the per-text Translations panels.
+- Rules editor: languages the browser has not downloaded yet download one per click (the browser allows one per click), with a notice saying how many are ready.
+- Rules editor in another language: texts are edited in that language only; the English original is no longer shown under them.
+- Netacea scores its cookie once, so a page that sets and sends it back no longer looks more certain than it is.
+- Webhook: a server that does not answer within 10 seconds counts as a failed delivery (and is retried) instead of holding up the scan; private-window pages are never sent.
+- Rules: a custom pattern that could freeze scanning on long pages is refused when you save it.
+
+### Fixed
+
+- After a page served from the cache, the next page you open keeps its headers and cookies as evidence (Cloudflare and Akamai header rules could miss it).
+- A page served from the cache no longer leaves a scan running in the background for minutes.
+- Pages restored with Back or Forward, and pages Chrome loaded ahead of time, show their badge again; a preloaded page no longer wipes the captured data of the page you are on.
+- Clear Cache keeps the tab's captured headers and cookies, so the next scan without a reload is as complete as before.
+- Private windows: cookie rules read the private window's own cookies.
+- Headers and cookies are matched to the page's exact site, not to any address that contains its name.
+- Faster scans on large pages and pages that send big requests.
+- History: a page title containing quotes can no longer change how its card looks; webhook header values with quotes are no longer cut short when saved again.
+- Rules editor: closing it with ✕, Escape or a click outside asks before discarding any change (deleted patterns, icon, conditions, translations), not only typed text; a translation that finishes late no longer lands in the next rule.
+- Rules editor: changing only an official rule's icon marks it as edited, so Rules → Update keeps your icon.
+- Settings: Escape in Template variables closes only that window; an empty number field shows an error instead of saving nothing; the webhook method buttons react once per click.
+- History and Detection keep the page you are on when the list refreshes, and an open detection's details stay open when late evidence arrives.
+- Advanced: a tool card redrawn while its tool is reloading the page shows it is busy instead of ignoring clicks; one bad capture address no longer empties Advanced → History.
+- Keyboard: History cards, pattern types, condition options and icon tiles can be reached with Tab; page arrows have names and point the right way in Arabic.
+- Rules editor: Translate changes no longer wipes translations when the browser cannot translate some languages yet (the text stays as it was), and a change typed back as it was no longer counts.
+- Rules editor in English: the empty second description box (left over from 3.0.5's editing in your language) no longer shows.
+- "1 history item" instead of "1 history items"; Clear All leaves Select mode; Detection keeps refreshing after an error.
+
 ## [3.0.5] - 2026-10-26
 
 ### Added
@@ -695,6 +736,7 @@ Each line says what changed for the user. Technical detail lives in the commit h
 - Incomplete HTML escaping in Advanced capture details.
 - Repeated favicon 404 errors in the console.
 
+[3.0.6]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.5...v3.0.6
 [3.0.5]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.4...v3.0.5
 [3.0.4]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.3...v3.0.4
 [3.0.3]: https://github.com/scrapfly/Antibot-Detector/compare/v3.0.2...v3.0.3

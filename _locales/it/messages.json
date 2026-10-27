@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Cronologia sostituita con {0} voci"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Esportata 1 voce della cronologia"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Unita 1 nuova voce della cronologia"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Cronologia sostituita con 1 voce"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Impossibile importare la cronologia: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Non trovati"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "impostato {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "cambiato una volta"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "cambiato {0} volte"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "ultima modifica {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "scade {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "cookie di sessione"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "rimosso {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "scaduto {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Cronologia"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Impostato"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Cambiato"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Rimosso"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Scaduto"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "La registrazione inizia quando la pagina imposta il cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Registrati in precedenza"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Impronta breve del valore: distingue i valori, non salva mai il valore"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Ripristinare i rilevatori ufficiali?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Testi non ancora tradotti in tutte le lingue: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Traduci la regola"
-  },
   "ruleTranslateRuleHint": {
     "message": "Compila le traduzioni mancanti di descrizione, pattern e combinazioni con il traduttore di Chrome sul dispositivo. Controllale prima di salvare."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Traduci"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Traduci modifiche"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Tradotta"
+  },
+  "ruleTranslateBusy": {
+    "message": "Traduzione…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Tutti i testi di questa regola sono tradotti in tutte le {0} lingue."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "Non è stato possibile tradurre qui {0} dei {1} testi modificati in tutte le lingue (il browser potrebbe ancora scaricarle). Non si è perso nulla: quei testi sono rimasti com’erano. Riprova tra un momento."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Scaricato: {0}. {1} lingue pronte su {2}. Il browser scarica ogni lingua una sola volta, una per clic: fai di nuovo clic su Traduci per la successiva."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Traduzione di {0} testi…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Comando curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Apri una pagina web per copiarla come codice"
   },
   "detectionMdHeadingFmt": {
     "message": "Protezioni su {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Prova in corso…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Apri il popup su un sito web per crearne una regola."
+  },
+  "suggestRuleExactName": {
+    "message": "Cercato per nome esatto"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Nomi che iniziano con {0}: il resto sembra casuale"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Indirizzi di script che lo contengono: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Già rilevato da {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Lettura della pagina…"
+  },
+  "suggestRuleError": {
+    "message": "Impossibile leggere la pagina. Ricaricala e riprova."
+  },
+  "suggestRuleOutdated": {
+    "message": "L’estensione è stata aggiornata, ma la sua parte in background usa ancora la versione precedente. Ricarica l’estensione dalla pagina Estensioni del browser e riprova."
+  },
+  "pagePickButton": {
+    "message": "Da questa pagina"
+  },
+  "pagePickAddFmt": {
+    "message": "Aggiungi {0}"
+  },
+  "pagePickInRule": {
+    "message": "già nella regola"
+  },
+  "suggestRuleFilter": {
+    "message": "Filtra"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Già rilevati: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "inizia con"
+  },
+  "suggestRuleNoCookies": {
+    "message": "La pagina non ha cookie."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Nessuno script da altri siti."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Nessuna intestazione di risposta: ricarica la pagina per acquisirle."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "La regola corrisponde a {0} (confidenza {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Cambiare lingua ricarica l'estensione. Salvare prima le modifiche alle impostazioni?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Traduci le modifiche"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Testi modificati in {0}: {1}. Le altre lingue mostrano ancora il testo precedente."
   },
   "ruleTranslateChangesHint": {
     "message": "Traduce quello che hai scritto in inglese (l'originale) e nelle altre lingue con il traduttore integrato del browser. Controllali prima di salvare."
+  },
+  "combinationOneCount": {
+    "message": "1 combinazione"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} combinazioni"
+  },
+  "historyBulkScan": {
+    "message": "Analisi in blocco"
+  },
+  "bulkTitle": {
+    "message": "Analisi in blocco"
+  },
+  "bulkSubtitle": {
+    "message": "Analizza un elenco di pagine una alla volta in una scheda in background. Ogni pagina è una visita reale con i cookie del tuo browser, e ciò che trova viene aggiunto alla cronologia come sempre."
+  },
+  "bulkInputLabel": {
+    "message": "Pagine da analizzare"
+  },
+  "bulkInputHint": {
+    "message": "Un indirizzo per riga. Un indirizzo di sitemap (.xml) aggiunge le pagine che elenca. I duplicati vengono rimossi e si analizzano solo pagine http e https."
+  },
+  "bulkUpload": {
+    "message": "Carica .txt o .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Indirizzi: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Pagine per esecuzione (fino a {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Tempo massimo per pagina, in secondi"
+  },
+  "bulkStart": {
+    "message": "Avvia"
+  },
+  "bulkPause": {
+    "message": "Pausa"
+  },
+  "bulkResume": {
+    "message": "Riprendi"
+  },
+  "bulkStop": {
+    "message": "Interrompi"
+  },
+  "bulkScanWaiting": {
+    "message": "Analizza le pagine ancora in attesa"
+  },
+  "bulkNewList": {
+    "message": "Nuovo elenco"
+  },
+  "bulkResults": {
+    "message": "Risultati"
+  },
+  "bulkColAddress": {
+    "message": "Indirizzo"
+  },
+  "bulkStatusWaiting": {
+    "message": "In attesa"
+  },
+  "bulkStatusScanning": {
+    "message": "In analisi"
+  },
+  "bulkStatusDone": {
+    "message": "Fatto"
+  },
+  "bulkStatusFailed": {
+    "message": "Non riuscita"
+  },
+  "bulkStatusSkipped": {
+    "message": "Saltata"
+  },
+  "bulkReasonInvalid": {
+    "message": "Indirizzo non valido"
+  },
+  "bulkReasonScheme": {
+    "message": "Si analizzano solo pagine http e https"
+  },
+  "bulkReasonScope": {
+    "message": "Saltata da Impostazioni → Rilevamento → Siti da analizzare"
+  },
+  "bulkReasonSitemap": {
+    "message": "Impossibile leggere la sitemap. Si possono leggere solo sitemap https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Nessun risultato entro il tempo massimo"
+  },
+  "bulkReasonLoad": {
+    "message": "La pagina non si è caricata"
+  },
+  "bulkReasonError": {
+    "message": "L’analisi non è riuscita"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Terminata su {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Nessuna protezione trovata"
+  },
+  "bulkRunRunning": {
+    "message": "In corso"
+  },
+  "bulkRunPaused": {
+    "message": "In pausa"
+  },
+  "bulkRunStopped": {
+    "message": "Interrotta"
+  },
+  "bulkRunDone": {
+    "message": "Completata"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} di {1} completate"
+  },
+  "bulkCountsFmt": {
+    "message": "Fatte: {0} · Con protezioni: {1} · Non riuscite: {2} · Saltate: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "L’estensione si è riavviata durante l’esecuzione, che quindi si è interrotta. Le pagine ancora in attesa non sono state analizzate."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Non c’era nessuna finestra del browser aperta in cui analizzare le pagine."
+  },
+  "bulkStoppedOff": {
+    "message": "L’estensione è disattivata."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Duplicati rimossi: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Escluse oltre il limite: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Altre righe escluse: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "La cronologia è in pausa: le pagine vengono analizzate ma non registrate."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Lettura delle sitemap…"
+  },
+  "bulkNothingToScan": {
+    "message": "In questo elenco non c’è nessun indirizzo da analizzare."
+  },
+  "bulkErrBusy": {
+    "message": "Un’analisi in blocco è già in corso."
+  },
+  "bulkErrStart": {
+    "message": "Impossibile avviare l’analisi in blocco."
+  },
+  "bulkErrFile": {
+    "message": "Impossibile leggere il file."
+  },
+  "bulkEmpty": {
+    "message": "Incolla degli indirizzi o carica un file, poi scegli Avvia."
   }
 }

@@ -143,6 +143,7 @@ class Rules {
       addBtn.addEventListener('click', () => this.handleAddDetector());
     }
 
+
     // Update button - checks for updates or applies pending ones
     const checkUpdatesBtn = document.querySelector('#checkUpdatesBtn');
     if (checkUpdatesBtn) {

@@ -111,7 +111,7 @@ Rules.prototype.populateDetectionMethods = function(detector) {
       methodsHtml += `
         <div class="method-section collapsed" data-method-type="${methodType}">
           <div class="method-header">
-            <div class="method-header-left">
+            <div class="method-header-left" role="button" tabindex="0" aria-expanded="false">
               <svg class="method-collapse-icon" width="16" height="16" viewBox="0 0 24 24">
                 <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" fill="currentColor"/>
               </svg>
@@ -345,6 +345,8 @@ Rules.prototype.populateDetectionMethods = function(detector) {
       this.updateMethodSectionPagination(section);
     });
     this.updateAllAddPatternButtonStates();
+    // Cookies, Headers and Url: a "From this page" button on each pattern row (rules-suggest-ui.js)
+    if (typeof this.addPagePickButtons === 'function') this.addPagePickButtons(container);
 
     const searchInputs = container.querySelectorAll('.method-search-input');
     searchInputs.forEach(input => {
@@ -685,6 +687,7 @@ Rules.prototype.revealAndFocusInvalidRow = function(invalidRow) {
 
     this.revealEditorCard(section);
     section.classList.remove('collapsed');
+    section.querySelector('.method-header-left[role="button"]')?.setAttribute('aria-expanded', 'true');
 
     const methodType = invalidRow.methodType || this.getMethodSectionType(section);
     const searchInput = section.querySelector('.method-search-input');
@@ -821,6 +824,8 @@ Rules.prototype.addNewMethodItem = function(button) {
     }
     this.updateMethodSectionPagination(methodSection, { goToLastPage: true });
     this.updateAddPatternButtonState(methodSection);
+    // Cookies, Headers and Url: the row's "From this page" button (rules-suggest-ui.js)
+    if (typeof this.decoratePagePickRow === 'function') this.decoratePagePickRow(methodItems.lastElementChild);
   };
 
 Rules.prototype.addNewMethodSection = function() {
@@ -1280,7 +1285,12 @@ Rules.prototype.saveRule = async function() {
     Logger.debug('UI', 'Saving rule for:', draft.detector.displayName);
 
     const originalDetection = draft.originalDetection || {};
-    const metadataChanged = ['name', 'author', 'customIcon', 'difficulty', 'description'].some(field =>
+    // The icon picker writes its choice into edit.detector as well, so the icon is compared with the rule as it was
+    // opened (edit.original): an icon-only change still marks an official rule as edited
+    const before = edit.original || edit.detector;
+    const iconChanged = (draft.detector.icon ?? null) !== (before.icon ?? null)
+      || (draft.detector.customIcon || null) !== (before.customIcon || null);
+    const metadataChanged = iconChanged || ['name', 'author', 'customIcon', 'difficulty', 'description'].some(field =>
       draft.detector[field] !== edit.detector[field]) || draft.category !== (edit.originalCategory || edit.category)
       || JSON.stringify(draft.detector.descriptionI18n || null) !== JSON.stringify(edit.detector.descriptionI18n || null);
     const hasChanges = draft.isNew || metadataChanged ||

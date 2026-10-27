@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Riwayat diganti dengan {0} item"
   },
+  "notificationHistoryExportedOne": {
+    "message": "1 item riwayat diekspor"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "1 item riwayat baru digabungkan"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Riwayat diganti dengan 1 item"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Gagal mengimpor riwayat: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Tidak ditemukan"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "dipasang {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "berubah sekali"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "berubah {0} kali"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "perubahan terakhir {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "kedaluwarsa {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "cookie sesi"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "dihapus {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "kedaluwarsa {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Linimasa"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Dipasang"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Berubah"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Dihapus"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Kedaluwarsa"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Perekaman dimulai saat halaman memasang cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Terekam sebelumnya"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Sidik jari pendek dari nilai: membedakan nilai, tidak pernah menyimpan nilainya"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Pulihkan detektor resmi?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Teks yang belum diterjemahkan ke semua bahasa: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Terjemahkan aturan"
-  },
   "ruleTranslateRuleHint": {
     "message": "Mengisi terjemahan yang hilang untuk deskripsi, pola, dan kombinasi dengan penerjemah di perangkat milik Chrome. Periksa sebelum menyimpan."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Terjemahkan"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Terjemahkan perubahan"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Diterjemahkan"
+  },
+  "ruleTranslateBusy": {
+    "message": "Menerjemahkan…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Semua teks aturan ini sudah diterjemahkan ke semua {0} bahasa."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{0} dari {1} teks yang diubah tidak dapat diterjemahkan ke semua bahasa di sini (browser mungkin masih mengunduhnya). Tidak ada yang hilang: teks tersebut tetap seperti semula. Coba lagi sebentar lagi."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Diunduh: {0}. {1} dari {2} bahasa siap. Browser mengunduh tiap bahasa sekali, satu per klik: klik Terjemahkan lagi untuk berikutnya."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Menerjemahkan {0} teks…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Perintah curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Buka halaman web untuk menyalinnya sebagai kode"
   },
   "detectionMdHeadingFmt": {
     "message": "Proteksi di {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Menguji…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Buka popup di sebuah situs web untuk membuat aturan darinya."
+  },
+  "suggestRuleExactName": {
+    "message": "Dicari berdasarkan nama persisnya"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Nama yang diawali {0}: sisanya tampak acak"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Alamat skrip yang memuat ini: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Sudah dideteksi oleh {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Membaca halaman…"
+  },
+  "suggestRuleError": {
+    "message": "Halaman tidak dapat dibaca. Muat ulang lalu coba lagi."
+  },
+  "suggestRuleOutdated": {
+    "message": "Ekstensi sudah diperbarui, tetapi bagian latar belakangnya masih menjalankan versi lama. Muat ulang ekstensi di halaman Ekstensi browser, lalu coba lagi."
+  },
+  "pagePickButton": {
+    "message": "Dari halaman ini"
+  },
+  "pagePickAddFmt": {
+    "message": "Tambahkan {0}"
+  },
+  "pagePickInRule": {
+    "message": "sudah di aturan"
+  },
+  "suggestRuleFilter": {
+    "message": "Saring"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Sudah terdeteksi: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "diawali"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Halaman ini tidak memiliki cookie."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Tidak ada skrip dari situs lain."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Tidak ada header respons: muat ulang halaman untuk menangkapnya."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Aturan cocok dengan {0} (kepercayaan {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Mengganti bahasa akan memuat ulang ekstensi. Simpan perubahan pengaturan terlebih dahulu?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Terjemahkan perubahan"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Teks yang Anda ubah dalam {0}: {1}. Bahasa lain masih menampilkan teks lama."
   },
   "ruleTranslateChangesHint": {
     "message": "Menerjemahkan yang Anda tulis ke bahasa Inggris (aslinya) dan ke bahasa lain dengan penerjemah bawaan browser. Periksa sebelum menyimpan."
+  },
+  "combinationOneCount": {
+    "message": "1 kombinasi"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} kombinasi"
+  },
+  "historyBulkScan": {
+    "message": "Pindai massal"
+  },
+  "bulkTitle": {
+    "message": "Pindai massal"
+  },
+  "bulkSubtitle": {
+    "message": "Memindai daftar halaman satu per satu di tab latar belakang. Setiap halaman adalah kunjungan sungguhan dengan cookie browser Anda, dan temuannya ditambahkan ke Riwayat seperti biasa."
+  },
+  "bulkInputLabel": {
+    "message": "Halaman yang dipindai"
+  },
+  "bulkInputHint": {
+    "message": "Satu alamat per baris. Alamat peta situs (.xml) menambahkan halaman yang dicantumkannya. Duplikat dihapus, dan hanya halaman http dan https yang dipindai."
+  },
+  "bulkUpload": {
+    "message": "Unggah .txt atau .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Alamat: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Halaman per putaran (hingga {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Batas waktu per halaman, dalam detik"
+  },
+  "bulkStart": {
+    "message": "Mulai"
+  },
+  "bulkPause": {
+    "message": "Jeda"
+  },
+  "bulkResume": {
+    "message": "Lanjutkan"
+  },
+  "bulkStop": {
+    "message": "Hentikan"
+  },
+  "bulkScanWaiting": {
+    "message": "Pindai halaman yang masih menunggu"
+  },
+  "bulkNewList": {
+    "message": "Daftar baru"
+  },
+  "bulkResults": {
+    "message": "Hasil"
+  },
+  "bulkColAddress": {
+    "message": "Alamat"
+  },
+  "bulkStatusWaiting": {
+    "message": "Menunggu"
+  },
+  "bulkStatusScanning": {
+    "message": "Memindai"
+  },
+  "bulkStatusDone": {
+    "message": "Selesai"
+  },
+  "bulkStatusFailed": {
+    "message": "Gagal"
+  },
+  "bulkStatusSkipped": {
+    "message": "Dilewati"
+  },
+  "bulkReasonInvalid": {
+    "message": "Bukan alamat yang valid"
+  },
+  "bulkReasonScheme": {
+    "message": "Hanya halaman http dan https yang dipindai"
+  },
+  "bulkReasonScope": {
+    "message": "Dilewati oleh Pengaturan → Deteksi → Situs yang dipindai"
+  },
+  "bulkReasonSitemap": {
+    "message": "Peta situs tidak dapat dibaca. Hanya peta situs https yang dapat dibaca."
+  },
+  "bulkReasonTimeout": {
+    "message": "Tidak ada hasil dalam batas waktu"
+  },
+  "bulkReasonLoad": {
+    "message": "Halaman tidak termuat"
+  },
+  "bulkReasonError": {
+    "message": "Pemindaian gagal"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Berakhir di {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Tidak ada perlindungan ditemukan"
+  },
+  "bulkRunRunning": {
+    "message": "Berjalan"
+  },
+  "bulkRunPaused": {
+    "message": "Dijeda"
+  },
+  "bulkRunStopped": {
+    "message": "Dihentikan"
+  },
+  "bulkRunDone": {
+    "message": "Selesai"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} dari {1} selesai"
+  },
+  "bulkCountsFmt": {
+    "message": "Selesai: {0} · Dengan perlindungan: {1} · Gagal: {2} · Dilewati: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Ekstensi dimulai ulang selama putaran, jadi putaran dihentikan. Halaman yang masih menunggu tidak dipindai."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Tidak ada jendela browser yang terbuka untuk memindai halaman."
+  },
+  "bulkStoppedOff": {
+    "message": "Ekstensi dinonaktifkan."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Duplikat dihapus: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Tidak diikutkan karena melebihi batas: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Baris lain yang tidak diikutkan: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Riwayat sedang dijeda: halaman dipindai tetapi tidak dicatat."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Membaca peta situs…"
+  },
+  "bulkNothingToScan": {
+    "message": "Tidak ada alamat untuk dipindai dalam daftar ini."
+  },
+  "bulkErrBusy": {
+    "message": "Pindai massal sudah berjalan."
+  },
+  "bulkErrStart": {
+    "message": "Pindai massal tidak dapat dimulai."
+  },
+  "bulkErrFile": {
+    "message": "File tidak dapat dibaca."
+  },
+  "bulkEmpty": {
+    "message": "Tempel alamat atau unggah file, lalu pilih Mulai."
   }
 }

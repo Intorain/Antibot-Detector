@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Історію замінено записами: {0}"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Експортовано 1 запис історії"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Об’єднано 1 новий запис історії"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Історію замінено 1 записом"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Не вдалося імпортувати історію: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Не знайдено"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "встановлено: {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "змінено один раз"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "змін: {0}"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "остання зміна: {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "спливає: {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "сеансовий cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "видалено: {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "сплив: {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Хронологія"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Встановлено"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Змінено"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Видалено"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Сплив"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Запис почнеться, коли сторінка встановить cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Записані раніше"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Короткий відбиток значення: розрізняє значення, саме значення не зберігається"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Відновити офіційні детектори?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Тексти, ще не перекладені всіма мовами: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Перекласти правило"
-  },
   "ruleTranslateRuleHint": {
     "message": "Заповнює відсутні переклади опису, шаблонів і комбінацій за допомогою перекладача Chrome на пристрої. Перевірте їх перед збереженням."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Перекласти"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Перекласти зміни"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Перекладено"
+  },
+  "ruleTranslateBusy": {
+    "message": "Переклад…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Усі тексти цього правила перекладено всіма {0} мовами."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "Не вдалося перекласти тут {0} з {1} змінених текстів усіма мовами (можливо, браузер ще їх завантажує). Нічого не втрачено: ці тексти лишилися як були. Спробуйте ще раз за хвилину."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Завантажено: {0}. Готово мов: {1} з {2}. Браузер завантажує кожну мову один раз, по одній за клацання: натисніть «Перекласти» ще раз для наступної."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Переклад текстів: {0}…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Команда curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Відкрийте вебсторінку, щоб скопіювати її як код"
   },
   "detectionMdHeadingFmt": {
     "message": "Захист на {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Перевірка…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Відкрийте спливне вікно на сайті, щоб створити з нього правило."
+  },
+  "suggestRuleExactName": {
+    "message": "Шукається за точною назвою"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Назви, що починаються з {0}: решта схожа на випадковий набір"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Адреси скриптів, які це містять: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Уже виявляє {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Читання сторінки…"
+  },
+  "suggestRuleError": {
+    "message": "Не вдалося прочитати сторінку. Перезавантажте її й спробуйте ще раз."
+  },
+  "suggestRuleOutdated": {
+    "message": "Розширення оновлено, але його фонова частина досі працює в старій версії. Перезавантажте розширення на сторінці «Розширення» в браузері й спробуйте ще раз."
+  },
+  "pagePickButton": {
+    "message": "З цієї сторінки"
+  },
+  "pagePickAddFmt": {
+    "message": "Додати {0}"
+  },
+  "pagePickInRule": {
+    "message": "уже в правилі"
+  },
+  "suggestRuleFilter": {
+    "message": "Фільтр"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Уже виявлено: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "починається з"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Сторінка не має файлів cookie."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Немає скриптів з інших сайтів."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Немає заголовків відповіді: перезавантажте сторінку, щоб їх отримати."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Правило збігається на {0} (впевненість {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Зміна мови перезавантажить розширення. Спершу зберегти зміни налаштувань?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Перекласти зміни"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Тексти, змінені мовою {0}: {1}. Інші мови досі показують старий текст."
   },
   "ruleTranslateChangesHint": {
     "message": "Перекладає написане англійською (оригінал) та іншими мовами вбудованим перекладачем браузера. Перевірте перед збереженням."
+  },
+  "combinationOneCount": {
+    "message": "1 комбінація"
+  },
+  "combinationsCountFmt": {
+    "message": "Комбінацій: {0}"
+  },
+  "historyBulkScan": {
+    "message": "Масове сканування"
+  },
+  "bulkTitle": {
+    "message": "Масове сканування"
+  },
+  "bulkSubtitle": {
+    "message": "Сканує список сторінок по одній у фоновій вкладці. Кожна сторінка — справжній візит із файлами cookie вашого браузера, а знайдене, як завжди, потрапляє до історії."
+  },
+  "bulkInputLabel": {
+    "message": "Сторінки для сканування"
+  },
+  "bulkInputHint": {
+    "message": "Одна адреса в рядку. Адреса карти сайту (.xml) додає сторінки, перелічені в ній. Дублікати вилучаються, скануються лише сторінки http і https."
+  },
+  "bulkUpload": {
+    "message": "Завантажити .txt або .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Адрес: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Сторінок за запуск (не більше {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Ліміт часу на сторінку, у секундах"
+  },
+  "bulkStart": {
+    "message": "Запустити"
+  },
+  "bulkPause": {
+    "message": "Призупинити"
+  },
+  "bulkResume": {
+    "message": "Продовжити"
+  },
+  "bulkStop": {
+    "message": "Зупинити"
+  },
+  "bulkScanWaiting": {
+    "message": "Сканувати сторінки, які ще чекають"
+  },
+  "bulkNewList": {
+    "message": "Новий список"
+  },
+  "bulkResults": {
+    "message": "Результати"
+  },
+  "bulkColAddress": {
+    "message": "Адреса"
+  },
+  "bulkStatusWaiting": {
+    "message": "Чекає"
+  },
+  "bulkStatusScanning": {
+    "message": "Сканується"
+  },
+  "bulkStatusDone": {
+    "message": "Готово"
+  },
+  "bulkStatusFailed": {
+    "message": "Збій"
+  },
+  "bulkStatusSkipped": {
+    "message": "Пропущено"
+  },
+  "bulkReasonInvalid": {
+    "message": "Недійсна адреса"
+  },
+  "bulkReasonScheme": {
+    "message": "Скануються лише сторінки http і https"
+  },
+  "bulkReasonScope": {
+    "message": "Пропущено згідно з Налаштування → Виявлення → Сайти для сканування"
+  },
+  "bulkReasonSitemap": {
+    "message": "Не вдалося прочитати карту сайту. Читаються лише карти сайту через https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Немає результату за відведений час"
+  },
+  "bulkReasonLoad": {
+    "message": "Сторінка не завантажилася"
+  },
+  "bulkReasonError": {
+    "message": "Сканування не вдалося"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Завершилася на {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Захисту не знайдено"
+  },
+  "bulkRunRunning": {
+    "message": "Виконується"
+  },
+  "bulkRunPaused": {
+    "message": "Призупинено"
+  },
+  "bulkRunStopped": {
+    "message": "Зупинено"
+  },
+  "bulkRunDone": {
+    "message": "Завершено"
+  },
+  "bulkProgressFmt": {
+    "message": "Готово {0} з {1}"
+  },
+  "bulkCountsFmt": {
+    "message": "Готово: {0} · Із захистом: {1} · Збій: {2} · Пропущено: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Розширення перезапустилося під час запуску, тому його зупинено. Сторінки, які ще чекали, не проскановано."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Не було відкритого вікна браузера, у якому можна сканувати сторінки."
+  },
+  "bulkStoppedOff": {
+    "message": "Розширення вимкнено."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Вилучено дублікатів: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Не ввійшло понад ліміт: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Інших пропущених рядків: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Історію призупинено: сторінки скануються, але не записуються."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Читання карт сайту…"
+  },
+  "bulkNothingToScan": {
+    "message": "У цьому списку немає адрес для сканування."
+  },
+  "bulkErrBusy": {
+    "message": "Масове сканування вже виконується."
+  },
+  "bulkErrStart": {
+    "message": "Не вдалося запустити масове сканування."
+  },
+  "bulkErrFile": {
+    "message": "Не вдалося прочитати файл."
+  },
+  "bulkEmpty": {
+    "message": "Вставте адреси або завантажте файл, потім натисніть «Запустити»."
   }
 }

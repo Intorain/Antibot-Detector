@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "इतिहास को {0} आइटम से बदला गया"
   },
+  "notificationHistoryExportedOne": {
+    "message": "1 इतिहास आइटम एक्सपोर्ट किया गया"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "1 नया इतिहास आइटम मर्ज किया गया"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "इतिहास को 1 आइटम से बदला गया"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "इतिहास इम्पोर्ट करने में विफल: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "नहीं मिलीं"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "सेट: {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "एक बार बदली"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "बदलाव: {0}"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "आख़िरी बदलाव: {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "समाप्ति: {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "सत्र कुकी"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "हटाई गई: {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "समाप्त: {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "टाइमलाइन"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "सेट"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "बदली"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "हटाई गई"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "समाप्त"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "रिकॉर्डिंग तब शुरू होती है जब पेज कुकी सेट करता है"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "पहले रिकॉर्ड की गई"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "मान का छोटा फ़िंगरप्रिंट: मानों में अंतर बताता है, मान कभी सहेजता नहीं"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "आधिकारिक डिटेक्टर बहाल करें?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "हर भाषा में अभी अनूदित न हुए टेक्स्ट: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "नियम का अनुवाद करें"
-  },
   "ruleTranslateRuleHint": {
     "message": "विवरण, पैटर्न और संयोजनों के छूटे हुए अनुवाद Chrome के ऑन-डिवाइस अनुवादक से भरता है। सहेजने से पहले जाँच लें।"
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "अनुवाद करें"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "बदलाव अनुवाद करें"
+  },
+  "ruleTranslatedLabel": {
+    "message": "अनूदित"
+  },
+  "ruleTranslateBusy": {
+    "message": "अनुवाद हो रहा है…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "इस नियम के सभी टेक्स्ट सभी {0} भाषाओं में अनूदित हैं।"
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{1} बदले गए टेक्स्ट में से {0} का यहाँ सभी भाषाओं में अनुवाद नहीं हो सका (ब्राउज़र शायद अभी उन्हें डाउनलोड कर रहा है)। कुछ भी नहीं खोया: वे टेक्स्ट पहले जैसे हैं। थोड़ी देर में फिर कोशिश करें।"
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "डाउनलोड हुई: {0}। {2} में से {1} भाषाएँ तैयार। ब्राउज़र हर भाषा एक बार, हर क्लिक पर एक, डाउनलोड करता है: अगली के लिए फिर से अनुवाद करें दबाएँ।"
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "{0} टेक्स्ट का अनुवाद हो रहा है…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl कमांड"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "इसे कोड के रूप में कॉपी करने के लिए कोई वेब पेज खोलें"
   },
   "detectionMdHeadingFmt": {
     "message": "{0} पर सुरक्षा उपाय"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "जाँच हो रही है…"
   },
+  "suggestRuleUnsupported": {
+    "message": "किसी वेबसाइट से नियम बनाने के लिए पॉपअप को उस वेबसाइट पर खोलें।"
+  },
+  "suggestRuleExactName": {
+    "message": "सटीक नाम से खोजा जाता है"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "{0} से शुरू होने वाले नाम: बाकी हिस्सा बेतरतीब लगता है"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "इसे शामिल करने वाले स्क्रिप्ट पते: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "{0} पहले से पहचानता है"
+  },
+  "suggestRuleLoading": {
+    "message": "पेज पढ़ा जा रहा है…"
+  },
+  "suggestRuleError": {
+    "message": "पेज पढ़ा नहीं जा सका। उसे रीलोड करके फिर से कोशिश करें।"
+  },
+  "suggestRuleOutdated": {
+    "message": "एक्सटेंशन अपडेट हो गया है, पर उसका बैकग्राउंड हिस्सा अब भी पुराना संस्करण चला रहा है। ब्राउज़र के एक्सटेंशन पेज में एक्सटेंशन को फिर से लोड करें और दोबारा कोशिश करें।"
+  },
+  "pagePickButton": {
+    "message": "इस पेज से"
+  },
+  "pagePickAddFmt": {
+    "message": "{0} जोड़ें"
+  },
+  "pagePickInRule": {
+    "message": "इस नियम में है"
+  },
+  "suggestRuleFilter": {
+    "message": "फ़िल्टर करें"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "पहले से पहचाने गए: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "से शुरू"
+  },
+  "suggestRuleNoCookies": {
+    "message": "इस पेज पर कोई कुकी नहीं है।"
+  },
+  "suggestRuleNoScripts": {
+    "message": "दूसरी साइटों की कोई स्क्रिप्ट नहीं।"
+  },
+  "suggestRuleNoHeaders": {
+    "message": "कोई रिस्पॉन्स हेडर नहीं: उन्हें पकड़ने के लिए पेज रीलोड करें।"
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "नियम {0} पर मेल खाता है (विश्वसनीयता {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "भाषा बदलने से एक्सटेंशन फिर से लोड होता है। क्या पहले सेटिंग्स में किए गए बदलाव सहेजें?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "बदलावों का अनुवाद करें"
-  },
   "ruleTranslateChangedFmt": {
     "message": "{0} में आपके बदले गए टेक्स्ट: {1}। अन्य भाषाएँ अभी भी पुराना टेक्स्ट दिखाती हैं।"
   },
   "ruleTranslateChangesHint": {
     "message": "आपने जो लिखा उसका अंग्रेज़ी (मूल) और अन्य भाषाओं में ब्राउज़र के डिवाइस पर चलने वाले अनुवादक से अनुवाद करता है। सहेजने से पहले उन्हें जाँचें।"
+  },
+  "combinationOneCount": {
+    "message": "1 संयोजन"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} संयोजन"
+  },
+  "historyBulkScan": {
+    "message": "बल्क स्कैन"
+  },
+  "bulkTitle": {
+    "message": "बल्क स्कैन"
+  },
+  "bulkSubtitle": {
+    "message": "पेजों की सूची को बैकग्राउंड टैब में एक-एक करके स्कैन करता है। हर पेज आपके ब्राउज़र की कुकीज़ के साथ एक असली विज़िट है, और जो मिलता है वह हमेशा की तरह इतिहास में जुड़ जाता है।"
+  },
+  "bulkInputLabel": {
+    "message": "स्कैन करने के पेज"
+  },
+  "bulkInputHint": {
+    "message": "हर पंक्ति में एक पता। साइटमैप (.xml) का पता उसमें दिए पेज जोड़ देता है। दोहराए गए पते हटा दिए जाते हैं, और सिर्फ़ http और https पेज स्कैन होते हैं।"
+  },
+  "bulkUpload": {
+    "message": ".txt या .csv अपलोड करें"
+  },
+  "bulkCountFmt": {
+    "message": "पते: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "हर रन में पेज ({0} तक)"
+  },
+  "bulkTimeoutLabel": {
+    "message": "हर पेज की समय सीमा, सेकंड में"
+  },
+  "bulkStart": {
+    "message": "शुरू करें"
+  },
+  "bulkPause": {
+    "message": "रोकें"
+  },
+  "bulkResume": {
+    "message": "फिर से शुरू करें"
+  },
+  "bulkStop": {
+    "message": "बंद करें"
+  },
+  "bulkScanWaiting": {
+    "message": "अभी इंतज़ार कर रहे पेज स्कैन करें"
+  },
+  "bulkNewList": {
+    "message": "नई सूची"
+  },
+  "bulkResults": {
+    "message": "नतीजे"
+  },
+  "bulkColAddress": {
+    "message": "पता"
+  },
+  "bulkStatusWaiting": {
+    "message": "इंतज़ार में"
+  },
+  "bulkStatusScanning": {
+    "message": "स्कैन हो रहा है"
+  },
+  "bulkStatusDone": {
+    "message": "हो गया"
+  },
+  "bulkStatusFailed": {
+    "message": "विफल"
+  },
+  "bulkStatusSkipped": {
+    "message": "छोड़ा गया"
+  },
+  "bulkReasonInvalid": {
+    "message": "मान्य पता नहीं है"
+  },
+  "bulkReasonScheme": {
+    "message": "सिर्फ़ http और https पेज स्कैन होते हैं"
+  },
+  "bulkReasonScope": {
+    "message": "सेटिंग्स → जांच → स्कैन की जाने वाली साइटें के कारण छोड़ा गया"
+  },
+  "bulkReasonSitemap": {
+    "message": "साइटमैप पढ़ा नहीं जा सका। सिर्फ़ https साइटमैप पढ़े जा सकते हैं।"
+  },
+  "bulkReasonTimeout": {
+    "message": "समय सीमा में कोई नतीजा नहीं"
+  },
+  "bulkReasonLoad": {
+    "message": "पेज लोड नहीं हुआ"
+  },
+  "bulkReasonError": {
+    "message": "स्कैन विफल रहा"
+  },
+  "bulkEndedOnFmt": {
+    "message": "{0} पर खत्म हुआ"
+  },
+  "bulkNoProtection": {
+    "message": "कोई सुरक्षा नहीं मिली"
+  },
+  "bulkRunRunning": {
+    "message": "चल रहा है"
+  },
+  "bulkRunPaused": {
+    "message": "रुका हुआ"
+  },
+  "bulkRunStopped": {
+    "message": "बंद किया गया"
+  },
+  "bulkRunDone": {
+    "message": "पूरा हुआ"
+  },
+  "bulkProgressFmt": {
+    "message": "{1} में से {0} पूरे"
+  },
+  "bulkCountsFmt": {
+    "message": "हो गए: {0} · सुरक्षा वाले: {1} · विफल: {2} · छोड़े गए: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "रन के दौरान एक्सटेंशन फिर से शुरू हुआ, इसलिए रन बंद हो गया। इंतज़ार कर रहे पेज स्कैन नहीं हुए।"
+  },
+  "bulkStoppedNoWindow": {
+    "message": "पेज स्कैन करने के लिए कोई ब्राउज़र विंडो खुली नहीं थी।"
+  },
+  "bulkStoppedOff": {
+    "message": "एक्सटेंशन बंद है।"
+  },
+  "bulkDuplicatesFmt": {
+    "message": "हटाए गए दोहराव: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "सीमा से ऊपर छोड़े गए: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "छोड़ी गई दूसरी पंक्तियाँ: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "इतिहास रुका हुआ है: पेज स्कैन होते हैं पर दर्ज नहीं होते।"
+  },
+  "bulkReadingSitemaps": {
+    "message": "साइटमैप पढ़े जा रहे हैं…"
+  },
+  "bulkNothingToScan": {
+    "message": "इस सूची में स्कैन करने के लिए कोई पता नहीं है।"
+  },
+  "bulkErrBusy": {
+    "message": "एक बल्क स्कैन पहले से चल रहा है।"
+  },
+  "bulkErrStart": {
+    "message": "बल्क स्कैन शुरू नहीं हो सका।"
+  },
+  "bulkErrFile": {
+    "message": "फ़ाइल पढ़ी नहीं जा सकी।"
+  },
+  "bulkEmpty": {
+    "message": "पते चिपकाएँ या फ़ाइल अपलोड करें, फिर शुरू करें चुनें।"
   }
 }

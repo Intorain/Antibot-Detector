@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "แทนที่ประวัติด้วย {0} รายการแล้ว"
   },
+  "notificationHistoryExportedOne": {
+    "message": "ส่งออกรายการประวัติ 1 รายการแล้ว"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "รวมรายการประวัติใหม่ 1 รายการแล้ว"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "แทนที่ประวัติด้วย 1 รายการแล้ว"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "นำเข้าประวัติไม่สำเร็จ: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "ไม่พบ"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "ตั้งค่า: {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "เปลี่ยนหนึ่งครั้ง"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "เปลี่ยน {0} ครั้ง"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "เปลี่ยนล่าสุด: {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "หมดอายุ: {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "คุกกี้เซสชัน"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "ลบ: {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "หมดอายุแล้ว: {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "ไทม์ไลน์"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "ตั้งค่า"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "เปลี่ยน"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "ลบ"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "หมดอายุ"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "การบันทึกจะเริ่มเมื่อหน้าเว็บตั้งค่าคุกกี้"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "บันทึกไว้ก่อนหน้า"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "ลายนิ้วมือสั้นของค่า: แยกค่าต่างๆ ออกจากกัน โดยไม่เก็บค่าจริง"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "คืนค่าตัวตรวจจับทางการหรือไม่"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "ข้อความที่ยังไม่ได้แปลเป็นทุกภาษา: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "แปลกฎ"
-  },
   "ruleTranslateRuleHint": {
     "message": "เติมคำแปลที่ขาดของคำอธิบาย รูปแบบ และชุดค่าผสมด้วยตัวแปลบนอุปกรณ์ของ Chrome ตรวจสอบก่อนบันทึก"
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "แปล"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "แปลส่วนที่แก้ไข"
+  },
+  "ruleTranslatedLabel": {
+    "message": "แปลแล้ว"
+  },
+  "ruleTranslateBusy": {
+    "message": "กำลังแปล…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "ข้อความทั้งหมดของกฎนี้แปลเป็นทั้ง {0} ภาษาแล้ว"
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "แปลข้อความที่แก้ไข {0} จาก {1} รายการเป็นทุกภาษาที่นี่ไม่ได้ (เบราว์เซอร์อาจยังดาวน์โหลดอยู่) ไม่มีอะไรสูญหาย ข้อความเหล่านั้นยังเหมือนเดิม ลองอีกครั้งในอีกสักครู่"
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "ดาวน์โหลด {0} แล้ว: พร้อม {1} จาก {2} ภาษา เบราว์เซอร์ดาวน์โหลดแต่ละภาษาครั้งเดียว ครั้งละหนึ่งภาษาต่อการคลิก: คลิกแปลอีกครั้งสำหรับภาษาถัดไป"
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "กำลังแปล {0} ข้อความ…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "คำสั่ง curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "เปิดหน้าเว็บเพื่อคัดลอกเป็นโค้ด"
   },
   "detectionMdHeadingFmt": {
     "message": "ระบบป้องกันบน {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "กำลังทดสอบ…"
   },
+  "suggestRuleUnsupported": {
+    "message": "เปิดป๊อปอัปบนเว็บไซต์เพื่อสร้างกฎจากเว็บไซต์นั้น"
+  },
+  "suggestRuleExactName": {
+    "message": "ค้นหาด้วยชื่อที่ตรงกันทุกตัว"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "ชื่อที่ขึ้นต้นด้วย {0}: ส่วนที่เหลือดูเหมือนสุ่ม"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "ที่อยู่สคริปต์ที่มีข้อความนี้: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "{0} ตรวจพบอยู่แล้ว"
+  },
+  "suggestRuleLoading": {
+    "message": "กำลังอ่านหน้า…"
+  },
+  "suggestRuleError": {
+    "message": "อ่านหน้าไม่ได้ โหลดหน้าซ้ำแล้วลองอีกครั้ง"
+  },
+  "suggestRuleOutdated": {
+    "message": "ส่วนขยายได้รับการอัปเดตแล้ว แต่ส่วนที่ทำงานเบื้องหลังยังใช้เวอร์ชันเก่าอยู่ โหลดส่วนขยายใหม่ในหน้าส่วนขยายของเบราว์เซอร์แล้วลองอีกครั้ง"
+  },
+  "pagePickButton": {
+    "message": "จากหน้านี้"
+  },
+  "pagePickAddFmt": {
+    "message": "เพิ่ม {0}"
+  },
+  "pagePickInRule": {
+    "message": "มีในกฎนี้แล้ว"
+  },
+  "suggestRuleFilter": {
+    "message": "กรอง"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "ตรวจพบแล้ว: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "ขึ้นต้นด้วย"
+  },
+  "suggestRuleNoCookies": {
+    "message": "หน้านี้ไม่มีคุกกี้"
+  },
+  "suggestRuleNoScripts": {
+    "message": "ไม่มีสคริปต์จากเว็บไซต์อื่น"
+  },
+  "suggestRuleNoHeaders": {
+    "message": "ไม่มีส่วนหัวการตอบกลับ: โหลดหน้าซ้ำเพื่อเก็บข้อมูล"
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "กฎตรงกับ {0} (ความมั่นใจ {1}%)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "การเปลี่ยนภาษาจะโหลดส่วนขยายใหม่ บันทึกการเปลี่ยนแปลงการตั้งค่าก่อนไหม"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "แปลการเปลี่ยนแปลง"
-  },
   "ruleTranslateChangedFmt": {
     "message": "ข้อความที่คุณเปลี่ยนเป็นภาษา{0}: {1} ภาษาอื่นยังแสดงข้อความเดิม"
   },
   "ruleTranslateChangesHint": {
     "message": "แปลสิ่งที่คุณเขียนเป็นภาษาอังกฤษ (ต้นฉบับ) และภาษาอื่นด้วยตัวแปลในเบราว์เซอร์ ตรวจสอบก่อนบันทึก"
+  },
+  "combinationOneCount": {
+    "message": "1 ชุดค่าผสม"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} ชุดค่าผสม"
+  },
+  "historyBulkScan": {
+    "message": "สแกนหลายหน้า"
+  },
+  "bulkTitle": {
+    "message": "สแกนหลายหน้า"
+  },
+  "bulkSubtitle": {
+    "message": "สแกนรายการหน้าทีละหน้าในแท็บเบื้องหลัง แต่ละหน้าเป็นการเข้าชมจริงด้วยคุกกี้ของเบราว์เซอร์ และสิ่งที่พบจะถูกเพิ่มลงในประวัติตามปกติ"
+  },
+  "bulkInputLabel": {
+    "message": "หน้าที่จะสแกน"
+  },
+  "bulkInputHint": {
+    "message": "บรรทัดละหนึ่งที่อยู่ ที่อยู่ของแผนผังเว็บไซต์ (.xml) จะเพิ่มหน้าที่อยู่ในนั้น ที่อยู่ซ้ำจะถูกลบออก และสแกนเฉพาะหน้า http และ https"
+  },
+  "bulkUpload": {
+    "message": "อัปโหลด .txt หรือ .csv"
+  },
+  "bulkCountFmt": {
+    "message": "ที่อยู่: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "จำนวนหน้าต่อรอบ (ไม่เกิน {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "เวลาจำกัดต่อหน้า (วินาที)"
+  },
+  "bulkStart": {
+    "message": "เริ่ม"
+  },
+  "bulkPause": {
+    "message": "หยุดชั่วคราว"
+  },
+  "bulkResume": {
+    "message": "ทำต่อ"
+  },
+  "bulkStop": {
+    "message": "หยุด"
+  },
+  "bulkScanWaiting": {
+    "message": "สแกนหน้าที่ยังรออยู่"
+  },
+  "bulkNewList": {
+    "message": "รายการใหม่"
+  },
+  "bulkResults": {
+    "message": "ผลลัพธ์"
+  },
+  "bulkColAddress": {
+    "message": "ที่อยู่"
+  },
+  "bulkStatusWaiting": {
+    "message": "รออยู่"
+  },
+  "bulkStatusScanning": {
+    "message": "กำลังสแกน"
+  },
+  "bulkStatusDone": {
+    "message": "เสร็จ"
+  },
+  "bulkStatusFailed": {
+    "message": "ไม่สำเร็จ"
+  },
+  "bulkStatusSkipped": {
+    "message": "ข้ามแล้ว"
+  },
+  "bulkReasonInvalid": {
+    "message": "ไม่ใช่ที่อยู่ที่ถูกต้อง"
+  },
+  "bulkReasonScheme": {
+    "message": "สแกนเฉพาะหน้า http และ https"
+  },
+  "bulkReasonScope": {
+    "message": "ข้ามตาม การตั้งค่า → การตรวจจับ → ไซต์ที่จะสแกน"
+  },
+  "bulkReasonSitemap": {
+    "message": "อ่านแผนผังเว็บไซต์ไม่ได้ อ่านได้เฉพาะแผนผังเว็บไซต์ที่เป็น https"
+  },
+  "bulkReasonTimeout": {
+    "message": "ไม่มีผลลัพธ์ภายในเวลาที่กำหนด"
+  },
+  "bulkReasonLoad": {
+    "message": "หน้าโหลดไม่สำเร็จ"
+  },
+  "bulkReasonError": {
+    "message": "การสแกนไม่สำเร็จ"
+  },
+  "bulkEndedOnFmt": {
+    "message": "ไปจบที่ {0}"
+  },
+  "bulkNoProtection": {
+    "message": "ไม่พบการป้องกัน"
+  },
+  "bulkRunRunning": {
+    "message": "กำลังทำงาน"
+  },
+  "bulkRunPaused": {
+    "message": "หยุดชั่วคราวแล้ว"
+  },
+  "bulkRunStopped": {
+    "message": "หยุดแล้ว"
+  },
+  "bulkRunDone": {
+    "message": "เสร็จสิ้น"
+  },
+  "bulkProgressFmt": {
+    "message": "เสร็จ {0} จาก {1}"
+  },
+  "bulkCountsFmt": {
+    "message": "เสร็จ: {0} · มีการป้องกัน: {1} · ไม่สำเร็จ: {2} · ข้าม: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "ส่วนขยายเริ่มใหม่ระหว่างรอบการสแกน จึงหยุดลง หน้าที่ยังรออยู่ไม่ได้ถูกสแกน"
+  },
+  "bulkStoppedNoWindow": {
+    "message": "ไม่มีหน้าต่างเบราว์เซอร์ที่เปิดอยู่สำหรับสแกนหน้า"
+  },
+  "bulkStoppedOff": {
+    "message": "ส่วนขยายปิดอยู่"
+  },
+  "bulkDuplicatesFmt": {
+    "message": "ที่อยู่ซ้ำที่ลบออก: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "ไม่รวมเพราะเกินขีดจำกัด: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "บรรทัดอื่นที่ไม่รวม: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "ประวัติหยุดชั่วคราวอยู่ หน้าจะถูกสแกนแต่ไม่ถูกบันทึก"
+  },
+  "bulkReadingSitemaps": {
+    "message": "กำลังอ่านแผนผังเว็บไซต์…"
+  },
+  "bulkNothingToScan": {
+    "message": "ไม่มีที่อยู่ให้สแกนในรายการนี้"
+  },
+  "bulkErrBusy": {
+    "message": "มีการสแกนหลายหน้ากำลังทำงานอยู่แล้ว"
+  },
+  "bulkErrStart": {
+    "message": "เริ่มการสแกนหลายหน้าไม่ได้"
+  },
+  "bulkErrFile": {
+    "message": "อ่านไฟล์ไม่ได้"
+  },
+  "bulkEmpty": {
+    "message": "วางที่อยู่หรืออัปโหลดไฟล์ แล้วเลือกเริ่ม"
   }
 }

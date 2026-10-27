@@ -116,7 +116,12 @@ class History {
     if (this.selectMode) this.pruneSelection(itemsToShow);
 
     if (this.paginationManager) {
-      this.paginationManager.setItems(itemsToShow);
+      // Pinning, a note, watching, deleting or a new scan redraw the same search: the list stays on its page.
+      // A new search or chip starts on page 1.
+      const filterKey = JSON.stringify([this.searchQuery || '', this.activeChips || null]);
+      const keepPage = this._renderedFilterKey === filterKey;
+      this._renderedFilterKey = filterKey;
+      this.paginationManager.setItems(itemsToShow, { keepPage });
     }
     if (this.selectMode) this.syncSelectBar();
 
@@ -228,6 +233,9 @@ class History {
       const safeUrl = FormatUtils.escapeHtml(item.url || '');
       // The full address on the card (cut off with an ellipsis), the domain when none was saved
       const safeDomain = FormatUtils.escapeHtml(domain);
+      // Attribute context ("..."): escapeHtml leaves quotes, so a title or an imported id with one would break out
+      const attrTitle = FormatUtils.escapeAttr(rawTitle);
+      const attrUrl = FormatUtils.escapeAttr(item.url || domain);
 
       const faviconSrc = UrlUtils.resolveDisplayFavicon(item.favicon, item.url || item.hostname);
       const summary = this.getHistorySummary(item);
@@ -244,21 +252,21 @@ class History {
       const selectLabel = FormatUtils.escapeAttr(FormatUtils.t('historySelectCheckboxFmt', 'Select {0}', rawTitle));
 
       return `
-        <div class="history-item${selected ? ' is-selected' : ''}" data-history-id="${item.id}">
+        <div class="history-item${selected ? ' is-selected' : ''}" data-history-id="${FormatUtils.escapeAttr(item.id)}" role="group" tabindex="0" aria-label="${attrTitle}">
           <div class="history-item-top">
             ${selecting ? `<input type="checkbox" class="history-select-input" aria-label="${selectLabel}"${selected ? ' checked' : ''}>` : ''}
             <span class="history-favicon-tile">
-              <img src="${faviconSrc}" alt="" class="history-favicon" data-fallback="${UrlUtils.getDefaultFaviconUrl()}">
+              <img src="${FormatUtils.escapeAttr(faviconSrc)}" alt="" class="history-favicon" data-fallback="${UrlUtils.getDefaultFaviconUrl()}">
             </span>
             <div class="history-item-content">
               <div class="history-title-row">
                 ${item.pinned === true ? `<span class="history-pin" ${FormatUtils.tipAttrs(item.autoPinned === true ? autoPinnedTip : pinnedTip)}>${PIN_ICON}</span>` : ''}
                 ${item.watch === true ? `<span class="history-watch" ${FormatUtils.tipAttrs(watchTip, item.watchedAt ? _tr('historyWatchCheckedFmt', 'Last checked {0}').replace('{0}', FormatUtils.getTimeAgo(item.watchedAt)) : _tr('historyWatchNever', 'Not checked yet'))}>${WATCH_ICON}</span>` : ''}
-                <div class="history-title" title="${safeTitle}">${safeTitle}</div>
+                <div class="history-title" title="${attrTitle}">${safeTitle}</div>
                 ${changedBadgeHtml(item)}
               </div>
               <div class="history-subline">
-                <span class="history-url" dir="ltr" title="${safeUrl || safeDomain}">${safeUrl || safeDomain}</span>
+                <span class="history-url" dir="ltr" title="${attrUrl}">${safeUrl || safeDomain}</span>
 
               </div>
               ${item.note ? `<div class="history-note" title="${FormatUtils.escapeAttr(item.note)}">${FormatUtils.escapeHtml(item.note)}</div>` : ''}
@@ -609,6 +617,8 @@ class History {
     try {
       await this.sendHistoryChange({ type: HistoryStore.Messages.CLEAR });
       this.historyItems = [];
+      // Select mode ends with the list: its "N selected" bar would stay with nothing to act on
+      if (this.selectMode && typeof this.exitSelectMode === 'function') this.exitSelectMode();
       this.showEmptyState();
       Logger.ui('History cleared');
       NotificationHelper.success(_tr('notificationHistoryCleared', 'History cleared'));
@@ -707,6 +717,12 @@ class History {
         if (historyItem) {
           this.showHistoryItemDetails(historyItem);
         }
+      });
+      // Keyboard: Enter or Space on the card itself (not on its buttons) does what a click does
+      item.addEventListener('keydown', (e) => {
+        if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault();
+        e.currentTarget.click();
       });
     });
   }
@@ -1242,7 +1258,7 @@ class History {
     return ordered.map(({ detection, index }) => {
       const rawName = FormatUtils.detectorName(detection);
       const name = rawName || _tr('unknownDetection', 'Unknown Detection');
-      const safeName = FormatUtils.escapeHtml(name);
+      const safeName = FormatUtils.escapeAttr(name); // also in alt="..."
       const category = detection.category || '';
       const categoryKey = Categories.labelOf(category)?.[0] || null;
       const translatedCategory = categoryKey ? _tr(categoryKey, category) : category;
@@ -1861,7 +1877,9 @@ class History {
     a.click();
 
     URL.revokeObjectURL(url);
-    NotificationHelper.success(FormatUtils.t('notificationHistoryExportedFmt', `Exported ${items.length} history items`, items.length));
+    NotificationHelper.success(items.length === 1
+      ? FormatUtils.t('notificationHistoryExportedOne', 'Exported 1 history item')
+      : FormatUtils.t('notificationHistoryExportedFmt', `Exported ${items.length} history items`, items.length));
   }
 
   /**
@@ -1898,15 +1916,21 @@ class History {
 
       // Preview locally (same rule the worker applies), then let the worker
       // apply it to the stored list so entries saved meanwhile are kept.
+      // The preview stays local: a save that fails leaves the list, its search and its filters as they were.
+      // After a save, the list is the stored one (loadHistoryFromStorage).
       const before = this.historyItems.length;
-      this.historyItems = HistoryStore.applyImport(this.historyItems, data.items, mode, this.historyLimit);
-      const added = Math.max(0, this.historyItems.length - before);
+      const preview = HistoryStore.applyImport(this.historyItems, data.items, mode, this.historyLimit);
+      const added = Math.max(0, preview.length - before);
       await this.saveHistoryToStorage(data.items, mode);
 
       if (mode === 'merge') {
-        NotificationHelper.success(_fmt('notificationHistoryMergedFmt', `Merged ${added} new history items`, added));
+        NotificationHelper.success(added === 1
+          ? _tr('notificationHistoryMergedOne', 'Merged 1 new history item')
+          : _fmt('notificationHistoryMergedFmt', `Merged ${added} new history items`, added));
       } else {
-        NotificationHelper.success(_fmt('notificationHistoryReplacedFmt', `Replaced history with ${this.historyItems.length} items`, this.historyItems.length));
+        NotificationHelper.success(preview.length === 1
+          ? _tr('notificationHistoryReplacedOne', 'Replaced history with 1 item')
+          : _fmt('notificationHistoryReplacedFmt', `Replaced history with ${preview.length} items`, preview.length));
       }
       this.renderHistory();
     } catch (error) {
@@ -2143,6 +2167,12 @@ class History {
       });
     }
 
+    // Bulk scan: its own page in a tab (sections/bulk/), where a list of pages is scanned in a background tab
+    const bulkBtn = document.querySelector('#historyTab #bulkScanBtn');
+    if (bulkBtn) {
+      bulkBtn.addEventListener('click', () => this.openBulkScan());
+    }
+
     // Setup export button
     const exportBtn = document.querySelector('#historyTab #exportHistoryBtn');
     if (exportBtn) {
@@ -2155,6 +2185,23 @@ class History {
     if (importBtn && importFile) {
       importBtn.addEventListener('click', () => importFile.click());
       importFile.addEventListener('change', (e) => this.handleImport(e));
+    }
+  }
+
+  /** Open the Bulk scan page in a new tab (an open one is focused instead of opening a second). */
+  async openBulkScan() {
+    const url = chrome.runtime.getURL('sections/bulk/bulk.html');
+    try {
+      const [open] = await chrome.tabs.query({ url });
+      if (open) {
+        await chrome.tabs.update(open.id, { active: true });
+        if (open.windowId !== undefined && chrome.windows && chrome.windows.update) await chrome.windows.update(open.windowId, { focused: true });
+      } else {
+        await chrome.tabs.create({ url });
+      }
+    } catch (error) {
+      Logger.error('UI', 'Failed to open Bulk scan:', error);
+      window.open(url, '_blank', 'noopener');
     }
   }
 

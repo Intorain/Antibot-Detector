@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "履歴を{0}件の項目で置き換えました"
   },
+  "notificationHistoryExportedOne": {
+    "message": "1件の履歴項目をエクスポートしました"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "1件の新しい履歴項目をマージしました"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "履歴を1件の項目で置き換えました"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "履歴のインポートに失敗しました: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "見つからない"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "設定: {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "1 回変更"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "変更 {0} 回"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "最終変更: {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "有効期限: {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "セッション Cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "削除: {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "期限切れ: {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "タイムライン"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "設定"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "変更"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "削除"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "期限切れ"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "ページが Cookie を設定すると記録が始まります"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "以前に記録"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "値の短い指紋: 値を区別しますが、値そのものは保存しません"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "公式の検出器を復元しますか？"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "すべての言語に翻訳されていないテキスト: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "ルールを翻訳"
-  },
   "ruleTranslateRuleHint": {
     "message": "説明、パターン、組み合わせの足りない翻訳を、Chrome のオンデバイス翻訳で補います。保存する前に確認してください。"
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "翻訳"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "変更を翻訳"
+  },
+  "ruleTranslatedLabel": {
+    "message": "翻訳済み"
+  },
+  "ruleTranslateBusy": {
+    "message": "翻訳中…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "このルールのすべてのテキストは {0} 言語すべてに翻訳済みです。"
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "変更した {1} 件のうち {0} 件のテキストを、ここではすべての言語に翻訳できませんでした（ブラウザーがまだダウンロード中かもしれません）。失われたものはありません。これらのテキストは元のままです。少し待ってからもう一度お試しください。"
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "{0} をダウンロードしました。{2} 言語中 {1} 言語の準備ができています。ブラウザーは各言語を一度だけ、1 クリックにつき 1 つダウンロードします。次の言語は、もう一度「翻訳」をクリックしてください。"
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "{0} 件のテキストを翻訳中…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl コマンド"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "コードとしてコピーするには Web ページを開いてください"
   },
   "detectionMdHeadingFmt": {
     "message": "{0} の保護機能"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "テスト中…"
   },
+  "suggestRuleUnsupported": {
+    "message": "ルールを作成するには、ウェブサイトでポップアップを開いてください。"
+  },
+  "suggestRuleExactName": {
+    "message": "名前の完全一致で検索"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "{0} で始まる名前（残りはランダムに見えます）"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "これを含むスクリプトのアドレス: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "{0} が検出済み"
+  },
+  "suggestRuleLoading": {
+    "message": "ページを読み込み中…"
+  },
+  "suggestRuleError": {
+    "message": "ページを読み取れませんでした。再読み込みして、もう一度お試しください。"
+  },
+  "suggestRuleOutdated": {
+    "message": "拡張機能は更新されましたが、バックグラウンド部分はまだ古いバージョンのままです。ブラウザの拡張機能ページで拡張機能を再読み込みしてから、もう一度お試しください。"
+  },
+  "pagePickButton": {
+    "message": "このページから"
+  },
+  "pagePickAddFmt": {
+    "message": "{0} 件を追加"
+  },
+  "pagePickInRule": {
+    "message": "このルールにあり"
+  },
+  "suggestRuleFilter": {
+    "message": "絞り込み"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "検出済み: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "前方一致"
+  },
+  "suggestRuleNoCookies": {
+    "message": "このページには Cookie がありません。"
+  },
+  "suggestRuleNoScripts": {
+    "message": "他のサイトのスクリプトはありません。"
+  },
+  "suggestRuleNoHeaders": {
+    "message": "レスポンスヘッダーがありません。取得するにはページを再読み込みしてください。"
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "ルールは {0} に一致します（信頼度 {1}%）"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "言語を変更すると拡張機能が再読み込みされます。先に設定の変更を保存しますか？"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "変更を翻訳"
-  },
   "ruleTranslateChangedFmt": {
     "message": "{0}で変更したテキスト：{1}。他の言語には古いテキストが表示されたままです。"
   },
   "ruleTranslateChangesHint": {
     "message": "入力した内容をブラウザー内蔵の翻訳機能で英語（原文）と他の言語に翻訳します。保存する前に確認してください。"
+  },
+  "combinationOneCount": {
+    "message": "1 件の組み合わせ"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} 件の組み合わせ"
+  },
+  "historyBulkScan": {
+    "message": "一括スキャン"
+  },
+  "bulkTitle": {
+    "message": "一括スキャン"
+  },
+  "bulkSubtitle": {
+    "message": "ページのリストをバックグラウンドのタブで 1 つずつスキャンします。各ページはブラウザーの Cookie を使った実際の訪問で、見つかったものはいつもどおり履歴に追加されます。"
+  },
+  "bulkInputLabel": {
+    "message": "スキャンするページ"
+  },
+  "bulkInputHint": {
+    "message": "1 行に 1 つのアドレス。サイトマップ（.xml）のアドレスは、そこに載っているページを追加します。重複は除かれ、http と https のページだけがスキャンされます。"
+  },
+  "bulkUpload": {
+    "message": ".txt または .csv をアップロード"
+  },
+  "bulkCountFmt": {
+    "message": "アドレス: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "1 回の実行あたりのページ数（最大 {0}）"
+  },
+  "bulkTimeoutLabel": {
+    "message": "1 ページあたりの制限時間（秒）"
+  },
+  "bulkStart": {
+    "message": "開始"
+  },
+  "bulkPause": {
+    "message": "一時停止"
+  },
+  "bulkResume": {
+    "message": "再開"
+  },
+  "bulkStop": {
+    "message": "停止"
+  },
+  "bulkScanWaiting": {
+    "message": "まだ待機中のページをスキャン"
+  },
+  "bulkNewList": {
+    "message": "新しいリスト"
+  },
+  "bulkResults": {
+    "message": "結果"
+  },
+  "bulkColAddress": {
+    "message": "アドレス"
+  },
+  "bulkStatusWaiting": {
+    "message": "待機中"
+  },
+  "bulkStatusScanning": {
+    "message": "スキャン中"
+  },
+  "bulkStatusDone": {
+    "message": "完了"
+  },
+  "bulkStatusFailed": {
+    "message": "失敗"
+  },
+  "bulkStatusSkipped": {
+    "message": "スキップ"
+  },
+  "bulkReasonInvalid": {
+    "message": "有効なアドレスではありません"
+  },
+  "bulkReasonScheme": {
+    "message": "http と https のページだけがスキャンされます"
+  },
+  "bulkReasonScope": {
+    "message": "設定 → 検出 → スキャンするサイト によりスキップ"
+  },
+  "bulkReasonSitemap": {
+    "message": "サイトマップを読み込めませんでした。読み込めるのは https のサイトマップだけです。"
+  },
+  "bulkReasonTimeout": {
+    "message": "制限時間内に結果がありません"
+  },
+  "bulkReasonLoad": {
+    "message": "ページが読み込まれませんでした"
+  },
+  "bulkReasonError": {
+    "message": "スキャンに失敗しました"
+  },
+  "bulkEndedOnFmt": {
+    "message": "最終的に {0} に移動"
+  },
+  "bulkNoProtection": {
+    "message": "保護は見つかりませんでした"
+  },
+  "bulkRunRunning": {
+    "message": "実行中"
+  },
+  "bulkRunPaused": {
+    "message": "一時停止中"
+  },
+  "bulkRunStopped": {
+    "message": "停止しました"
+  },
+  "bulkRunDone": {
+    "message": "完了しました"
+  },
+  "bulkProgressFmt": {
+    "message": "{1} 件中 {0} 件完了"
+  },
+  "bulkCountsFmt": {
+    "message": "完了: {0} · 保護あり: {1} · 失敗: {2} · スキップ: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "実行中に拡張機能が再起動したため、停止しました。まだ待機中だったページはスキャンされていません。"
+  },
+  "bulkStoppedNoWindow": {
+    "message": "ページをスキャンするブラウザーのウィンドウが開いていませんでした。"
+  },
+  "bulkStoppedOff": {
+    "message": "拡張機能がオフになっています。"
+  },
+  "bulkDuplicatesFmt": {
+    "message": "除いた重複: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "上限を超えて除外: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "その他の除外された行: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "履歴が一時停止中のため、ページはスキャンされますが記録されません。"
+  },
+  "bulkReadingSitemaps": {
+    "message": "サイトマップを読み込んでいます…"
+  },
+  "bulkNothingToScan": {
+    "message": "このリストにはスキャンできるアドレスがありません。"
+  },
+  "bulkErrBusy": {
+    "message": "一括スキャンはすでに実行中です。"
+  },
+  "bulkErrStart": {
+    "message": "一括スキャンを開始できませんでした。"
+  },
+  "bulkErrFile": {
+    "message": "ファイルを読み込めませんでした。"
+  },
+  "bulkEmpty": {
+    "message": "アドレスを貼り付けるかファイルをアップロードして、開始を選んでください。"
   }
 }

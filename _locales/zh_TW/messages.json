@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "已用 {0} 筆記錄取代歷史記錄"
   },
+  "notificationHistoryExportedOne": {
+    "message": "已匯出 1 筆歷史記錄"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "已合併 1 筆新的歷史記錄"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "已用 1 筆記錄取代歷史記錄"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "無法匯入歷史記錄：{0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "未找到"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "設定於 {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "變更過 1 次"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "變更過 {0} 次"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "最近變更 {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "到期 {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "工作階段 Cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "刪除於 {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "到期於 {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "時間軸"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "設定"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "變更"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "刪除"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "到期"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "頁面設定此 Cookie 時開始記錄"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "先前記錄的"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "值的簡短指紋：用於區分不同的值，從不儲存值本身"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "要還原官方偵測器嗎？"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "尚未翻譯成所有語言的文字：{0}"
   },
-  "ruleTranslateRule": {
-    "message": "翻譯規則"
-  },
   "ruleTranslateRuleHint": {
     "message": "使用 Chrome 的裝置端翻譯工具，填入說明、模式和組合中缺少的翻譯。儲存前請檢查。"
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "翻譯"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "翻譯變更"
+  },
+  "ruleTranslatedLabel": {
+    "message": "已翻譯"
+  },
+  "ruleTranslateBusy": {
+    "message": "正在翻譯…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "此規則的所有文字皆已翻譯成全部 {0} 種語言。"
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "有 {0} 條（共 {1} 條）變更的文字在此無法翻譯成所有語言（瀏覽器可能仍在下載）。沒有遺失任何內容：這些文字維持原樣。請稍後再試。"
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "已下載：{0}。{2} 種語言中已有 {1} 種就緒。瀏覽器每種語言只下載一次，每次點擊下載一種：請再次點擊「翻譯」下載下一種。"
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "正在翻譯 {0} 段文字…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl 指令"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "開啟網頁即可將其複製為程式碼"
   },
   "detectionMdHeadingFmt": {
     "message": "{0} 上的防護"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "正在測試…"
   },
+  "suggestRuleUnsupported": {
+    "message": "請在網站上開啟彈出式視窗，才能據此建立規則。"
+  },
+  "suggestRuleExactName": {
+    "message": "依確切名稱比對"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "以 {0} 開頭的名稱：其餘部分看起來是隨機的"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "包含此內容的指令碼位址：{0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "已由 {0} 偵測"
+  },
+  "suggestRuleLoading": {
+    "message": "正在讀取網頁…"
+  },
+  "suggestRuleError": {
+    "message": "無法讀取網頁。請重新載入網頁後再試一次。"
+  },
+  "suggestRuleOutdated": {
+    "message": "擴充功能已更新，但其背景部分仍在執行舊版本。請在瀏覽器的擴充功能頁面重新載入擴充功能，然後再試一次。"
+  },
+  "pagePickButton": {
+    "message": "從此頁面"
+  },
+  "pagePickAddFmt": {
+    "message": "新增 {0} 項"
+  },
+  "pagePickInRule": {
+    "message": "已在此規則中"
+  },
+  "suggestRuleFilter": {
+    "message": "篩選"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "已偵測到：{0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "前綴比對"
+  },
+  "suggestRuleNoCookies": {
+    "message": "此網頁沒有 Cookie。"
+  },
+  "suggestRuleNoScripts": {
+    "message": "沒有來自其他網站的指令碼。"
+  },
+  "suggestRuleNoHeaders": {
+    "message": "沒有回應標頭：請重新載入網頁以擷取它們。"
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "規則符合 {0}（信賴度 {1}%）"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "變更語言會重新載入擴充功能。要先儲存對設定的變更嗎？"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "翻譯變更"
-  },
   "ruleTranslateChangedFmt": {
     "message": "你用{0}修改的文字：{1}。其他語言仍顯示舊文字。"
   },
   "ruleTranslateChangesHint": {
     "message": "使用瀏覽器內建的翻譯功能，將你寫的內容翻譯成英文（原文）和其他語言。儲存前請檢查。"
+  },
+  "combinationOneCount": {
+    "message": "1 個組合"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} 個組合"
+  },
+  "historyBulkScan": {
+    "message": "批次掃描"
+  },
+  "bulkTitle": {
+    "message": "批次掃描"
+  },
+  "bulkSubtitle": {
+    "message": "在背景分頁中逐一掃描網頁清單。每個網頁都是使用瀏覽器 Cookie 的真實造訪，找到的內容會照常加入歷史記錄。"
+  },
+  "bulkInputLabel": {
+    "message": "要掃描的網頁"
+  },
+  "bulkInputHint": {
+    "message": "每行一個網址。網站地圖（.xml）網址會加入其中列出的網頁。重複的網址會被移除，且只掃描 http 和 https 網頁。"
+  },
+  "bulkUpload": {
+    "message": "上傳 .txt 或 .csv"
+  },
+  "bulkCountFmt": {
+    "message": "網址：{0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "每次執行的網頁數（最多 {0}）"
+  },
+  "bulkTimeoutLabel": {
+    "message": "每個網頁的時間限制（秒）"
+  },
+  "bulkStart": {
+    "message": "開始"
+  },
+  "bulkPause": {
+    "message": "暫停"
+  },
+  "bulkResume": {
+    "message": "繼續"
+  },
+  "bulkStop": {
+    "message": "停止"
+  },
+  "bulkScanWaiting": {
+    "message": "掃描仍在等待的網頁"
+  },
+  "bulkNewList": {
+    "message": "新清單"
+  },
+  "bulkResults": {
+    "message": "結果"
+  },
+  "bulkColAddress": {
+    "message": "網址"
+  },
+  "bulkStatusWaiting": {
+    "message": "等待中"
+  },
+  "bulkStatusScanning": {
+    "message": "掃描中"
+  },
+  "bulkStatusDone": {
+    "message": "完成"
+  },
+  "bulkStatusFailed": {
+    "message": "失敗"
+  },
+  "bulkStatusSkipped": {
+    "message": "已略過"
+  },
+  "bulkReasonInvalid": {
+    "message": "不是有效的網址"
+  },
+  "bulkReasonScheme": {
+    "message": "只掃描 http 和 https 網頁"
+  },
+  "bulkReasonScope": {
+    "message": "因 設定 → 偵測 → 要掃描的網站 而略過"
+  },
+  "bulkReasonSitemap": {
+    "message": "無法讀取網站地圖。只能讀取 https 網站地圖。"
+  },
+  "bulkReasonTimeout": {
+    "message": "在時間限制內沒有結果"
+  },
+  "bulkReasonLoad": {
+    "message": "網頁未能載入"
+  },
+  "bulkReasonError": {
+    "message": "掃描失敗"
+  },
+  "bulkEndedOnFmt": {
+    "message": "最終停在 {0}"
+  },
+  "bulkNoProtection": {
+    "message": "未發現任何防護"
+  },
+  "bulkRunRunning": {
+    "message": "執行中"
+  },
+  "bulkRunPaused": {
+    "message": "已暫停"
+  },
+  "bulkRunStopped": {
+    "message": "已停止"
+  },
+  "bulkRunDone": {
+    "message": "已完成"
+  },
+  "bulkProgressFmt": {
+    "message": "已完成 {0}/{1}"
+  },
+  "bulkCountsFmt": {
+    "message": "完成：{0} · 有防護：{1} · 失敗：{2} · 已略過：{3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "執行期間擴充功能重新啟動，因此執行已停止。仍在等待的網頁未被掃描。"
+  },
+  "bulkStoppedNoWindow": {
+    "message": "沒有開啟的瀏覽器視窗可用來掃描網頁。"
+  },
+  "bulkStoppedOff": {
+    "message": "擴充功能已關閉。"
+  },
+  "bulkDuplicatesFmt": {
+    "message": "已移除重複：{0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "超出上限未納入：{0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "其他未納入的行：{0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "歷史記錄已暫停：網頁會被掃描，但不會被記錄。"
+  },
+  "bulkReadingSitemaps": {
+    "message": "正在讀取網站地圖…"
+  },
+  "bulkNothingToScan": {
+    "message": "此清單中沒有可掃描的網址。"
+  },
+  "bulkErrBusy": {
+    "message": "已有批次掃描正在執行。"
+  },
+  "bulkErrStart": {
+    "message": "無法開始批次掃描。"
+  },
+  "bulkErrFile": {
+    "message": "無法讀取該檔案。"
+  },
+  "bulkEmpty": {
+    "message": "貼上網址或上傳檔案，然後選擇開始。"
   }
 }

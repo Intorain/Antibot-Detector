@@ -34,6 +34,14 @@ function buildMessageHandlerRegistry(context) {
     if (typeof HistoryWatch !== 'undefined') {
         HistoryWatch.registerHandlers(registry);
     }
+    // Advanced → Check Cookies: the protection cookie timeline of the page's site
+    if (typeof CookieTimelineRecorder !== 'undefined') {
+        CookieTimelineRecorder.registerHandlers(registry);
+    }
+    // Bulk scan: start, pause, resume, stop from its page
+    if (typeof BulkScanRunner !== 'undefined') {
+        BulkScanRunner.registerHandlers(registry);
+    }
 
     return registry;
 }

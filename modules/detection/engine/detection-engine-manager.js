@@ -2004,6 +2004,10 @@ class DetectionEngineManager {
             setBadgeTextColor(tabId, true);
             chrome.action.setBadgeBackgroundColor({ color: BADGE.COLORS.BLACKLISTED, tabId: tabId }).catch(() => {});
             if (typeof ToolbarTitle !== 'undefined') ToolbarTitle.apply(chrome, tabId, 'skipped');
+            // A Bulk scan page that ended on a skipped site: listed as skipped, not left to time out
+            if (typeof BackgroundTabScan !== 'undefined' && BackgroundTabScan.isScanTab(tabId) && !BackgroundTabScan.isQuiet(tabId)) {
+                BackgroundTabScan.scanFinished(tabId, pageUrl, [], { excluded: true });
+            }
             return;
         }
         setPausedIcon(tabId, false);
@@ -2053,9 +2057,11 @@ class DetectionEngineManager {
 
             // A watchlist check's tab that landed on a cached page (its watched address redirected there): the check gets
             // the cached result as the scan's outcome and judges the address itself; the webhook and History are the
-            // check's business, never this tab's
-            if (typeof HistoryWatch !== 'undefined' && HistoryWatch.isWatchTab(tabId)) {
-                HistoryWatch.scanFinished(tabId, pageUrl, storedData.detectionResults || []);
+            // check's business, never this tab's. A Bulk scan tab gets it too, once the cache hit is handled as usual (end
+            // of this branch)
+            const scanTab = typeof BackgroundTabScan !== 'undefined' && BackgroundTabScan.isScanTab(tabId);
+            if (scanTab && BackgroundTabScan.isQuiet(tabId)) {
+                BackgroundTabScan.scanFinished(tabId, pageUrl, storedData.detectionResults || []);
                 return;
             }
 
@@ -2063,7 +2069,8 @@ class DetectionEngineManager {
             if (Settings && typeof Settings.sendWebhookIfEnabled === 'function' && storedData.detectionResults && storedData.detectionResults.length > 0) {
                 const tab = await chrome.tabs.get(tabId).catch(() => null);
                 if (!await isCurrentDocument()) return ignored;
-                await Settings.sendWebhookIfEnabled({
+                // A private-window page is never sent anywhere (History leaves it out too)
+                if (!(tab && tab.incognito === true)) await Settings.sendWebhookIfEnabled({
                     url: pageUrl,
                     hostname: UrlUtils.getHostnameFromUrl(pageUrl),
                     title: (tab && tab.title) || 'Untitled',
@@ -2095,7 +2102,16 @@ class DetectionEngineManager {
                 }
             }
 
+            if (scanTab) BackgroundTabScan.scanFinished(tabId, pageUrl, storedData.detectionResults || []);
             return;
+        }
+
+        // A page back from the back/forward cache only gets its cached result back on the badge: the tab's
+        // captured headers, cookies and requests by now belong to the page it went to, so a scan from here
+        // would mix the two (the popup still scans it on request)
+        if (triggerSource === 'bfcache_restore') {
+            Logger.debug('SCAN', `Page restored from the back/forward cache with no cached result, tab ${tabId}`);
+            return { status: 'not_cached' };
         }
 
         // Coalesce this document's notifications, never a new page or reload
@@ -2144,13 +2160,6 @@ class DetectionEngineManager {
         return await sendDataRequest();
     }
 
-    /**
-     * Handle CLEAR_DETECTION_CACHE message
-     * @param {object} request - Message request object
-     * @param {function} sendResponse - Response callback
-     * @param {Set} manuallyClearedCaches - Set to track manually cleared URLs
-     * @returns {boolean} True (async response)
-     */
     /** Settings → Data → Storage → Clear: every saved detection result, under the same lock as the stores and the single clear. */
     static async handleClearAllDetectionCache(sendResponse) {
         try {
@@ -2171,7 +2180,13 @@ class DetectionEngineManager {
         return true;
     }
 
-    static async handleClearDetectionCache(request, sendResponse, manuallyClearedCaches = null) {
+    /**
+     * Handle CLEAR_DETECTION_CACHE message
+     * @param {object} request - Message request object
+     * @param {function} sendResponse - Response callback
+     * @returns {boolean} True (async response)
+     */
+    static async handleClearDetectionCache(request, sendResponse) {
         try {
             const requestedScopeRaw = String(request.cacheScope || '').toLowerCase();
             const requestedScope = requestedScopeRaw === 'url' ? 'full' : requestedScopeRaw;
@@ -2203,10 +2218,6 @@ class DetectionEngineManager {
             }
 
             if (cleared) {
-                if (manuallyClearedCaches) {
-                    manuallyClearedCaches.add(urlHash);
-                }
-
                 sendResponse({ status: 'cleared', urlHash });
             } else {
                 sendResponse({ status: 'not_found' });

@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Historiken ersattes. Poster: {0}"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Exporterade 1 historikpost"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Sammanfogade 1 ny historikpost"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Historiken ersattes med 1 post"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Det gick inte att importera historiken: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "Hittades inte"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "satt {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "ändrad en gång"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "ändrad {0} gånger"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "senaste ändring {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "går ut {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "sessionscookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "borttagen {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "gick ut {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Tidslinje"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Satt"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Ändrad"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Borttagen"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Utgången"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Inspelningen börjar när sidan sätter kakan"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Registrerade tidigare"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Kort fingeravtryck av värdet: skiljer värden åt, sparar aldrig värdet"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Återställa officiella detektorer?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Texter som ännu inte är översatta till alla språk: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Översätt regeln"
-  },
   "ruleTranslateRuleHint": {
     "message": "Fyller i de översättningar som saknas för beskrivningen, mönstren och kombinationerna med Chromes översättare på enheten. Kontrollera dem innan du sparar."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Översätt"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Översätt ändringar"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Översatt"
+  },
+  "ruleTranslateBusy": {
+    "message": "Översätter…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Alla texter i den här regeln är översatta till alla {0} språk."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "{0} av {1} ändrade texter kunde inte översättas till alla språk här (webbläsaren kanske fortfarande laddar ner dem). Inget gick förlorat: texterna är som de var. Försök igen om en stund."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Nedladdat: {0}. {1} av {2} språk klara. Webbläsaren laddar ner varje språk en gång, ett per klick: klicka på Översätt igen för nästa."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Översätter {0} texter…"
@@ -6331,6 +6406,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl-kommando"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Öppna en webbsida för att kopiera den som kod"
   },
   "detectionMdHeadingFmt": {
     "message": "Skydd på {0}"
@@ -6536,6 +6620,57 @@
   "ruleLiveTestRunning": {
     "message": "Testar…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Öppna popupen på en webbplats för att skapa en regel från den."
+  },
+  "suggestRuleExactName": {
+    "message": "Söks på exakt namn"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Namn som börjar med {0}: resten ser slumpmässigt ut"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Skriptadresser som innehåller detta: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Upptäcks redan av {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Läser sidan…"
+  },
+  "suggestRuleError": {
+    "message": "Sidan kunde inte läsas. Läs in den igen och försök på nytt."
+  },
+  "suggestRuleOutdated": {
+    "message": "Tillägget har uppdaterats, men dess bakgrundsdel kör fortfarande den gamla versionen. Läs in tillägget igen på webbläsarens sida Tillägg och försök igen."
+  },
+  "pagePickButton": {
+    "message": "Från den här sidan"
+  },
+  "pagePickAddFmt": {
+    "message": "Lägg till {0}"
+  },
+  "pagePickInRule": {
+    "message": "redan i regeln"
+  },
+  "suggestRuleFilter": {
+    "message": "Filtrera"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Redan upptäckta: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "börjar med"
+  },
+  "suggestRuleNoCookies": {
+    "message": "Sidan har inga cookies."
+  },
+  "suggestRuleNoScripts": {
+    "message": "Inga skript från andra webbplatser."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "Inga svarshuvuden: läs in sidan igen för att fånga dem."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "Regeln matchar {0} (säkerhet {1} %)"
   },
@@ -6617,13 +6752,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Byte av språk läser in tillägget igen. Spara ändringarna i inställningarna först?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Översätt ändringarna"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Texter du ändrade på {0}: {1}. De andra språken visar fortfarande den gamla texten."
   },
   "ruleTranslateChangesHint": {
     "message": "Översätter det du skrev till engelska (originalet) och de andra språken med webbläsarens inbyggda översättare. Kontrollera dem innan du sparar."
+  },
+  "combinationOneCount": {
+    "message": "1 kombination"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} kombinationer"
+  },
+  "historyBulkScan": {
+    "message": "Massskanning"
+  },
+  "bulkTitle": {
+    "message": "Massskanning"
+  },
+  "bulkSubtitle": {
+    "message": "Skannar en lista med sidor en i taget i en bakgrundsflik. Varje sida är ett riktigt besök med webbläsarens cookies, och det som hittas läggs till i historiken som vanligt."
+  },
+  "bulkInputLabel": {
+    "message": "Sidor att skanna"
+  },
+  "bulkInputHint": {
+    "message": "En adress per rad. En sitemap-adress (.xml) lägger till sidorna den listar. Dubbletter tas bort, och bara http- och https-sidor skannas."
+  },
+  "bulkUpload": {
+    "message": "Ladda upp .txt eller .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Adresser: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Sidor per körning (högst {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Tidsgräns per sida, i sekunder"
+  },
+  "bulkStart": {
+    "message": "Starta"
+  },
+  "bulkPause": {
+    "message": "Pausa"
+  },
+  "bulkResume": {
+    "message": "Fortsätt"
+  },
+  "bulkStop": {
+    "message": "Stoppa"
+  },
+  "bulkScanWaiting": {
+    "message": "Skanna sidorna som fortfarande väntar"
+  },
+  "bulkNewList": {
+    "message": "Ny lista"
+  },
+  "bulkResults": {
+    "message": "Resultat"
+  },
+  "bulkColAddress": {
+    "message": "Adress"
+  },
+  "bulkStatusWaiting": {
+    "message": "Väntar"
+  },
+  "bulkStatusScanning": {
+    "message": "Skannar"
+  },
+  "bulkStatusDone": {
+    "message": "Klar"
+  },
+  "bulkStatusFailed": {
+    "message": "Misslyckades"
+  },
+  "bulkStatusSkipped": {
+    "message": "Hoppades över"
+  },
+  "bulkReasonInvalid": {
+    "message": "Ingen giltig adress"
+  },
+  "bulkReasonScheme": {
+    "message": "Bara http- och https-sidor skannas"
+  },
+  "bulkReasonScope": {
+    "message": "Överhoppad enligt Inställningar → Upptäckt → Webbplatser att skanna"
+  },
+  "bulkReasonSitemap": {
+    "message": "Det gick inte att läsa sitemapen. Bara https-sitemaps kan läsas."
+  },
+  "bulkReasonTimeout": {
+    "message": "Inget resultat inom tidsgränsen"
+  },
+  "bulkReasonLoad": {
+    "message": "Sidan laddades inte"
+  },
+  "bulkReasonError": {
+    "message": "Skanningen misslyckades"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Hamnade på {0}"
+  },
+  "bulkNoProtection": {
+    "message": "Inget skydd hittades"
+  },
+  "bulkRunRunning": {
+    "message": "Pågår"
+  },
+  "bulkRunPaused": {
+    "message": "Pausad"
+  },
+  "bulkRunStopped": {
+    "message": "Stoppad"
+  },
+  "bulkRunDone": {
+    "message": "Slutförd"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} av {1} klara"
+  },
+  "bulkCountsFmt": {
+    "message": "Klara: {0} · Med skydd: {1} · Misslyckade: {2} · Överhoppade: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "Tillägget startade om under körningen, så den stoppades. Sidorna som fortfarande väntade skannades inte."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "Inget webbläsarfönster var öppet att skanna sidor i."
+  },
+  "bulkStoppedOff": {
+    "message": "Tillägget är avstängt."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Borttagna dubbletter: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Utelämnade över gränsen: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Andra utelämnade rader: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "Historiken är pausad: sidorna skannas men sparas inte."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Läser sitemaps…"
+  },
+  "bulkNothingToScan": {
+    "message": "Det finns ingen adress att skanna i den här listan."
+  },
+  "bulkErrBusy": {
+    "message": "En massskanning pågår redan."
+  },
+  "bulkErrStart": {
+    "message": "Det gick inte att starta massskanningen."
+  },
+  "bulkErrFile": {
+    "message": "Det gick inte att läsa filen."
+  },
+  "bulkEmpty": {
+    "message": "Klistra in adresser eller ladda upp en fil och välj sedan Starta."
   }
 }

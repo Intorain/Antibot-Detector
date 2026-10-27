@@ -985,6 +985,15 @@
   "notificationHistoryReplacedFmt": {
     "message": "Historial reemplazado con {0} elementos"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Se exportó 1 elemento del historial"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Se fusionó 1 nuevo elemento del historial"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Historial reemplazado con 1 elemento"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Error al importar el historial: {0}"
   },
@@ -4290,6 +4299,54 @@
   "advCookieNotFound": {
     "message": "No encontradas"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "creada {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "cambió una vez"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "cambió {0} veces"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "último cambio {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "caduca {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "cookie de sesión"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "eliminada {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "caducó {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Cronología"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Creada"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Cambiada"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Eliminada"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Caducada"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "El registro empieza cuando la página crea la cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Registradas antes"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Huella corta del valor: distingue valores, nunca guarda el valor"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "¿Restaurar los detectores oficiales?"
   },
@@ -6218,11 +6275,29 @@
   "ruleTranslateBarFmt": {
     "message": "Textos que aún faltan por traducir en algún idioma: {0}"
   },
-  "ruleTranslateRule": {
-    "message": "Traducir la regla"
-  },
   "ruleTranslateRuleHint": {
     "message": "Completa las traducciones que faltan de la descripción, los patrones y las combinaciones con el traductor de Chrome en el dispositivo. Revísalas antes de guardar."
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Traducir"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Traducir cambios"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Traducida"
+  },
+  "ruleTranslateBusy": {
+    "message": "Traduciendo…"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Todos los textos de esta regla están traducidos a los {0} idiomas."
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "No se pudieron traducir {0} de {1} textos cambiados a todos los idiomas aquí (puede que el navegador aún esté descargándolos). No se perdió nada: esos textos siguen como estaban. Vuelve a intentarlo en un momento."
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Descargado: {0}. {1} de {2} idiomas listos. El navegador descarga cada idioma una sola vez, uno por clic: vuelve a pulsar Traducir para el siguiente."
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Traduciendo {0} textos…"
@@ -6333,6 +6408,15 @@
   },
   "detectionCopyMenuJson": {
     "message": "JSON"
+  },
+  "detectionCopyMenuCurl": {
+    "message": "Comando curl"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Abre una página web para copiarla como código"
   },
   "detectionMdHeadingFmt": {
     "message": "Protecciones en {0}"
@@ -6538,6 +6622,57 @@
   "ruleLiveTestRunning": {
     "message": "Probando…"
   },
+  "suggestRuleUnsupported": {
+    "message": "Abre la ventana emergente en un sitio web para crear una regla a partir de él."
+  },
+  "suggestRuleExactName": {
+    "message": "Se busca por su nombre exacto"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Nombres que empiezan por {0}: el resto parece aleatorio"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Direcciones de scripts que lo contienen: {0}"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Ya lo detecta {0}"
+  },
+  "suggestRuleLoading": {
+    "message": "Leyendo la página…"
+  },
+  "suggestRuleError": {
+    "message": "No se pudo leer la página. Recárgala y vuelve a intentarlo."
+  },
+  "suggestRuleOutdated": {
+    "message": "La extensión se actualizó, pero su parte en segundo plano sigue con la versión anterior. Recarga la extensión en la página Extensiones del navegador y vuelve a intentarlo."
+  },
+  "pagePickButton": {
+    "message": "De esta página"
+  },
+  "pagePickAddFmt": {
+    "message": "Añadir {0}"
+  },
+  "pagePickInRule": {
+    "message": "ya en la regla"
+  },
+  "suggestRuleFilter": {
+    "message": "Filtrar"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Ya detectados: {0}"
+  },
+  "suggestRulePrefixTag": {
+    "message": "empieza por"
+  },
+  "suggestRuleNoCookies": {
+    "message": "La página no tiene cookies."
+  },
+  "suggestRuleNoScripts": {
+    "message": "No hay scripts de otros sitios."
+  },
+  "suggestRuleNoHeaders": {
+    "message": "No hay cabeceras de respuesta: recarga la página para capturarlas."
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "La regla coincide en {0} (confianza {1}%)"
   },
@@ -6619,13 +6754,166 @@
   "settingsLanguageUnsavedMessage": {
     "message": "Cambiar el idioma recarga la extensión. ¿Guardar primero los cambios en los ajustes?"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Traducir los cambios"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Textos que cambiaste en {0}: {1}. Los demás idiomas siguen mostrando el texto anterior."
   },
   "ruleTranslateChangesHint": {
     "message": "Traduce lo que escribiste al inglés (el original) y a los demás idiomas con el traductor integrado del navegador. Revísalos antes de guardar."
+  },
+  "combinationOneCount": {
+    "message": "1 combinación"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} combinaciones"
+  },
+  "historyBulkScan": {
+    "message": "Análisis masivo"
+  },
+  "bulkTitle": {
+    "message": "Análisis masivo"
+  },
+  "bulkSubtitle": {
+    "message": "Analiza una lista de páginas de una en una en una pestaña en segundo plano. Cada página es una visita real con las cookies de tu navegador, y lo que encuentra se añade al Historial como siempre."
+  },
+  "bulkInputLabel": {
+    "message": "Páginas a analizar"
+  },
+  "bulkInputHint": {
+    "message": "Una dirección por línea. Una dirección de sitemap (.xml) añade las páginas que contiene. Se quitan los duplicados y solo se analizan páginas http y https."
+  },
+  "bulkUpload": {
+    "message": "Subir .txt o .csv"
+  },
+  "bulkCountFmt": {
+    "message": "Direcciones: {0}"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Páginas por ejecución (hasta {0})"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Tiempo límite por página, en segundos"
+  },
+  "bulkStart": {
+    "message": "Iniciar"
+  },
+  "bulkPause": {
+    "message": "Pausar"
+  },
+  "bulkResume": {
+    "message": "Reanudar"
+  },
+  "bulkStop": {
+    "message": "Detener"
+  },
+  "bulkScanWaiting": {
+    "message": "Analizar las páginas que siguen pendientes"
+  },
+  "bulkNewList": {
+    "message": "Nueva lista"
+  },
+  "bulkResults": {
+    "message": "Resultados"
+  },
+  "bulkColAddress": {
+    "message": "Dirección"
+  },
+  "bulkStatusWaiting": {
+    "message": "Pendiente"
+  },
+  "bulkStatusScanning": {
+    "message": "Analizando"
+  },
+  "bulkStatusDone": {
+    "message": "Hecho"
+  },
+  "bulkStatusFailed": {
+    "message": "Error"
+  },
+  "bulkStatusSkipped": {
+    "message": "Omitida"
+  },
+  "bulkReasonInvalid": {
+    "message": "No es una dirección válida"
+  },
+  "bulkReasonScheme": {
+    "message": "Solo se analizan páginas http y https"
+  },
+  "bulkReasonScope": {
+    "message": "Omitida por Ajustes → Detección → Sitios a analizar"
+  },
+  "bulkReasonSitemap": {
+    "message": "No se pudo leer el sitemap. Solo se pueden leer sitemaps https."
+  },
+  "bulkReasonTimeout": {
+    "message": "Sin resultado dentro del tiempo límite"
+  },
+  "bulkReasonLoad": {
+    "message": "La página no cargó"
+  },
+  "bulkReasonError": {
+    "message": "El análisis falló"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Terminó en {0}"
+  },
+  "bulkNoProtection": {
+    "message": "No se encontró ninguna protección"
+  },
+  "bulkRunRunning": {
+    "message": "En curso"
+  },
+  "bulkRunPaused": {
+    "message": "En pausa"
+  },
+  "bulkRunStopped": {
+    "message": "Detenido"
+  },
+  "bulkRunDone": {
+    "message": "Terminado"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} de {1} terminadas"
+  },
+  "bulkCountsFmt": {
+    "message": "Hechas: {0} · Con protecciones: {1} · Con error: {2} · Omitidas: {3}"
+  },
+  "bulkStoppedRestart": {
+    "message": "La extensión se reinició durante la ejecución, así que se detuvo. Las páginas pendientes no se analizaron."
+  },
+  "bulkStoppedNoWindow": {
+    "message": "No había ninguna ventana del navegador abierta donde analizar las páginas."
+  },
+  "bulkStoppedOff": {
+    "message": "La extensión está desactivada."
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Duplicados quitados: {0}"
+  },
+  "bulkOverCapFmt": {
+    "message": "Fuera por superar el límite: {0}"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Otras líneas omitidas: {0}"
+  },
+  "bulkHistoryPaused": {
+    "message": "El Historial está en pausa: las páginas se analizan pero no se guardan."
+  },
+  "bulkReadingSitemaps": {
+    "message": "Leyendo sitemaps…"
+  },
+  "bulkNothingToScan": {
+    "message": "No hay ninguna dirección que analizar en esta lista."
+  },
+  "bulkErrBusy": {
+    "message": "Ya hay un análisis masivo en curso."
+  },
+  "bulkErrStart": {
+    "message": "No se pudo iniciar el análisis masivo."
+  },
+  "bulkErrFile": {
+    "message": "No se pudo leer el archivo."
+  },
+  "bulkEmpty": {
+    "message": "Pega direcciones o sube un archivo y luego elige Iniciar."
   }
 }

@@ -62,6 +62,15 @@ function tabOfWorkerRequest(details) {
 const tabPageRequests = new Map();
 
 /**
+ * A request made for a page Chrome is prerendering (speculation rules) is not the visible page's: recorded
+ * under the tab's id, it replaced the shown page's headers and cleared its captured data. Pages the person
+ * has not opened are left alone; once activated, the content script asks for their result.
+ */
+function isPrerenderRequest(details) {
+    return !!details && details.documentLifecycle === 'prerender';
+}
+
+/**
  * A tab starting a new page forgets what the page before sent and received: its requests and request
  * bodies (what it fetched after its scan, late analytics or a challenge it solved, belongs to it, not to the
  * next page), its response headers and cookies, and its captured responses. Kept until then, a scan of the
@@ -71,22 +80,62 @@ function forgetTabRequests(tabId, requestId) {
     if (typeof tabId !== 'number' || tabId < 0) return;
     if (requestId !== undefined && tabPageRequests.get(tabId) === requestId) return; // a redirect of the same load
     if (requestId === undefined) tabPageRequests.delete(tabId); else tabPageRequests.set(tabId, requestId);
+    // "This tab shows a cached result" belonged to the page before: the new page's own response headers and
+    // Set-Cookie arrive before it commits (and before its content script asks the cache), so a flag left over
+    // until the address changed dropped them. A cache hit on the new page sets it again.
+    if (typeof tabsUsingCache !== 'undefined') tabsUsingCache.delete(tabId);
     for (const store of [payloadStore, networkUrlsStore, headersStore, requestHeadersStore, responseCookiesStore]) store.delete(tabId);
     if (typeof responseStore !== 'undefined') responseStore.delete(tabId);
     // The finished scan of the page before takes no more late requests (detection-lifecycle.js)
     if (typeof forgetFinishedPage === 'function') forgetFinishedPage(tabId);
 }
 
+/**
+ * A request body as payload rules read it, at most `limit` characters (the same limit as a captured response):
+ * an upload of several megabytes was decoded whole and held per tab, then matched by every payload rule.
+ * @returns {{payloadData: (string|Object|null), payloadType: string}}
+ */
+function readRequestBody(requestBody, limit) {
+    if (!requestBody) return { payloadData: null, payloadType: 'unknown' };
+    if (requestBody.formData) {
+        const formData = {};
+        let left = limit;
+        for (const [name, values] of Object.entries(requestBody.formData)) {
+            if (left <= 0) break;
+            formData[name] = (Array.isArray(values) ? values : [values]).map(value => {
+                const text = String(value).slice(0, Math.max(0, left));
+                left -= text.length;
+                return text;
+            });
+        }
+        return { payloadData: formData, payloadType: 'formData' };
+    }
+    if (Array.isArray(requestBody.raw) && requestBody.raw.length > 0) {
+        const decoder = new TextDecoder('utf-8');
+        let text = '';
+        for (const item of requestBody.raw) {
+            if (text.length >= limit) break;
+            if (!item || !item.bytes) continue;
+            // UTF-8 never takes more than four bytes per character, so this many bytes always fill the limit
+            const bytes = new Uint8Array(item.bytes, 0, Math.min(item.bytes.byteLength, (limit - text.length) * 4));
+            text += decoder.decode(bytes);
+        }
+        return { payloadData: text.slice(0, limit), payloadType: 'raw' };
+    }
+    return { payloadData: null, payloadType: 'unknown' };
+}
+
 function setupHeaderCapture() {
     // Synchronous and registered first, so the new page's own request is recorded after the clear
     chrome.webRequest.onBeforeRequest.addListener(
-        (details) => { forgetTabRequests(details.tabId, details.requestId); },
+        (details) => { if (!isPrerenderRequest(details)) forgetTabRequests(details.tabId, details.requestId); },
         { urls: ['<all_urls>'], types: ['main_frame'] }
     );
 
     // Listen for response headers
     chrome.webRequest.onHeadersReceived.addListener(
         safeWebRequestListener(async (details) => {
+            if (isPrerenderRequest(details)) return;
             // Skip if extension is disabled
             if (!await isExtensionEnabled()) {
                 return;
@@ -143,6 +192,7 @@ function setupHeaderCapture() {
     // Listen for request headers
     chrome.webRequest.onBeforeSendHeaders.addListener(
         safeWebRequestListener(async (details) => {
+            if (isPrerenderRequest(details)) return;
             // Skip if extension is disabled
             if (!await isExtensionEnabled()) {
                 return;
@@ -176,6 +226,7 @@ function setupHeaderCapture() {
     // Listen for request payloads (POST/PUT/PATCH/DELETE bodies)
     chrome.webRequest.onBeforeRequest.addListener(
         safeWebRequestListener(async (details) => {
+            if (isPrerenderRequest(details)) return;
             // Skip if extension is disabled
             if (!await isExtensionEnabled()) {
                 return;
@@ -191,29 +242,7 @@ function setupHeaderCapture() {
 
                 // Only store payloads for methods that typically have bodies
                 if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-                    let payloadData = null;
-                    let payloadType = 'unknown';
-
-                    if (details.requestBody.formData) {
-                        payloadData = details.requestBody.formData;
-                        payloadType = 'formData';
-                    }
-                    else if (details.requestBody.raw && details.requestBody.raw.length > 0) {
-                        const rawData = details.requestBody.raw.map(item => {
-                            if (item.bytes) {
-                                try {
-                                    const decoder = new TextDecoder('utf-8');
-                                    return decoder.decode(item.bytes);
-                                } catch (e) {
-                                    return btoa(String.fromCharCode(...new Uint8Array(item.bytes)));
-                                }
-                            }
-                            return '';
-                        }).join('');
-
-                        payloadData = rawData;
-                        payloadType = 'raw';
-                    }
+                    const { payloadData, payloadType } = readRequestBody(details.requestBody, Constants.MAX_RESPONSE_BODY_CHARS);
 
                     // Store all payloads in an array per tab
                     if (payloadData) {
@@ -243,6 +272,7 @@ function setupHeaderCapture() {
     // Capture all network URLs for pattern detection (anti-bot scripts load asynchronously)
     chrome.webRequest.onBeforeRequest.addListener(
         safeWebRequestListener(async (details) => {
+            if (isPrerenderRequest(details)) return;
             // Skip if extension is disabled
             if (!await isExtensionEnabled()) {
                 return;

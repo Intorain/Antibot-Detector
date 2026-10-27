@@ -988,6 +988,18 @@
   "notificationHistoryReplacedFmt": {
     "message": "Replaced history with {0} items"
   },
+  "notificationHistoryExportedOne": {
+    "message": "Exported 1 history item",
+    "description": "History export toast when exactly one entry was exported (notificationHistoryExportedFmt for other counts)"
+  },
+  "notificationHistoryMergedOne": {
+    "message": "Merged 1 new history item",
+    "description": "History import toast when exactly one new entry was merged (notificationHistoryMergedFmt for other counts)"
+  },
+  "notificationHistoryReplacedOne": {
+    "message": "Replaced history with 1 item",
+    "description": "History import toast when the history was replaced with exactly one entry (notificationHistoryReplacedFmt for other counts)"
+  },
   "notificationImportHistoryFailedFmt": {
     "message": "Failed to import history: {0}"
   },
@@ -4546,6 +4558,54 @@
   "advCookieNotFound": {
     "message": "Not found"
   },
+  "advCookieTimelineSetFmt": {
+    "message": "set {0}"
+  },
+  "advCookieTimelineChangedOnce": {
+    "message": "changed once"
+  },
+  "advCookieTimelineChangedFmt": {
+    "message": "changed {0} times"
+  },
+  "advCookieTimelineLastChangeFmt": {
+    "message": "last change {0}"
+  },
+  "advCookieTimelineExpiresFmt": {
+    "message": "expires {0}"
+  },
+  "advCookieTimelineSession": {
+    "message": "session cookie"
+  },
+  "advCookieTimelineRemovedFmt": {
+    "message": "removed {0}"
+  },
+  "advCookieTimelineExpiredFmt": {
+    "message": "expired {0}"
+  },
+  "advCookieTimelineTitle": {
+    "message": "Timeline"
+  },
+  "advCookieTimelineEventSet": {
+    "message": "Set"
+  },
+  "advCookieTimelineEventChanged": {
+    "message": "Changed"
+  },
+  "advCookieTimelineEventRemoved": {
+    "message": "Removed"
+  },
+  "advCookieTimelineEventExpired": {
+    "message": "Expired"
+  },
+  "advCookieTimelineEmpty": {
+    "message": "Recording starts when the page sets the cookie"
+  },
+  "advCookieTimelineEarlier": {
+    "message": "Recorded earlier"
+  },
+  "advCookieTimelineMarkerHint": {
+    "message": "Short fingerprint of the value: tells values apart, never stores the value"
+  },
   "restoreOfficialDetectorsConfirmTitle": {
     "message": "Restore official detectors?"
   },
@@ -6679,13 +6739,37 @@
     "message": "Texts not yet translated into every language: {0}",
     "description": "Rules → editor: shown above the rule when some of its texts (the description, a pattern's description, a combination's name) lack a translation in some language; {0} is how many texts"
   },
-  "ruleTranslateRule": {
-    "message": "Translate the rule",
-    "description": "Rules → editor: button that translates every text of the rule that is missing a translation, with Chrome's on-device translator"
-  },
   "ruleTranslateRuleHint": {
     "message": "Fills the missing translations of the description, the patterns and the combinations with Chrome's on-device translator. Check them before saving.",
     "description": "Hover text of the Translate the rule button"
+  },
+  "ruleTranslateBtnLabel": {
+    "message": "Translate",
+    "description": "Rule editor header: button that translates the rule's texts (description, pattern descriptions, combination names) into every language"
+  },
+  "ruleTranslateChangesShort": {
+    "message": "Translate changes",
+    "description": "Rule editor header button when texts were rewritten in the UI language: puts them into English and every other language"
+  },
+  "ruleTranslatedLabel": {
+    "message": "Translated",
+    "description": "Rule editor header button when every text of the rule is translated into all languages"
+  },
+  "ruleTranslateBusy": {
+    "message": "Translating…",
+    "description": "Rule editor header button while the translations are being made"
+  },
+  "ruleTranslateAllTranslatedFmt": {
+    "message": "Every text of this rule is translated into all {0} languages.",
+    "description": "Rule editor: hover text and notice when nothing is left to translate ({0} = number of languages)"
+  },
+  "ruleTranslateChangesKeptFmt": {
+    "message": "Could not translate {0} of {1} changed texts into every language here (the browser may still be downloading them). Nothing was lost: those texts are as they were. Try again in a moment.",
+    "description": "Rule editor \u2192 Translate changes: some texts could not be translated into every language, so they were left unchanged ({0} = how many, {1} = changed texts)"
+  },
+  "ruleTranslateDownloadedFmt": {
+    "message": "Downloaded {0}: {1} of {2} languages ready. The browser downloads each language once, one per click: click Translate again for the next.",
+    "description": "Rule editor \u2192 Translate: a language model was downloaded; the browser allows one download per click ({0} = language, {1} = ready, {2} = total)"
   },
   "ruleTranslateRuleWorkingFmt": {
     "message": "Translating {0} texts…",
@@ -6830,6 +6914,15 @@
   "detectionCopyMenuJson": {
     "message": "JSON",
     "description": "Copy menu on the Detection tab: copies the results as JSON. Usually kept as JSON."
+  },
+  "detectionCopyMenuCurl": {
+    "message": "curl command"
+  },
+  "detectionCopyMenuPython": {
+    "message": "Python (requests)"
+  },
+  "detectionReplayNoPage": {
+    "message": "Open a web page to copy it as code"
   },
   "detectionMdHeadingFmt": {
     "message": "Protections on {0}",
@@ -7103,6 +7196,74 @@
     "message": "Testing…",
     "description": "The Test button while the test runs"
   },
+  "suggestRuleUnsupported": {
+    "message": "Open the popup on a website to build a rule from it.",
+    "description": "New rule from this page: why the button is unavailable (a browser page, or the popup opened in its own tab)"
+  },
+  "suggestRuleExactName": {
+    "message": "Matched by its exact name",
+    "description": "New rule from this page: a cookie or header the new rule will look for by its exact name"
+  },
+  "suggestRuleCookiePrefixFmt": {
+    "message": "Names starting with {0}: the rest looks random",
+    "description": "New rule from this page: a cookie name with a random-looking end; {0} is the part the new rule will look for at the start of the name"
+  },
+  "suggestRuleScriptFmt": {
+    "message": "Script addresses containing this: {0}",
+    "description": "New rule from this page: a script address the new rule will look for; {0} is how many loaded scripts have it"
+  },
+  "suggestRuleDetectedByFmt": {
+    "message": "Already detected by {0}",
+    "description": "New rule from this page: an item an installed rule already finds; {0} lists those rules' names"
+  },
+  "suggestRuleLoading": {
+    "message": "Reading the page…",
+    "description": "New rule from this page: shown while the page is read"
+  },
+  "suggestRuleError": {
+    "message": "The page could not be read. Reload it and try again.",
+    "description": "New rule from this page: the page could not be read"
+  },
+  "suggestRuleOutdated": {
+    "message": "The extension was updated but its background part still runs the old version. Reload the extension in the browser's Extensions page and try again.",
+    "description": "New rule from this page: the worker still runs the version from before the extension was updated (reload the extension)"
+  },
+  "pagePickButton": {
+    "message": "From this page",
+    "description": "Rules editor \u2192 Cookies, Headers, Url: button beside Add Pattern that lists what the current page has, to add as patterns"
+  },
+  "pagePickAddFmt": {
+    "message": "Add {0}",
+    "description": "Rules editor \u2192 From this page: button that adds the ticked items as patterns ({0} = how many)"
+  },
+  "pagePickInRule": {
+    "message": "in this rule",
+    "description": "Rules editor \u2192 From this page: tag on an item the rule already has as a pattern"
+  },
+  "suggestRuleFilter": {
+    "message": "Filter",
+    "description": "New rule from this page: placeholder of the box that filters the list by name"
+  },
+  "suggestRuleKnownFmt": {
+    "message": "Already detected: {0}",
+    "description": "New rule from this page: folded group of items an installed rule already finds ({0} = how many)"
+  },
+  "suggestRulePrefixTag": {
+    "message": "starts with",
+    "description": "New rule from this page: short tag on a cookie matched by the start of its name (the rest looks random)"
+  },
+  "suggestRuleNoCookies": {
+    "message": "The page has no cookies.",
+    "description": "New rule from this page: the page has no cookies"
+  },
+  "suggestRuleNoScripts": {
+    "message": "No scripts from other sites.",
+    "description": "New rule from this page: the page loaded no scripts from other sites"
+  },
+  "suggestRuleNoHeaders": {
+    "message": "No response headers: reload the page to capture them.",
+    "description": "New rule from this page: no response headers were captured for the page (a page shown from the saved results)"
+  },
   "ruleLiveTestMatchesFmt": {
     "message": "The rule matches {0} (confidence {1}%)",
     "description": "Result of Test on this page. {0} = the page's host name, {1} = the rule's confidence on it (a number)"
@@ -7211,10 +7372,6 @@
     "message": "Changing the language reloads the extension. Save your changes to the settings first?",
     "description": "Settings → Language: the question; buttons Save, Discard, Cancel"
   },
-  "ruleTranslateChangesBtn": {
-    "message": "Translate the changes",
-    "description": "Rule editor, top bar: button that translates the texts the person rewrote in their language into English and the other languages"
-  },
   "ruleTranslateChangedFmt": {
     "message": "Texts you changed in {0}: {1}. The other languages still show the old text.",
     "description": "Rule editor, top bar: {0} = the UI language's name (Español), {1} = how many texts were rewritten in it"
@@ -7222,5 +7379,213 @@
   "ruleTranslateChangesHint": {
     "message": "Translates what you wrote into English (the original) and into the other languages, with the browser's on-device translator. Check them before saving.",
     "description": "Rule editor, top bar: tooltip of Translate the changes"
+  },
+  "combinationOneCount": {
+    "message": "1 combination",
+    "description": "Rules editor: count on the folded Combinations card when the rule has one"
+  },
+  "combinationsCountFmt": {
+    "message": "{0} combinations",
+    "description": "Rules editor: count on the folded Combinations card ({0} = how many)"
+  },
+  "historyBulkScan": {
+    "message": "Bulk scan",
+    "description": "History menu: opens the Bulk scan page"
+  },
+  "bulkTitle": {
+    "message": "Bulk scan",
+    "description": "Bulk scan page: title"
+  },
+  "bulkSubtitle": {
+    "message": "Scan a list of pages one at a time in a background tab. Each page is a real visit with your browser's cookies, and what it finds is added to History as usual.",
+    "description": "Bulk scan page: subtitle"
+  },
+  "bulkInputLabel": {
+    "message": "Pages to scan",
+    "description": "Bulk scan: label of the address list"
+  },
+  "bulkInputHint": {
+    "message": "One address per line. A sitemap .xml address adds the pages it lists. Duplicates are removed, and only http and https pages are scanned.",
+    "description": "Bulk scan: hint under the address list"
+  },
+  "bulkUpload": {
+    "message": "Upload .txt or .csv",
+    "description": "Bulk scan: button that reads a file into the list"
+  },
+  "bulkCountFmt": {
+    "message": "Addresses: {0}",
+    "description": "Bulk scan: how many lines the list has ({0} = count)"
+  },
+  "bulkCapLabelFmt": {
+    "message": "Pages per run (up to {0})",
+    "description": "Bulk scan: label of the cap field ({0} = the maximum)"
+  },
+  "bulkTimeoutLabel": {
+    "message": "Time limit per page, in seconds",
+    "description": "Bulk scan: label of the per-page timeout field"
+  },
+  "bulkStart": {
+    "message": "Start",
+    "description": "Bulk scan: start the run"
+  },
+  "bulkPause": {
+    "message": "Pause",
+    "description": "Bulk scan: pause the run"
+  },
+  "bulkResume": {
+    "message": "Resume",
+    "description": "Bulk scan: resume a paused run"
+  },
+  "bulkStop": {
+    "message": "Stop",
+    "description": "Bulk scan: stop the run"
+  },
+  "bulkScanWaiting": {
+    "message": "Scan the pages still waiting",
+    "description": "Bulk scan: start a new run with the pages a stopped run did not scan"
+  },
+  "bulkNewList": {
+    "message": "New list",
+    "description": "Bulk scan: forget the finished run and edit the list again"
+  },
+  "bulkResults": {
+    "message": "Results",
+    "description": "Bulk scan: heading of the results table"
+  },
+  "bulkColAddress": {
+    "message": "Address",
+    "description": "Bulk scan: results column with the page address"
+  },
+  "bulkStatusWaiting": {
+    "message": "Waiting",
+    "description": "Bulk scan: page status"
+  },
+  "bulkStatusScanning": {
+    "message": "Scanning",
+    "description": "Bulk scan: page status"
+  },
+  "bulkStatusDone": {
+    "message": "Done",
+    "description": "Bulk scan: page status"
+  },
+  "bulkStatusFailed": {
+    "message": "Failed",
+    "description": "Bulk scan: page status"
+  },
+  "bulkStatusSkipped": {
+    "message": "Skipped",
+    "description": "Bulk scan: page status"
+  },
+  "bulkReasonInvalid": {
+    "message": "Not a valid address",
+    "description": "Bulk scan: why a line was skipped"
+  },
+  "bulkReasonScheme": {
+    "message": "Only http and https pages are scanned",
+    "description": "Bulk scan: why a line was skipped"
+  },
+  "bulkReasonScope": {
+    "message": "Skipped by Settings → Detection → Sites to scan",
+    "description": "Bulk scan: why a page was skipped"
+  },
+  "bulkReasonSitemap": {
+    "message": "The sitemap could not be read. Only https sitemaps can be read.",
+    "description": "Bulk scan: why a sitemap line was skipped"
+  },
+  "bulkReasonTimeout": {
+    "message": "No result within the time limit",
+    "description": "Bulk scan: why a page failed"
+  },
+  "bulkReasonLoad": {
+    "message": "The page did not load",
+    "description": "Bulk scan: why a page failed"
+  },
+  "bulkReasonError": {
+    "message": "The scan failed",
+    "description": "Bulk scan: why a page failed"
+  },
+  "bulkEndedOnFmt": {
+    "message": "Ended on {0}",
+    "description": "Bulk scan: the page redirected ({0} = the address it ended on)"
+  },
+  "bulkNoProtection": {
+    "message": "No protection found",
+    "description": "Bulk scan: a scanned page with no detection"
+  },
+  "bulkRunRunning": {
+    "message": "Running",
+    "description": "Bulk scan: run state"
+  },
+  "bulkRunPaused": {
+    "message": "Paused",
+    "description": "Bulk scan: run state"
+  },
+  "bulkRunStopped": {
+    "message": "Stopped",
+    "description": "Bulk scan: run state"
+  },
+  "bulkRunDone": {
+    "message": "Finished",
+    "description": "Bulk scan: run state"
+  },
+  "bulkProgressFmt": {
+    "message": "{0} of {1} finished",
+    "description": "Bulk scan: progress ({0} = pages finished, {1} = all pages)"
+  },
+  "bulkCountsFmt": {
+    "message": "Done: {0} · With protections: {1} · Failed: {2} · Skipped: {3}",
+    "description": "Bulk scan: totals of the run"
+  },
+  "bulkStoppedRestart": {
+    "message": "The extension restarted during the run, so it stopped. The pages still waiting were not scanned.",
+    "description": "Bulk scan: why the run stopped"
+  },
+  "bulkStoppedNoWindow": {
+    "message": "No browser window was open to scan pages in.",
+    "description": "Bulk scan: why the run stopped or did not start"
+  },
+  "bulkStoppedOff": {
+    "message": "The extension is switched off.",
+    "description": "Bulk scan: why the run stopped or did not start"
+  },
+  "bulkDuplicatesFmt": {
+    "message": "Duplicates removed: {0}",
+    "description": "Bulk scan: note under the progress ({0} = count)"
+  },
+  "bulkOverCapFmt": {
+    "message": "Left out over the limit: {0}",
+    "description": "Bulk scan: pages over the per-run cap ({0} = count)"
+  },
+  "bulkMoreSkippedFmt": {
+    "message": "Other lines left out: {0}",
+    "description": "Bulk scan: skipped lines not listed in the table ({0} = count)"
+  },
+  "bulkHistoryPaused": {
+    "message": "History is paused, so the pages are scanned but not recorded.",
+    "description": "Bulk scan: notice when History is paused"
+  },
+  "bulkReadingSitemaps": {
+    "message": "Reading sitemaps…",
+    "description": "Bulk scan: while the sitemaps of the list are fetched"
+  },
+  "bulkNothingToScan": {
+    "message": "There is no address to scan in this list.",
+    "description": "Bulk scan: Start with nothing scannable"
+  },
+  "bulkErrBusy": {
+    "message": "A bulk scan is already running.",
+    "description": "Bulk scan: Start while another run is going on"
+  },
+  "bulkErrStart": {
+    "message": "The bulk scan could not start.",
+    "description": "Bulk scan: Start failed"
+  },
+  "bulkErrFile": {
+    "message": "The file could not be read.",
+    "description": "Bulk scan: upload failed"
+  },
+  "bulkEmpty": {
+    "message": "Paste addresses or upload a file, then choose Start.",
+    "description": "Bulk scan: empty state"
   }
 }
