@@ -613,6 +613,12 @@ Rules.prototype.updateAllAddPatternButtonStates = function() {
     });
   };
 
+/** A regular expression the detection engine compiles and runs (utils/pattern-cache.js refuses the dangerous ones). */
+Rules.isRunnableRegex = function(pattern) {
+  try { new RegExp(pattern); } catch (_) { return false; }
+  return typeof isLikelyEvilRegex !== 'function' || !isLikelyEvilRegex(pattern);
+};
+
 Rules.prototype.validatePatternRows = function() {
     const methodsContainer = document.querySelector('#detectionMethodsContainer');
     if (!methodsContainer) {
@@ -641,6 +647,16 @@ Rules.prototype.validatePatternRows = function() {
             methodType,
             itemIndexInSection
           });
+          return;
+        }
+        // A pattern marked as a regex has to be one the engine can run: an invalid one matches nothing (and the
+        // rule could not be imported back from an export), one that backtracks catastrophically is refused
+        const valueInput = item.querySelector('.method-input.method-value');
+        for (const [flag, input] of [['nameRegex', requiredInput], ['valueRegex', valueInput]]) {
+          const pattern = input && input.value ? input.value.trim() : '';
+          if (item.dataset[flag] !== 'true' || !pattern || Rules.isRunnableRegex(pattern)) continue;
+          invalidRows.push({ section, item, input, methodType, itemIndexInSection, reason: 'regex' });
+          break;
         }
       });
     });
@@ -1132,7 +1148,7 @@ Rules.prototype._collectDetectionFromForm = function() {
           if (describedOnRow) {
             if (item.dataset.description) methodData.description = item.dataset.description;
             else delete methodData.description;
-            // Its translations (Settings → Description → Translations)
+            // Its translations (kept as they were unless the text itself was replaced: they translate the old text)
             let translations = null;
             try { translations = item.dataset.descriptionI18n ? JSON.parse(item.dataset.descriptionI18n) : null; } catch (_) { translations = null; }
             const kept = translations && typeof translations === 'object'
@@ -1178,8 +1194,12 @@ Rules.prototype.saveRule = async function() {
       this.markPatternValidationState(patternValidation.invalidRows);
       this.revealAndFocusInvalidRow(patternValidation.invalidRows[0]);
 
-      const requiredMessage = (typeof I18n !== 'undefined' && I18n.get('rulesUiFillRequiredPatterns'))
-        || 'Please fill all required pattern fields before saving.';
+      const regexRow = patternValidation.invalidRows.find(row => row.reason === 'regex');
+      const requiredMessage = regexRow
+        ? ((typeof I18n !== 'undefined' && I18n.get('rulesUiInvalidRegex'))
+          || 'A pattern marked as a regular expression is not valid, or could freeze scanning. Fix it, or turn Regex off for that row.')
+        : ((typeof I18n !== 'undefined' && I18n.get('rulesUiFillRequiredPatterns'))
+          || 'Please fill all required pattern fields before saving.');
       if (typeof NotificationHelper !== 'undefined' && typeof NotificationHelper.warning === 'function') {
         NotificationHelper.warning(requiredMessage);
       } else {
@@ -1261,7 +1281,7 @@ Rules.prototype.saveRule = async function() {
       draft.detector.customIcon = draft.customIcon;
     }
 
-    // Detector Information → Description, with its translations
+    // Detector Information → Description (its translations stay with it unless its text was replaced)
     if (typeof this.collectDetectorDescription === 'function' && document.querySelector('#detectorDescriptionInput')) {
       const { description, descriptionI18n } = this.collectDetectorDescription();
       if (description) draft.detector.description = description;

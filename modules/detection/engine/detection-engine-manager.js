@@ -1532,8 +1532,10 @@ class DetectionEngineManager {
      * @param {string} url - Page URL
      * @returns {Promise<object|null>} Cached detection data or null
      */
-    static async getStoredDetection(url) {
+    static async getStoredDetection(url, { privateWindow } = {}) {
         if (DetectionEngineManager.isCacheBypassed(url)) return null;
+        // A page scanned in a private window is never an answer for a normal window (its History, webhook or popup)
+        const hidden = (stored) => privateWindow === false && stored && stored.privateWindow === true;
         const releaseStorageLock = await acquireDetectionStorageLock();
         try { // outer: release the storage lock in finally
         try {
@@ -1574,6 +1576,7 @@ class DetectionEngineManager {
                     Logger.debug('CACHE', `Skipped (found with JS hooks ${hooksOff ? 'on' : 'off'}): ${url}`);
                     return null;
                 }
+                if (hidden(stored)) return null;
 
                 Logger.debug('CACHE', `Hit (${source}, scope ${stored.cacheScope || '?'}): ${url}`);
                 return stored;
@@ -1617,7 +1620,7 @@ class DetectionEngineManager {
                     continue;
                 }
                 const storedHostname = stored.hostname || UrlUtils.getHostnameFromUrl(stored.url || '');
-                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname) && sameHooks(stored)) {
+                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname) && sameHooks(stored) && !hidden(stored)) {
                     if (!hostnameFallback ||
                         getStoredDetectionCount(stored) > getStoredDetectionCount(hostnameFallback) ||
                         (getStoredDetectionCount(stored) === getStoredDetectionCount(hostnameFallback) && stored.timestamp > hostnameFallback.timestamp)) {
@@ -1720,16 +1723,18 @@ class DetectionEngineManager {
             const getStoredDetectionCount = (stored) => (
                 stored?.detectionCount ?? (Array.isArray(stored?.detectionResults) ? stored.detectionResults.length : 0)
             );
-            // A watchlist check keeps no earlier result: it exists to say what the page shows now
-            const fresh = DetectionEngineManager.isCacheBypassed(url);
-            let existingPositiveData = !fresh && existingIsValid && getStoredDetectionCount(existingStoredData) > 0
+            // A watchlist check or a Bulk scan keeps no earlier result: they exist to say what the page shows now
+            const fresh = DetectionEngineManager.isCacheBypassed(url) || pageData.fresh === true;
+            // A normal window's scan never takes a private window's result, and the other way round
+            const samePrivacy = (stored) => (stored && stored.privateWindow === true) === (pageData.privateWindow === true);
+            let existingPositiveData = !fresh && existingIsValid && samePrivacy(existingStoredData) && getStoredDetectionCount(existingStoredData) > 0
                 ? existingStoredData
                 : null;
 
             if (detectionResults.length === 0 && !existingPositiveData && !fresh) {
                 const requestedHostname = UrlUtils.getHostnameFromUrl(url);
                 for (const stored of Object.values(storage)) {
-                    if (!stored || Date.now() >= stored.expiry || getStoredDetectionCount(stored) <= 0 || !sameHooks(stored)) {
+                    if (!stored || Date.now() >= stored.expiry || getStoredDetectionCount(stored) <= 0 || !sameHooks(stored) || !samePrivacy(stored)) {
                         continue;
                     }
 
@@ -1827,7 +1832,9 @@ class DetectionEngineManager {
                 detectionCount: detectionResults.length,
                 fromStorage: false,
                 cacheScope: cacheScope,
-                ...(hooksOff ? { hooksOff: true } : {})
+                ...(hooksOff ? { hooksOff: true } : {}),
+                // Removed when no private window is left (DetectionCacheRetention)
+                ...(pageData.privateWindow === true ? { privateWindow: true } : {})
             };
 
             storage[urlHash] = storedData;
@@ -1914,11 +1921,11 @@ class DetectionEngineManager {
      * @param {object} storage
      * @returns {{storage: object, expired: number, evicted: number}}
      */
-    static pruneStorageObject(storage) {
+    static pruneStorageObject(storage, options = {}) {
         if (typeof DetectionCacheRetention === 'undefined' || !DetectionCacheRetention.prune) {
-            return { storage, expired: 0, evicted: 0 };
+            return { storage, expired: 0, evicted: 0, privateRemoved: 0 };
         }
-        return DetectionCacheRetention.prune(storage);
+        return DetectionCacheRetention.prune(storage, options);
     }
 
     /**
@@ -1926,7 +1933,7 @@ class DetectionEngineManager {
      * when something was removed.
      * @returns {Promise<{expired: number, evicted: number}>}
      */
-    static async pruneStoredDetections() {
+    static async pruneStoredDetections({ dropPrivate = false } = {}) {
         const releaseStorageLock = await acquireDetectionStorageLock();
         try {
             const result = await chrome.storage.local.get([DetectionEngineManager.STORAGE_KEY]);
@@ -1942,11 +1949,11 @@ class DetectionEngineManager {
             if (!storage || typeof storage !== 'object' || Array.isArray(storage)) {
                 return { expired: 0, evicted: 0 };
             }
-            const pruned = DetectionEngineManager.pruneStorageObject(storage);
-            if (pruned.expired > 0 || pruned.evicted > 0) {
+            const pruned = DetectionEngineManager.pruneStorageObject(storage, { dropPrivate });
+            if (pruned.expired > 0 || pruned.evicted > 0 || pruned.privateRemoved > 0) {
                 await chrome.storage.local.set({ [DetectionEngineManager.STORAGE_KEY]: pruned.storage });
             }
-            return { expired: pruned.expired, evicted: pruned.evicted };
+            return { expired: pruned.expired, evicted: pruned.evicted, privateRemoved: pruned.privateRemoved || 0 };
         } finally {
             releaseStorageLock();
         }
@@ -1976,6 +1983,12 @@ class DetectionEngineManager {
         const targetDocument = sender.documentId ? { documentId: sender.documentId } : { frameId: 0 };
 
         Logger.debug('SCAN', `Page load (${triggerSource}) tab ${tabId}`);
+        // A prerendered page just shown: its load sent no request in this tab, so what the tab captured (requests,
+        // bodies, headers, cookies) is still the page shown before, maybe another site. It is not this page's evidence
+        if (triggerSource === 'prerender_activation' && typeof forgetTabRequests === 'function') {
+            if (typeof noteTabLeaving === 'function') noteTabLeaving(tabId);
+            forgetTabRequests(tabId);
+        }
 
         // Check if extension is enabled
         try {
@@ -2012,8 +2025,10 @@ class DetectionEngineManager {
         }
         setPausedIcon(tabId, false);
 
-        // Check cache first
-        const storedData = await DetectionEngineManager.getStoredDetection(pageUrl);
+        // Check cache first. A Bulk scan scans every page now, also one its address redirected to (only the listed
+        // address is set aside from the cache): a cached result days old would be reported as found today
+        const bulkScanTab = typeof BackgroundTabScan !== 'undefined' && BackgroundTabScan.isScanTab(tabId) && !BackgroundTabScan.isQuiet(tabId);
+        const storedData = bulkScanTab ? null : await DetectionEngineManager.getStoredDetection(pageUrl, { privateWindow: sender.tab?.incognito === true });
         if (!await isCurrentDocument()) return ignored;
 
         if (storedData) {
@@ -2096,7 +2111,8 @@ class DetectionEngineManager {
                         };
                         await HistoryRecorder.saveDetectionToHistory(tabId, pageData, storedData.detectionResults, chrome, {
                             historySettings,
-                            source: 'cache_hit'
+                            source: 'cache_hit',
+                            fromCache: true
                         });
                     }
                 }

@@ -104,7 +104,7 @@ class DetectorManager {
 
     /**
      * The official copy of an edited detector, keeping the user's on/off and
-     * difficulty choices. Null when there is nothing to restore.
+     * difficulty choices and their translations. Null when there is nothing to restore.
      * @param {object} detector
      * @returns {object|null}
      */
@@ -114,7 +114,133 @@ class DetectorManager {
         if (typeof detector.enabled === 'boolean') restored.enabled = detector.enabled;
         if (detector.difficulty !== undefined) restored.difficulty = detector.difficulty;
         if (detector.difficultyChosen) restored.difficultyChosen = true;
-        return restored;
+        return DetectorManager.carryTranslations(restored, detector);
+    }
+
+    /**
+     * A deep copy without the rule texts' translations (descriptionI18n,
+     * nameI18n at any depth): what a rule detects and how it is named in English.
+     * @param {*} value
+     * @returns {*}
+     */
+    static withoutTranslations(value) {
+        if (Array.isArray(value)) return value.map(item => DetectorManager.withoutTranslations(item));
+        if (!value || typeof value !== 'object') return value;
+        const copy = {};
+        for (const [key, item] of Object.entries(value)) {
+            if (!/I18n$/.test(key)) copy[key] = DetectorManager.withoutTranslations(item);
+        }
+        return copy;
+    }
+
+    // Fields that change without the rule's content changing: on/off, the save time and the version it keeps
+    static CONTENT_IGNORED_FIELDS = ['enabled', 'lastUpdated', 'version'];
+    // Pattern flags whose default is on: false is a choice there. Any other flag left out reads as false, and the
+    // editor leaves out the ones that are off
+    static FLAGS_ON_BY_DEFAULT = new Set(['standalone', 'caseSensitive', 'insensitive', 'enabled']);
+
+    /**
+     * What a rule detects and how it reads in English, as comparable text: key order, flags that are off, and the
+     * category's spelling ("Anti-Bot" as shipped, "antibot" once saved) do not matter
+     */
+    static ruleContent(detector) {
+        const copy = DetectorManager.withoutTranslations(DetectorManager.cleanDetectorCopy(detector));
+        for (const field of DetectorManager.CONTENT_IGNORED_FIELDS) delete copy[field];
+        if (typeof copy.category === 'string') copy.category = copy.category.toLowerCase().replace(/[^a-z]/g, '');
+        const canonical = (value) => {
+            if (Array.isArray(value)) return value.map(canonical);
+            if (!value || typeof value !== 'object') return value;
+            return Object.fromEntries(Object.keys(value).sort()
+                .filter(key => value[key] !== false || DetectorManager.FLAGS_ON_BY_DEFAULT.has(key))
+                .map(key => [key, canonical(value[key])]));
+        };
+        return JSON.stringify(canonical(copy));
+    }
+
+    /**
+     * An official rule marked as edited whose only change is translations:
+     * translating is not editing, so updates replace it (keeping the
+     * translations) and it is not shown as edited.
+     * @param {object} detector
+     * @returns {boolean}
+     */
+    static isTranslationOnlyEdit(detector) {
+        if (!detector?.userModified || !detector.officialSnapshot) return false;
+        return DetectorManager.ruleContent(detector) === DetectorManager.ruleContent(detector.officialSnapshot);
+    }
+
+    /**
+     * An official rule the user really changed (patterns, name, icon, difficulty, ...), not only translated
+     * @param {object} detector
+     * @returns {boolean}
+     */
+    static isUserEdited(detector) {
+        return !!(detector?.userModified && detector.officialSnapshot) && !DetectorManager.isTranslationOnlyEdit(detector);
+    }
+
+    /** Unmark a rule as edited (its translations stay) */
+    static clearUserEdit(detector) {
+        if (!detector) return detector;
+        delete detector.userModified;
+        delete detector.officialSnapshot;
+        delete detector.dismissedVersion;
+        return detector;
+    }
+
+    /**
+     * The person's own translations in a rule, keyed by the English text they
+     * translate, per field: { description: { "<English>": { "<locale>": "<translation>" } }, name: {...} }.
+     * Covers the description, pattern descriptions and combination names.
+     * @param {object} detector
+     * @returns {Object<string, Object<string, string>>}
+     */
+    static userTranslations(detector) {
+        const found = { description: {}, name: {} };
+        const walk = (value) => {
+            if (Array.isArray(value)) { value.forEach(walk); return; }
+            if (!value || typeof value !== 'object') return;
+            for (const [field, map] of [['description', value.descriptionI18n], ['name', value.nameI18n]]) {
+                const text = value[field];
+                if (typeof text !== 'string' || !text.trim() || !map || typeof map !== 'object' || Array.isArray(map)) continue;
+                for (const [locale, translation] of Object.entries(map)) {
+                    if (typeof translation !== 'string' || !translation.trim()) continue;
+                    (found[field][text] ||= {})[locale] = translation;
+                }
+            }
+            for (const [key, item] of Object.entries(value)) {
+                if (!/I18n$/.test(key) && key !== 'officialSnapshot') walk(item);
+            }
+        };
+        walk(detector);
+        return found;
+    }
+
+    /**
+     * Put the person's translations from `source` on `target` (a new official
+     * version, or the official copy restored): a text that is still the same in
+     * English keeps its translations; one Scrapfly reworded starts over.
+     * @param {object} target - Changed in place
+     * @param {object} source
+     * @returns {object} target
+     */
+    static carryTranslations(target, source) {
+        const translations = DetectorManager.userTranslations(source);
+        if (!target || !Object.keys(translations.description).length && !Object.keys(translations.name).length) return target;
+        const walk = (value) => {
+            if (Array.isArray(value)) { value.forEach(walk); return; }
+            if (!value || typeof value !== 'object') return;
+            for (const [field, mapField] of [['description', 'descriptionI18n'], ['name', 'nameI18n']]) {
+                const own = typeof value[field] === 'string' && Object.hasOwn(translations[field], value[field]) ? translations[field][value[field]] : null;
+                if (!own) continue;
+                const current = value[mapField] && typeof value[mapField] === 'object' && !Array.isArray(value[mapField]) ? value[mapField] : {};
+                value[mapField] = { ...current, ...own };
+            }
+            for (const [key, item] of Object.entries(value)) {
+                if (!/I18n$/.test(key) && key !== 'officialSnapshot') walk(item);
+            }
+        };
+        walk(target);
+        return target;
     }
 
     /**
@@ -381,8 +507,10 @@ class DetectorManager {
                     for (const [detectorKey, detector] of Object.entries(categoryDetectors)) {
                         const originalDifficulty = detector?.difficulty;
                         if (detector?.detection) {
-                            for (const methodData of Object.values(detector.detection)) {
-                                if (typeof methodData === 'string') {
+                            // A known method saved as text is the old damage this repairs; text under any other key
+                            // (a comment in an imported file) is dropped by normalize, never a reason to reload everything
+                            for (const [method, methodData] of Object.entries(detector.detection)) {
+                                if (typeof methodData === 'string' && DetectorManager.schema.METHODS.includes(method)) {
                                     hasCorruption = true;
                                     break;
                                 }
@@ -861,7 +989,9 @@ class DetectorManager {
      */
     async importDetectors(data, merge = true) {
         const extensionVersion = typeof chrome !== 'undefined' ? chrome.runtime?.getManifest?.().version : null;
-        const incoming = DetectorManager.schema.admitImport(data, extensionVersion);
+        const incoming = DetectorManager.schema.admitImport(data, extensionVersion, { partial: merge });
+        // The rules of the file left out (not valid here), for the message that names them
+        this.lastImportSkipped = incoming && Array.isArray(incoming.skipped) ? incoming.skipped.slice() : [];
         if (!incoming) return false;
 
         // Construct a candidate without touching live rules. An invalid record
@@ -883,7 +1013,15 @@ class DetectorManager {
             }
             for (const records of Object.values(candidate)) delete records[detector.id];
             if (!candidate[category]) candidate[category] = {};
-            candidate[category][detector.id] = DetectorManager.applyDetectorFixups(detector);
+            // A file cannot say how this browser's rules relate to Scrapfly's: an edit mark or an "official copy" in it
+            // would make Update skip the rule and Reset restore whatever the file holds
+            const imported = JSON.parse(JSON.stringify(detector));
+            for (const field of ['userModified', 'officialSnapshot', 'dismissedVersion']) delete imported[field];
+            // Only Rules → Update installs an official rule: a file's copy under an official id is the person's own
+            // rule (Update offers the real one beside it), never one shown as Scrapfly's
+            const author = typeof imported.author === 'string' ? imported.author.trim().toLowerCase() : '';
+            if (author === 'scrapfly' && DetectionUtils._officialDetectorIds && DetectionUtils._officialDetectorIds.has(imported.id)) delete imported.author;
+            candidate[category][detector.id] = DetectorManager.applyDetectorFixups(imported);
         }
         await this.saveDetectorsToStorage(candidate);
         return true;

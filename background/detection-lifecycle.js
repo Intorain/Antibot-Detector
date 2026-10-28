@@ -219,7 +219,11 @@ async function applyLateResponses(tabId) {
  * @returns {Promise<Array|null>} the page's new results, or null when nothing changed
  */
 async function addLateEvidence(tabId, pageUrl, tabFavicon, evidence, stillValid, source, fallback) {
-    const stored = await DetectionEngineManager.getStoredDetection(pageUrl);
+    // The entry keeps its private-window mark when it is written again, so it still goes when the private session ends
+    const privateWindow = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function'
+        && await HistoryRecorder.isIncognitoTab(tabId, chrome).catch(() => false);
+    if (!stillValid()) return null;
+    const stored = await DetectionEngineManager.getStoredDetection(pageUrl, { privateWindow });
     if (!stillValid()) return null;
     const byId = new Map();
     const base = Array.isArray(stored?.detectionResults) ? stored.detectionResults : (Array.isArray(fallback) ? fallback : []);
@@ -236,7 +240,8 @@ async function addLateEvidence(tabId, pageUrl, tabFavicon, evidence, stillValid,
     const storedData = await DetectionEngineManager.storeDetection(pageUrl, {
         url: pageUrl,
         hostname: UrlUtils.getHostnameFromUrl(pageUrl),
-        favicon: stored?.favicon || tabFavicon
+        favicon: stored?.favicon || tabFavicon,
+        ...(privateWindow || stored?.privateWindow === true ? { privateWindow: true } : {})
     }, finalResults);
     if (!stillValid()) return null;
     await setBadgeForDetections(tabId, pageUrl, finalResults);
@@ -407,7 +412,8 @@ async function finalizeDetection(tabId, state) {
     // page that ended on such a site is told so (it is listed as skipped).
     const scanTab = typeof BackgroundTabScan !== 'undefined' && BackgroundTabScan.isScanTab(tabId);
     const quietTab = scanTab && BackgroundTabScan.isQuiet(tabId);
-    if (!quietTab && await Utils.isUrlBlacklisted(state.url)) {
+    // A watch check that ended on such a site keeps nothing either (the check is told: it counts as skipped)
+    if (await Utils.isUrlBlacklisted(state.url)) {
         if (!DetectionSessionStore.isCurrent(tabId, state)) return;
         Logger.detection(`${Logger.hostOf(state.url)}: excluded domain, scan results not kept`);
         if (scanTab) BackgroundTabScan.scanFinished(tabId, state.url, [], { excluded: true });
@@ -417,11 +423,17 @@ async function finalizeDetection(tabId, state) {
     }
     const normalizedFavicon = UrlUtils.normalizeFaviconForStorage(state.favicon, state.url);
 
-    // Store to cache
+    // Store to cache (a private-window page only until the last private window closes)
+    const privateWindow = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function'
+        && await HistoryRecorder.isIncognitoTab(tabId, chrome).catch(() => false);
+    if (!DetectionSessionStore.isCurrent(tabId, state)) return;
     const pageData = {
         url: state.url,
         hostname: UrlUtils.getHostnameFromUrl(state.url),
-        favicon: normalizedFavicon
+        favicon: normalizedFavicon,
+        ...(privateWindow ? { privateWindow: true } : {}),
+        // A Bulk scan reports what the page shows now: a clean scan never takes an older result's place
+        ...(scanTab && !quietTab ? { fresh: true } : {})
     };
 
     const storedDataWithExpiry = await DetectionEngineManager.storeDetection(state.url, pageData, finalResults);
@@ -484,8 +496,9 @@ async function finalizeDetection(tabId, state) {
 
     if (!DetectionSessionStore.isCurrent(tabId, state)) return;
 
-    // Save complete detections (includes hooks/fingerprints) to history
-    if (finalResults.length > 0 && !preservedExistingCache && !watching) {
+    // Save complete detections (includes hooks/fingerprints) to history. A scan that found nothing is recorded only when
+    // the page had a protection before (onlyIfChanged): that is a change
+    if (!preservedExistingCache && !watching) {
         try {
             const pageData = {
                 url: state.url,
@@ -502,7 +515,8 @@ async function finalizeDetection(tabId, state) {
             if (shouldSave) {
                 await HistoryRecorder.saveDetectionToHistory(tabId, pageData, finalResults, chrome, {
                     historySettings,
-                    source: 'finalize'
+                    source: 'finalize',
+                    ...(finalResults.length === 0 ? { onlyIfChanged: true } : {})
                 });
             }
         } catch (error) {
@@ -515,8 +529,6 @@ async function finalizeDetection(tabId, state) {
     // A private-window page is never sent anywhere (History leaves it out too)
     if (finalResults.length > 0 && !preservedExistingCache && !watching && DetectionSessionStore.isCurrent(tabId, state)) {
         try {
-            const privateWindow = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function' &&
-                await HistoryRecorder.isIncognitoTab(tabId, chrome);
             if (!privateWindow && DetectionSessionStore.isCurrent(tabId, state)) Promise.resolve(Settings.sendWebhookIfEnabled({
                 url: state.url,
                 hostname: UrlUtils.getHostnameFromUrl(state.url),
