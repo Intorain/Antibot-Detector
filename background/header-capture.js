@@ -97,11 +97,55 @@ function isOtherPageRequest(details) {
     return false;
 }
 
-/** A new page starts loading in the tab: from now on the document it showed is the one being left. */
-function noteTabLeaving(tabId) {
+/**
+ * A new page starts loading in the tab: from now on the document it showed is the one being left. `shownDocumentId` is
+ * the page that is being shown when the caller already knows it (a prerendered page just activated): the tab may
+ * already name it after a request of its own, and it is not the page being left.
+ */
+function noteTabLeaving(tabId, shownDocumentId) {
     const shown = tabDocuments.get(tabId);
+    if (shown && shown === shownDocumentId) return;
     if (shown) leavingDocuments.set(tabId, shown);
     tabDocuments.delete(tabId);
+}
+
+// Main-frame navigations started and not yet over, per tab: a second navigation supersedes the first, whose
+// "cancelled" event must not end the mark that protects the second
+const pendingNavigations = new Map();
+
+/** A main-frame navigation starts (not a redirect of one). */
+function navigationStarted(tabId) {
+    noteTabLeaving(tabId);
+    pendingNavigations.set(tabId, (pendingNavigations.get(tabId) || 0) + 1);
+}
+
+/**
+ * A main-frame navigation ended without showing a new page (a download, a 204, a cancelled, superseded or failed load):
+ * once none is left pending, the page that was being left is the shown page again. Kept as "the page being left", it
+ * dropped every later request of a page that stayed, and a later real navigation did not know which page it left.
+ */
+function navigationFailed(tabId) {
+    if (typeof tabId !== 'number') return;
+    const left = (pendingNavigations.get(tabId) || 0) - 1;
+    if (left > 0) { pendingNavigations.set(tabId, left); return; }
+    pendingNavigations.delete(tabId);
+    const gone = leavingDocuments.get(tabId);
+    leavingDocuments.delete(tabId);
+    if (gone && !tabDocuments.has(tabId)) tabDocuments.set(tabId, gone);
+}
+
+/**
+ * The new page committed: the old document is unloading and Chrome marks it itself, so the mark ends, and the tab shows
+ * the committed document (also a page restored from the back/forward cache). A commit of the left document itself
+ * (a same-document change while another navigation is pending) or of a prerendered page is not the new page.
+ */
+function navigationCommitted(details) {
+    if (!details || typeof details.tabId !== 'number' || details.documentLifecycle === 'prerender') return;
+    const left = leavingDocuments.get(details.tabId);
+    if (left && details.documentId === left) return;
+    pendingNavigations.delete(details.tabId);
+    leavingDocuments.delete(details.tabId);
+    if (details.documentId) tabDocuments.set(details.tabId, details.documentId);
 }
 
 /**
@@ -164,11 +208,16 @@ function setupHeaderCapture() {
     chrome.webRequest.onBeforeRequest.addListener(
         (details) => {
             if (isPrerenderRequest(details)) return;
-            if (tabPageRequests.get(details.tabId) !== details.requestId) noteTabLeaving(details.tabId); // not a redirect
+            if (tabPageRequests.get(details.tabId) !== details.requestId) navigationStarted(details.tabId); // not a redirect
             forgetTabRequests(details.tabId, details.requestId);
         },
         { urls: ['<all_urls>'], types: ['main_frame'] }
     );
+
+    if (chrome.webNavigation) {
+        if (chrome.webNavigation.onCommitted) chrome.webNavigation.onCommitted.addListener((details) => { if (details && details.frameId === 0) navigationCommitted(details); });
+        if (chrome.webNavigation.onErrorOccurred) chrome.webNavigation.onErrorOccurred.addListener((details) => { if (details && details.frameId === 0) navigationFailed(details.tabId); });
+    }
 
     // Listen for response headers
     chrome.webRequest.onHeadersReceived.addListener(

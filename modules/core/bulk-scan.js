@@ -13,6 +13,8 @@
  *                    the run's states: running → paused → running, then done or stopped; recover() is what a service
  *                    worker that starts again does with a run it finds in session storage (nobody is scanning it any
  *                    more: it is stopped, never left "running")
+ *   continuation(), carryOver()   "Scan the pages still waiting": what a stopped run leaves to scan, and the pages that
+ *                    already have their outcome, which stay in the list of the run that scans the rest
  *   summarize()      the protections of a finished page, as the table and the exports show them
  *   build(), fileName()   the CSV and JSON exports
  */
@@ -44,31 +46,92 @@
   const looksLikeAddress = (cell) => /^[a-z][a-z0-9+.-]*:/i.test(cell) || /^[^\s/:?#]+\.[^\s/:?#]+(:\d+)?([/?#]|$)/.test(cell);
 
   /**
-   * The addresses of a pasted list or a .txt/.csv file: one per line, blank lines and # comments ignored. The text is
-   * read as a table (the first cell of each row that looks like an address) only when it is one: tab-separated, with a
-   * header row (a row with no address, like "url,name"), or two or more rows that all split into the same number of
-   * cells. A row that starts with a quote, or whose first cell is not an address, is a table row anyway. Otherwise a
-   * comma or semicolon belongs to the address (?ids=1,2,3, ;jsessionid=…).
+   * Reads one line the way a CSV does: commas, semicolons and tabs separate cells, except inside double quotes (a CSV
+   * quotes a cell that holds a comma, and Bulk scan's own export does). `open` says a quoted cell is still open at the
+   * end of the line (it goes on in the next one).
+   * @param {string} line
+   * @returns {{cells: string[], open: boolean}}
+   */
+  function scanLine(line) {
+    const cells = [];
+    let cell = '';
+    let quoted = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (quoted) {
+        if (ch !== '"') cell += ch;
+        else if (line[i + 1] === '"') { cell += '"'; i++; } else quoted = false;
+        continue;
+      }
+      if (ch === '"' && !cell.trim()) { quoted = true; continue; }
+      if (ch === ',' || ch === ';' || ch === '\t') { cells.push(cell); cell = ''; continue; }
+      cell += ch;
+    }
+    cells.push(cell);
+    return { cells: cells.map(unquote), open: quoted };
+  }
+  const cellsOf = (line) => scanLine(line).cells;
+
+  // A quoted cell may hold a line break (a spreadsheet name or note): its lines are one row. A quote that is never
+  // closed within a few lines is not a quoted cell, so a stray quote cannot swallow the list below it
+  const MAX_QUOTED_LINES = 4;
+  function logicalLines(text) {
+    const raw = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\r|\n/);
+    const out = [];
+    for (let i = 0; i < raw.length; i++) {
+      let joined = raw[i];
+      let last = i;
+      while (scanLine(joined).open && last + 1 < raw.length && last - i < MAX_QUOTED_LINES - 1) joined += ` ${raw[++last]}`;
+      if (last > i && !scanLine(joined).open) { out.push(joined); i = last; } else out.push(raw[i]);
+    }
+    return out;
+  }
+
+  /**
+   * The parts of a line that is not a table row: one address, or several (a.com, b.com), or an address and a name. A
+   * comma or semicolon ends an address when what came before is only a host (a host has none), or follows a "/" (no
+   * path segment starts with one), or what follows is another address, or what follows has a space (an address has
+   * none: it is a name or a note). Any other one belongs to the address: ?ids=1,2,3, ;jsessionid=…, Portland,_Oregon.
+   * @param {string} line
+   * @returns {string[]}
+   */
+  function partsOf(line) {
+    const parts = [];
+    let start = 0;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] !== ',' && line[i] !== ';') continue;
+      const before = line.slice(start, i);
+      const after = line.slice(i + 1);
+      const token = after.split(/[,;]/)[0];
+      const ends = !/[/?#]/.test(before.replace(/^\s*[a-z][a-z0-9+.-]*:\/\//i, ''))
+        || /\/$/.test(before)
+        || /^\s*[a-z][a-z0-9+.-]*:\/\//i.test(after)
+        || (/^\s/.test(token) && looksLikeAddress(token.trim()))
+        || /\s/.test(token.trim());
+      if (ends) { parts.push(before); start = i + 1; }
+    }
+    parts.push(line.slice(start));
+    return parts.map(unquote);
+  }
+
+  /**
+   * The addresses of a pasted list or a .txt/.csv file: one per line, blank lines and # comments ignored. The text is a
+   * table when it has tabs or a header row (a row with no address, like "url,name"): every row's first address is its
+   * page and the other columns are data. Otherwise a line holds an address, or several, or an address and a name (see
+   * partsOf), and a row that starts with a quote is read as a quoted CSV row.
    * @param {string} text
    * @returns {string[]}
    */
   function linesOf(text) {
-    const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r\n|\r|\n/)
-      .map(raw => raw.trim()).filter(line => line && !line.startsWith('#'));
-    const cells = line => line.split(/[,;\t]/).map(unquote);
+    const lines = logicalLines(text).map(raw => raw.trim()).filter(line => line && !line.startsWith('#'));
     const table = lines.some(line => line.includes('\t'))
-      || lines.some(line => /[,;]/.test(line) && !cells(line).some(looksLikeAddress))
-      || (lines.length > 1 && lines.every(line => /[,;]/.test(line))
-        && new Set(lines.map(line => cells(line).length)).size === 1);
+      || lines.some(line => { const cells = cellsOf(line); return cells.length > 1 && !cells.some(looksLikeAddress); });
     const out = [];
     for (const line of lines) {
-      const row = table || /^["']/.test(line) || !looksLikeAddress(cells(line)[0]);
-      if (row && /[,;\t]/.test(line)) {
-        const cell = cells(line).find(looksLikeAddress);
-        if (cell) out.push(cell);
-        continue;
-      }
-      out.push(unquote(line));
+      const parts = table || /^"/.test(line) ? cellsOf(line) : partsOf(line);
+      if (parts.length < 2) { out.push(unquote(line)); continue; }
+      const addresses = parts.filter(looksLikeAddress);
+      out.push(...(table ? addresses.slice(0, 1) : addresses));
     }
     return out.filter(Boolean);
   }
@@ -271,6 +334,33 @@
     return true;
   }
 
+  /**
+   * What "Scan the pages still waiting" takes from a run that is over: the addresses still waiting, and the pages that
+   * already have their outcome (done, failed or skipped), which stay in the list with their results.
+   * @returns {{entries: string[], kept: object[], duplicates: number, overCap: number, skippedOver: number}|null} null when
+   *   the run is still going or nothing waits
+   */
+  function continuation(run) {
+    if (!run || typeof run !== 'object' || !Array.isArray(run.items) || isActive(run)) return null;
+    const entries = run.items.filter(item => item.status === 'waiting').map(item => item.url);
+    if (!entries.length) return null;
+    return {
+      entries,
+      kept: run.items.filter(item => item.status !== 'waiting' && item.status !== 'scanning').map(item => ({ ...item })),
+      duplicates: run.duplicates || 0, overCap: run.overCap || 0, skippedOver: run.skippedOver || 0
+    };
+  }
+
+  /** Put the kept pages before the ones a new run scans, with the counts of what the first paste left out. */
+  function carryOver(run, resumed) {
+    if (!run || !resumed) return run;
+    run.items = [...resumed.kept, ...run.items];
+    run.duplicates = resumed.duplicates;
+    run.overCap = (resumed.overCap || 0) + (run.overCap || 0);
+    run.skippedOver = (resumed.skippedOver || 0) + (run.skippedOver || 0);
+    return run;
+  }
+
   /** A run found by a service worker that has just started: whatever it says, nothing scans it any more. */
   function recover(run, now = Date.now()) {
     if (!run || typeof run !== 'object' || !Array.isArray(run.items)) return null;
@@ -369,7 +459,7 @@
   const api = {
     MAX_URLS, TIMEOUT_S, MAX_SKIPPED_LISTED, ITEM_STATUSES, RUN_STATUSES, REASONS, FORMATS,
     capOf, timeoutOf, linesOf, normalize, isSitemap, parseSitemap, prepare,
-    createRun, isActive, nextWaiting, counts, begin, finish, fail, skip, pause, resume, stop, complete, recover,
+    createRun, isActive, nextWaiting, counts, begin, finish, fail, skip, pause, resume, stop, complete, recover, continuation, carryOver,
     summarize, build, fileName
   };
   root.BulkScan = api;

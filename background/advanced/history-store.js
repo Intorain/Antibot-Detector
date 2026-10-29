@@ -17,6 +17,9 @@
 
 (function initAdvancedHistoryStore(globalContext) {
     const STORAGE_KEY = 'scrapfly_advanced_history';
+    // Captures made in a private window: cookie values, headers and addresses that must not outlast the browser session.
+    // They are kept in memory only (chrome.storage.session), shown with the others, and never written to storage.local.
+    const PRIVATE_KEY = 'session_advanced_private';
     const DEFAULT_HISTORY_LIMIT = 100;
     let queue = Promise.resolve();
     function serialize(operation) {
@@ -157,13 +160,59 @@
         };
     }
 
+    const sessionArea = () => (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.session) || null;
+
+    /** Whether private-window captures can be kept at all (in memory): without it they are shown and dropped. */
+    function canKeepPrivate() {
+        return !!sessionArea();
+    }
+
+    async function loadPrivate() {
+        const area = sessionArea();
+        if (!area) return {};
+        try {
+            const kept = (await area.get([PRIVATE_KEY]))[PRIVATE_KEY];
+            return kept && typeof kept === 'object' && !Array.isArray(kept) ? kept : {};
+        } catch (error) {
+            return {};
+        }
+    }
+
+    /**
+     * An entry as it is written: `captureData` is the same object as `data` under its older name (readers of either get
+     * both when the history is loaded), and a capture holds cookie values, headers and request bodies: written twice,
+     * it took twice the room.
+     */
+    function slim(entry) {
+        if (!entry || typeof entry !== 'object' || !('captureData' in entry)) return entry;
+        const { captureData, ...rest } = entry;
+        return rest;
+    }
+    const slimAll = (entries) => (Array.isArray(entries) ? entries.map(slim) : entries);
+
+    async function saveLocal(history) {
+        const { history: canonical } = migrateToCanonical(history);
+        const stored = Object.fromEntries(Object.entries(canonical).map(([moduleId, entries]) => [moduleId, slimAll(entries)]));
+        await chrome.storage.local.set({ [STORAGE_KEY]: stored });
+        return canonical;
+    }
+
     async function load(options = {}) {
         const { persistIfChanged = true } = options;
         const result = await chrome.storage.local.get([STORAGE_KEY]);
         const { history, changed } = migrateToCanonical(result[STORAGE_KEY]);
 
         if (changed && persistIfChanged) {
-            await save(history);
+            await saveLocal(history);
+        }
+
+        // What was captured in a private window sits beside the rest, newest first
+        const kept = await loadPrivate();
+        for (const [moduleId, rawEntries] of Object.entries(kept)) {
+            const entries = (Array.isArray(rawEntries) ? rawEntries : []).map(entry => normalizeCapture(moduleId, entry)).filter(Boolean);
+            if (!entries.length) continue;
+            history[moduleId] = [...entries, ...(Array.isArray(history[moduleId]) ? history[moduleId] : [])]
+                .sort((a, b) => toFiniteTimestamp(b && b.timestamp, 0) - toFiniteTimestamp(a && a.timestamp, 0));
         }
 
         return history;
@@ -171,7 +220,18 @@
 
     async function save(history) {
         const { history: canonical } = migrateToCanonical(history);
-        await chrome.storage.local.set({ [STORAGE_KEY]: canonical });
+        // Private-window captures go to memory, everything else to storage.local
+        const stored = {};
+        const kept = {};
+        for (const [moduleId, entries] of Object.entries(canonical)) {
+            const list = Array.isArray(entries) ? entries : [];
+            stored[moduleId] = slimAll(list.filter(entry => !(entry && entry.privateSession === true)));
+            const memory = slimAll(list.filter(entry => entry && entry.privateSession === true));
+            if (memory.length) kept[moduleId] = memory;
+        }
+        await chrome.storage.local.set({ [STORAGE_KEY]: stored });
+        const area = sessionArea();
+        if (area) await area.set({ [PRIVATE_KEY]: kept });
         return canonical;
     }
 
@@ -203,7 +263,8 @@
             ...capture,
             type: moduleId,
             timestamp: capture?.timestamp || now,
-            expiresAt: capture?.expiresAt || expiresAt
+            expiresAt: capture?.expiresAt || expiresAt,
+            ...(options.privateSession === true ? { privateSession: true } : {})
         });
 
         if (!history[moduleId]) {
@@ -269,6 +330,8 @@
         }
 
         await chrome.storage.local.set({ [STORAGE_KEY]: {} });
+        const area = sessionArea();
+        if (area) await area.set({ [PRIVATE_KEY]: {} });
         return {};
     }
 
@@ -285,7 +348,9 @@
 
     const AdvancedHistoryStore = {
         STORAGE_KEY,
+        PRIVATE_KEY,
         DEFAULT_HISTORY_LIMIT,
+        canKeepPrivate,
         migrate: migrateToCanonical,
         load: (...args) => serialize(() => load(...args)),
         appendCapture: (...args) => serialize(() => appendCapture(...args)),

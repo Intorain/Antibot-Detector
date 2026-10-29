@@ -339,6 +339,55 @@ test('a saved capture takes every tool\'s expired captures with it; a private wi
     assert.equal(f.saved().datadome, undefined, 'nothing kept from a private window');
 });
 
+test('a private window\'s capture is kept in memory only: listed with the others, never in storage.local, deletable', async () => {
+    const f = fixture(), context = f.context;
+    const memory = {};
+    context.chrome.storage.session = {
+        async get(keys) { await Promise.resolve(); return structuredClone(Object.fromEntries([].concat(keys).filter(k => k in memory).map(k => [k, memory[k]]))); },
+        async set(value) { await Promise.resolve(); Object.assign(memory, structuredClone(value)); }
+    };
+    const store = context.AdvancedHistoryStore;
+    assert.equal(store.canKeepPrivate(), true);
+    context.chrome.tabs.get = async id => ({ id, url: 'https://private.example/', incognito: true });
+    const kept = await context.saveToHistory(7, { cookie: 'datadome=SYNTHETIC' }, { type: 'datadome' });
+    assert.notEqual(kept.notSaved, true, 'shown with the others, not dropped');
+    assert.deepEqual((f.saved().datadome || []).length, 0, 'nothing of it in storage.local');
+    assert.equal(memory[store.PRIVATE_KEY].datadome.length, 1, 'kept in memory');
+    const loadedPrivate = (await store.load()).datadome[0];
+    assert.equal(loadedPrivate.privateSession, true);
+    assert.equal(loadedPrivate.captureData, loadedPrivate.data, 'a private entry reads back with both names, as the stored ones do');
+
+    context.chrome.tabs.get = async id => ({ id, url: 'https://shop.example/', incognito: false });
+    await context.saveToHistory(8, { cookie: 'datadome=OTHER' }, { type: 'datadome' });
+    assert.equal(f.saved().datadome.length, 1, 'a normal window\'s capture is stored as before');
+    assert.equal(f.saved().datadome[0].privateSession, undefined);
+    const both = (await store.getModule('datadome'));
+    assert.equal(both.length, 2, 'both are listed');
+
+    await store.deleteCapture('datadome', kept.id);
+    assert.equal((await store.getModule('datadome')).length, 1);
+    assert.deepEqual(memory[store.PRIVATE_KEY], {}, 'the private one is gone from memory');
+    await context.chrome.tabs.get(7);
+    context.chrome.tabs.get = async id => ({ id, url: 'https://private.example/', incognito: true });
+    await context.saveToHistory(7, { cookie: 'datadome=AGAIN' }, { type: 'datadome' });
+    await store.clear();
+    assert.deepEqual(memory[store.PRIVATE_KEY], {}, 'Clear all takes the private ones too');
+});
+
+test('a capture is written once: storage holds `data`, loading gives readers of the older `captureData` name the same object', async () => {
+    const f = fixture({ akamai: [{ id: 'old', timestamp: Date.now(), expiresAt: Date.now() + 60000, captureData: { cookie: 'a' } }] });
+    const store = f.context.AdvancedHistoryStore;
+    await store.appendCapture('cloudflare', { id: 'new', data: { cookie: 'b' }, captureData: { cookie: 'b' } });
+    const stored = f.saved();
+    assert.equal('captureData' in stored.cloudflare[0], false, 'not written twice');
+    assert.deepEqual(stored.cloudflare[0].data, { cookie: 'b' });
+    assert.equal('captureData' in stored.akamai[0], false, 'an older entry is written once with the next write');
+    assert.deepEqual(stored.akamai[0].data, { cookie: 'a' }, 'and keeps what it held');
+    const loaded = await store.load();
+    assert.equal(loaded.cloudflare[0].captureData, loaded.cloudflare[0].data, 'both names for readers');
+    assert.deepEqual(JSON.parse(JSON.stringify(loaded.akamai[0].captureData)), { cookie: 'a' });
+});
+
 test('FunCaptcha: two stops of the same capture (Stop pressed during the auto-stop) save its entries once', async () => {
     const f = fixture(), context = f.context;
     vm.runInContext(read('background/advanced/vendors/funcaptcha/interceptor.js'), context);
@@ -370,3 +419,17 @@ for (const vendorId of ['akamai', 'imperva']) {
         assert.equal(context.chrome.webRequest.onBeforeRequest.listeners.size, 0, 'no listener left on every request');
     });
 }
+
+test('reCAPTCHA auto-stop marks the capture stopped before it awaits the save, as a manual stop does', () => {
+    const source = read('background/advanced/vendors/recaptcha/interceptor.js');
+    const auto = source.slice(source.indexOf('const captureTimeout = setTimeout'));
+    const stopped = auto.indexOf('captureState.isCapturing = false');
+    const saved = auto.indexOf('await saveRecaptchaResults');
+    assert.ok(stopped > 0 && saved > 0, 'both steps are there');
+    assert.ok(stopped < saved, 'a Stop or a late request during the save finds the capture stopped and saves nothing twice');
+    // A manual Stop while the auto-stop saves (or a second Stop) returns at once: the first one reports when it is done
+    assert.ok(auto.indexOf('captureState.stopping = true') > 0 && auto.indexOf('captureState.stopping = true') < saved, 'the auto-stop claims the capture first');
+    assert.match(source, /if \(stateStop\.stopping\) return \{ status: 'stopping'/);
+    assert.match(source, /stateStop\.stopping = true;/);
+});
+

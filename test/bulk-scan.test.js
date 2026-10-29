@@ -7,6 +7,57 @@ const assert = require('node:assert/strict');
 const BulkScan = require('../modules/core/bulk-scan.js');
 const plain = (value) => JSON.parse(JSON.stringify(value));
 
+test('a CSV quotes a cell with a comma: Bulk scan\'s own export reads back to the same pages', () => {
+  const exported = '"https://a.example/?ids=1,2,3",done,2\n"https://b.example/x;y",done,0\n';
+  assert.deepEqual(BulkScan.linesOf('url,status,found\n' + exported), ['https://a.example/?ids=1,2,3', 'https://b.example/x;y']);
+  assert.deepEqual(BulkScan.linesOf(exported), ['https://a.example/?ids=1,2,3', 'https://b.example/x;y'], 'without the header too');
+  assert.deepEqual(BulkScan.linesOf('"Shop, the ""big"" one",https://c.example/\n"Other",https://d.example/'), ['https://c.example/', 'https://d.example/']);
+});
+
+test('several addresses on one line are all scanned; a comma inside an address is not a separator, however many rows have one', () => {
+  assert.deepEqual(BulkScan.linesOf('a.example,b.example,c.example'), ['a.example', 'b.example', 'c.example']);
+  assert.deepEqual(BulkScan.linesOf('a.example, b.example'), ['a.example', 'b.example']);
+  assert.deepEqual(BulkScan.linesOf('a.example\nb.example,Beta\nc.example'), ['a.example', 'b.example', 'c.example'], 'a name after an address is not part of it');
+  assert.deepEqual(BulkScan.linesOf('https://a.example/?ids=1,2,3\nhttps://b.example/?ids=4,5,6'), ['https://a.example/?ids=1,2,3', 'https://b.example/?ids=4,5,6'],
+    'two rows with as many commas are not a table');
+  assert.deepEqual(BulkScan.linesOf('https://a.example/x;jsessionid=A1\nhttps://b.example/y;jsessionid=B2'), ['https://a.example/x;jsessionid=A1', 'https://b.example/y;jsessionid=B2']);
+  assert.deepEqual(BulkScan.linesOf('https://a.example/,Shop A\nhttps://b.example/,Shop B'), ['https://a.example/', 'https://b.example/'], 'a table without a header');
+});
+
+test('a quoted cell may hold a line break: its lines are one row, and a stray quote cannot swallow the list below it', () => {
+  assert.deepEqual(BulkScan.linesOf('https://a.example/,"Acme\nwww.acme.example, Inc"'), ['https://a.example/'], 'the note\'s second line is not a page');
+  assert.deepEqual(BulkScan.linesOf('"Shop\nName",https://a.example/\n"Other",https://b.example/'), ['https://a.example/', 'https://b.example/']);
+  assert.deepEqual(BulkScan.linesOf('"https://a.example/x\nhttps://b.example/y\nhttps://c.example/z'), ['https://a.example/x', 'https://b.example/y', 'https://c.example/z'], 'a quote never closed');
+  assert.deepEqual(BulkScan.linesOf('"https://a.example/x"\nhttps://b.example/y'), ['https://a.example/x', 'https://b.example/y']);
+  assert.deepEqual(BulkScan.linesOf('url,note\nhttps://a.example/,"line one\nline two"\nhttps://b.example/,plain'), ['https://a.example/', 'https://b.example/'], 'in a table too');
+});
+
+test('a list is read by explicit rules: a comma ends an address after a host, after a "/", before another address or before a note with a space', () => {
+  const cases = [
+    // a CSV with a header: commas separate cells, whatever the address holds
+    ['url,name\nhttps://a.example/p?id=5,Alpha', ['https://a.example/p?id=5']],
+    ['url;name\nhttps://a.example/p?id=5;Alpha', ['https://a.example/p?id=5']],
+    ['name;url;status\nAlpha;https://a.example/p?id=5;done', ['https://a.example/p?id=5']],
+    // a plain list: a comma in a path or a query is part of the address
+    ['https://en.wikipedia.example/wiki/Portland,_Oregon', ['https://en.wikipedia.example/wiki/Portland,_Oregon']],
+    ['https://maps.example/maps/@40.7128,-74.0060,15z', ['https://maps.example/maps/@40.7128,-74.0060,15z']],
+    ['https://en.wikipedia.example/wiki/Portland,_Oregon\nhttps://a.example/x\nhttps://en.wikipedia.example/wiki/Paris,_Texas',
+      ['https://en.wikipedia.example/wiki/Portland,_Oregon', 'https://a.example/x', 'https://en.wikipedia.example/wiki/Paris,_Texas']],
+    ['https://a.example/?ids=1,2,3, my note', ['https://a.example/?ids=1,2,3']],
+    // several addresses on one line, with or without a query
+    ['https://a.example/?x=1, https://b.example/?y=2', ['https://a.example/?x=1', 'https://b.example/?y=2']],
+    ['https://a.example/?x=1;https://b.example/?y=2', ['https://a.example/?x=1', 'https://b.example/?y=2']],
+    ['a.example/?q=1, b.example/?q=2', ['a.example/?q=1', 'b.example/?q=2']],
+    ['a.example, b.example, c.example\nd.example, e.example, f.example', ['a.example', 'b.example', 'c.example', 'd.example', 'e.example', 'f.example']],
+    ['a.example,b.example\nc.example,d.example', ['a.example', 'b.example', 'c.example', 'd.example']],
+    // an address and a name or a status after it
+    ['https://a.example/,status=done\nhttps://b.example/,status=failed', ['https://a.example/', 'https://b.example/']],
+    ['https://a.example/x,Alpha Beta', ['https://a.example/x']],
+    ['a.example,', ['a.example']]
+  ];
+  for (const [input, expected] of cases) assert.deepEqual(BulkScan.linesOf(input), expected, JSON.stringify(input));
+});
+
 test('a pasted list or a .txt/.csv gives one address per line, the first address-like cell of a CSV row', () => {
   const text = '﻿https://a.example/\r\n\n# a comment\nb.example/path\n  "https://c.example/?q=1"  \n' +
     'url,title\nhttps://d.example/,Shop\nname;https://e.example/x;notes\nplain words\n';
@@ -216,3 +267,26 @@ test('file names carry the person\'s own day', () => {
   assert.equal(BulkScan.fileName('json', '2026-10-26'), 'scrapfly-bulk-scan-2026-10-26.json');
   assert.equal(BulkScan.fileName('exe', 'not a day'), 'scrapfly-bulk-scan-export.json');
 });
+
+test('continuing a stopped run: the waiting addresses to scan, the finished pages kept, the counts of the first paste carried', () => {
+  const run = BulkScan.createRun({ items: [
+    { url: 'https://a.example/', status: 'waiting' }, { url: 'https://b.example/', status: 'waiting' }, { url: 'mailto:x', status: 'skipped', reason: 'scheme' }
+  ], duplicates: 2, overCap: 3, skippedOver: 1 });
+  BulkScan.begin(run, 0);
+  BulkScan.finish(run, 0, { detections: [{ name: 'Akamai' }], difficulty: 'High', finalUrl: 'https://a.example/home' });
+  assert.equal(BulkScan.continuation(run), null, 'a run that is still going is not continued');
+  BulkScan.stop(run);
+  const resumed = BulkScan.continuation(run);
+  assert.deepEqual(plain(resumed.entries), ['https://b.example/']);
+  assert.deepEqual(plain(resumed.kept.map(item => [item.url, item.status])), [['https://a.example/', 'done'], ['mailto:x', 'skipped']]);
+  assert.equal(resumed.kept[0].finalUrl, 'https://a.example/home', 'a finished page keeps all it had');
+  const next = BulkScan.carryOver(BulkScan.createRun(BulkScan.prepare(resumed.entries), {}), resumed);
+  assert.deepEqual(plain(next.items.map(item => item.status)), ['done', 'skipped', 'waiting']);
+  assert.deepEqual([next.duplicates, next.overCap, next.skippedOver], [2, 3, 1]);
+  assert.deepEqual(plain(BulkScan.counts(next)), { total: 3, waiting: 1, scanning: 0, done: 1, failed: 0, skipped: 1, found: 1 });
+  resumed.kept[0].status = 'changed';
+  assert.equal(run.items[0].status, 'done', 'the kept pages are copies');
+  assert.equal(BulkScan.continuation({ status: 'done', items: [{ url: 'https://a.example/', status: 'done' }] }), null, 'nothing waits');
+  assert.equal(BulkScan.continuation(null), null);
+});
+

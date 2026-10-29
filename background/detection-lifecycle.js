@@ -218,7 +218,16 @@ async function applyLateResponses(tabId) {
  * @param {Array} [fallback] the scan's own results, used when the cache has no entry
  * @returns {Promise<Array|null>} the page's new results, or null when nothing changed
  */
-async function addLateEvidence(tabId, pageUrl, tabFavicon, evidence, stillValid, source, fallback) {
+function addLateEvidence(...args) {
+    // One at a time: each reads the stored result, adds its evidence and writes it back, so two running together (late
+    // responses and the one-second request batch) would each write without the other's evidence
+    const run = lateEvidenceQueue.then(() => addLateEvidenceNow(...args));
+    lateEvidenceQueue = run.catch(() => {});
+    return run;
+}
+let lateEvidenceQueue = Promise.resolve();
+
+async function addLateEvidenceNow(tabId, pageUrl, tabFavicon, evidence, stillValid, source, fallback) {
     // The entry keeps its private-window mark when it is written again, so it still goes when the private session ends
     const privateWindow = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function'
         && await HistoryRecorder.isIncognitoTab(tabId, chrome).catch(() => false);
@@ -847,7 +856,9 @@ async function processDetectionData(message, sender) {
             }
 
             // Check if detection data is already stored
-            const storedData = await DetectionEngineManager.getStoredDetection(currentState.url);
+            const privateTab = typeof HistoryRecorder !== 'undefined' && typeof HistoryRecorder.isIncognitoTab === 'function'
+                && await HistoryRecorder.isIncognitoTab(tabId, chrome).catch(() => false);
+            const storedData = await DetectionEngineManager.getStoredDetection(currentState.url, { privateWindow: privateTab });
             if (!DetectionSessionStore.isCurrent(tabId, state)) return;
             if (storedData) {
                 Logger.debug('SCAN', `Safety timeout: finalizing tab ${tabId}`);

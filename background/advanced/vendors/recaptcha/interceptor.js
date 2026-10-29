@@ -213,7 +213,8 @@ async function reCaptchaStartCapture(tabId) {
             const captureState = (typeof getCaptureState === 'function')
                 ? getCaptureState(reCaptchaCaptureStateRef, tabId)
                 : reCaptchaCaptureStateRef.get(tabId);
-            if (captureState === state && captureState?.isCapturing) {
+            if (captureState === state && captureState?.isCapturing && !captureState.stopping) {
+                captureState.stopping = true;
                 const completionIdentity = AdvancedJobManager.captureIdentity(captureState, tabId, 'recaptcha');
                 if (captureState.captureInterval) {
                     clearInterval(captureState.captureInterval);
@@ -221,11 +222,12 @@ async function reCaptchaStartCapture(tabId) {
 
                 const capturedResults = await processCaptureData(captureState);
                 Logger.network('[reCAPTCHA] Auto-stop - Captured results:', capturedResults);
-                // Decoded requests are kept as on a manual stop (a reload seen before the anchor stops it early)
-                await saveRecaptchaResults(tabId, capturedResults);
-
+                // Stopped before it is saved, as a manual stop is: a Stop or a late request that lands while the save is
+                // awaited must not save the same decoded requests again
                 captureState.results = capturedResults;
                 captureState.isCapturing = false;
+                // Decoded requests are kept as on a manual stop (a reload seen before the anchor stops it early)
+                await saveRecaptchaResults(tabId, capturedResults);
 
                 // Remove navigation listeners before deleting state
                 if (captureState.navigationListener) {
@@ -671,6 +673,9 @@ async function reCaptchaStopCapture(tabId) {
             return { status: 'not_capturing', results: [], resultsCount: 0 };
         }
 
+        // The auto-stop (or another Stop) is already saving this capture: it reports when it is done
+        if (stateStop.stopping) return { status: 'stopping', results: stateStop.results || [], resultsCount: (stateStop.results || []).length };
+        stateStop.stopping = true;
         const completionIdentity = AdvancedJobManager.captureIdentity(stateStop, tabId, 'recaptcha');
 
         // Clear intervals and timeouts
