@@ -1087,6 +1087,9 @@
   "detectorsImportedSkippedFmt": {
     "message": "Детекторы импортированы, кроме: {0} (недопустимы в этой версии)"
   },
+  "detectorsImportedKeptFmt": {
+    "message": "Уже установленные официальные правила не заменены: {0}"
+  },
   "detectorExportedFmt": {
     "message": "{0}: экспортировано"
   },
@@ -3458,6 +3461,9 @@
   },
   "iconPickerFileTooLarge": {
     "message": "Файл значка должен быть меньше 100 КБ"
+  },
+  "iconPickerNotAnImage": {
+    "message": "Выберите файл изображения (PNG, JPEG, GIF, WebP или SVG)"
   },
   "iconPickerNoResults": {
     "message": "Нет значков по вашему запросу"
@@ -6320,6 +6326,9 @@
   "settingsUiErrHistoryWatch": {
     "message": "Слежение должно быть выключено или выполняться ежедневно либо еженедельно"
   },
+  "settingsUiErrChoiceFmt": {
+    "message": "У настройки значение, которого нет в её списке: {0}"
+  },
   "toolbarTitleOff": {
     "message": "Обнаружение выключено"
   },
@@ -6346,6 +6355,9 @@
   },
   "detectionCopyMenuPython": {
     "message": "Python (requests)"
+  },
+  "detectionCopyMenuNode": {
+    "message": "Node.js (fetch)"
   },
   "detectionReplayNoPage": {
     "message": "Откройте веб-страницу, чтобы скопировать её как код"
@@ -6730,6 +6742,9 @@
   },
   "bulkScanWaiting": {
     "message": "Сканировать страницы, которые ещё ждут"
+  },
+  "bulkScanFailedAgain": {
+    "message": "Повторно сканировать страницы со сбоем"
   },
   "bulkNewList": {
     "message": "Новый список"

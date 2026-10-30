@@ -18,12 +18,24 @@ function simpleHash(str) {
     return hash.toString(36); // Base36 for shorter keys
 }
 
+/** A second, unrelated 32-bit hash (FNV-1a): a text's cache key holds both, so one collision is not enough */
+function fnv1aHash(str) {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+    }
+    return (hash >>> 0).toString(36);
+}
+
 /**
  * A rough reading of a regex source for the ReDoS check: atoms with the characters they can start with and
  * their quantifier, groups with their branches. Anything it does not understand reads as "any character",
  * which only makes the check stricter.
  */
 const REDOS_ASCII = 128;
+// This many unbounded repeats in a row over the same characters read as polynomial backtracking
+const REDOS_MAX_ADJACENT_REPEATS = 3;
 
 function redosSet(all = false) {
     return { ascii: new Array(REDOS_ASCII).fill(all), other: all };
@@ -231,9 +243,20 @@ function redosParse(source) {
  */
 function redosTreeIsEvil(branches, scope = { rest: [], boundary: null }) {
     for (const branch of branches) {
+        // Adjacent unbounded atoms that can match the same characters split a run of them any way they like: n^k
+        // steps for k of them (a*a*a*a*b, .*.*.*x). Two are quadratic and common (.*.*); three or more are refused.
+        let run = 0;
         for (let index = 0; index < branch.atoms.length; index++) {
             const atom = branch.atoms[index];
             const unbounded = atom.quant === 'unbounded';
+            if (unbounded && atom.kind !== 'zero') {
+                const before = index > 0 ? branch.atoms[index - 1] : null;
+                const joined = before && before.quant === 'unbounded' && before.kind !== 'zero' && redosOverlap(before.first, atom.first);
+                run = joined ? run + 1 : 1;
+                if (run >= REDOS_MAX_ADJACENT_REPEATS) return true;
+            } else {
+                run = 0;
+            }
             const rest = branch.atoms.slice(index + 1)
                 .filter(next => next.kind !== 'zero' && !next.nullable)
                 .map(next => next.first)
@@ -303,7 +326,9 @@ class PatternCache {
      * Generate cache key from pattern and options
      */
     getCacheKey(pattern, options = {}) {
-        return `${pattern}|${options.regex}|${options.wholeWord}|${options.caseSensitive}`;
+        // The pattern's length first: a pattern holding "|" cannot read as a shorter pattern and its options
+        const text = String(pattern);
+        return `${text.length}:${text}|${options.regex}|${options.wholeWord}|${options.caseSensitive}`;
     }
 
     /**
@@ -355,8 +380,9 @@ class PatternCache {
      */
     textKeyFor(text) {
         if (text.length > PatternCache.MATCH_CACHE_MAX_TEXT) return null;
-        // Hash full text instead of truncating (prevents collisions)
-        return text.length > 100 ? simpleHash(text) : text;
+        // A long text is keyed by its length and two hashes of all of it (not truncated); the leading control character
+        // keeps that key apart from a short text that happens to look like it
+        return text.length > 100 ? `\u0001${text.length}:${simpleHash(text)}.${fnv1aHash(text)}` : text;
     }
 
     /**
@@ -365,7 +391,7 @@ class PatternCache {
     getCachedMatch(text, pattern, options, textKey) {
         const textHash = textKey !== undefined ? textKey : this.textKeyFor(text);
         if (textHash === null) return { found: false };
-        const matchKey = `${textHash}|${this.getCacheKey(pattern, options)}`;
+        const matchKey = `${textHash === text ? 's' : 'h'}${textHash.length}:${textHash}|${this.getCacheKey(pattern, options)}`; // the kind of key and its length first: where the text ends is never a guess
 
         if (this.matchCache.has(matchKey)) {
             const cached = this.matchCache.get(matchKey);
@@ -384,7 +410,7 @@ class PatternCache {
     cacheMatch(text, pattern, options, result, textKey) {
         const textHash = textKey !== undefined ? textKey : this.textKeyFor(text);
         if (textHash === null) return;
-        const matchKey = `${textHash}|${this.getCacheKey(pattern, options)}`;
+        const matchKey = `${textHash === text ? 's' : 'h'}${textHash.length}:${textHash}|${this.getCacheKey(pattern, options)}`; // the kind of key and its length first: where the text ends is never a guess
         this.matchCache.set(matchKey, { result, timestamp: Date.now() });
         this.insertionOrder.push(matchKey);
         this.evictIfNeeded();

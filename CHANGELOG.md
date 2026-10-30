@@ -5,6 +5,49 @@ All notable changes to the Scrapfly Antibot Detector extension are documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/es-ES/0.3.0/).
 Each line says what changed for the user. Technical detail lives in the commit history.
 
+## [3.0.9] - 2026-10-30
+
+### Added
+
+- Detection → Copy: Node.js (fetch), a script that requests the page again with this browser's headers and cookies, naming the protection cookies; redirects are not followed, so the cookies stay on the page's host.
+- Bulk scan: Scan the failed pages again, for a finished or stopped run with pages that timed out or failed to load; the rest of the run stays in the table and the exports.
+
+### Changed
+
+- Settings → Data: History statistics is open when Settings opens, so Open statistics is one click away; Storage and Backup stay folded.
+- Detection and History details: each detection method (Matched detections in History) shows its type and score, and its value opens when you click the row.
+
+### Fixed
+
+- Anubis and PerimeterX (_pxhd) cookies are recognised again: their value rules needed more than the 100 characters the extension reads of a cookie.
+- Detection: a cookie rule that checks a value now looks at every cookie of that name, not only the first one.
+- Detection: a site on another port (localhost:3000 and localhost:8080) no longer shares a cached result with the first one.
+- Detection: a cached "match or not" answer can no longer be served to a different text or pattern.
+- Clear cache removes every result a reload could be served from (the www and bare-host entries, the page and site entries), so a cleared page is scanned again.
+- Rules: a pattern with three or more wildcards in a row (a*a*a*b) is refused, as it could freeze scanning.
+- Statistics: the change since the previous period is right for HUMAN (PerimeterX); the Domains search and "Show the domains with X" cover every protection of a domain, not the first eight.
+- Advanced: no tools are offered for detections the Detection tab dropped (Clear cache, a blocked site, the extension off); Current site is empty on a page without a host.
+- Copy buttons: a second click during "Copied!" no longer leaves the button on "Copied!".
+- Rules → Update: a bundled update the installed rule has caught up with no longer keeps the badge.
+- Scrapfly code: curl sends a value with a + (a CSS selector such as .price+.currency) encoded, so the API does not read it as a space.
+- Rules editor: a custom category stays in its list and is never saved empty; stray spaces are trimmed from names and values; a new pattern never reuses a saved id.
+- Rules editor: a flag written as text in a rule file no longer counts as on; Rules search finds a rule by category; history check and live test work after a rename.
+- Rules: importing says which official rules were kept because the file's copy differs; a rule icon that is not an image, or is too large to store, is refused.
+- Settings: a browser in Hebrew, Persian or Urdu, languages without a translation, no longer gets the English text mirrored right to left; relative times read right in every language.
+- Settings: Save checks a share address only when you changed it; a cache time saved by an older version loads again; an unknown dropdown value is refused with a message.
+- JS hooks: a page's own wrapper over a watched function is kept when the extension steps aside; a rescan on a page whose load never finishes now completes.
+- Sites left out of scanning get no JS hooks or window checks at all, so the page runs untouched.
+
+### Security
+
+- Copy → Python (requests): the cookies go to the page's own host only, not to a host the page redirects to, and non-ASCII values arrive intact.
+- Copy and share: a path parameter (;jsessionid=…) and an email address in the page's address are left out.
+- Advanced → hCaptcha: the extension asks for a configuration address the page names only when it is https on a public host name.
+- Changing settings, clearing the cache and the vendor capture tools answer the extension's own pages only, never a web page's context.
+- Scrapfly code: a detector name with a Unicode line separator can no longer end a comment and run as code in a Node.js snippet.
+- Rules import: a flag in an imported rule file can no longer break out of the editor's markup.
+- The extension's helper objects and function marker are no longer visible to the page, so a site cannot detect the extension from them.
+
 ## [3.0.8] - 2026-10-29
 
 ### Changed

@@ -122,6 +122,13 @@ DetectionModals.initializeModalElements = function() {
 
     // Evidence values copy on click or Enter (the rows are re-rendered for each detection: one delegated listener)
     if (this.modalElements.methods) {
+      // A click on a method row's head shows or hides its value
+      this.modalElements.methods.addEventListener('click', (e) => {
+        const head = e.target instanceof Element ? e.target.closest('.method-fold-head') : null;
+        if (!head) return;
+        const folded = head.closest('.method-item-card').classList.toggle('is-folded');
+        head.setAttribute('aria-expanded', String(!folded));
+      });
       this.modalElements.methods.addEventListener('click', (e) => DetectionUI.handleCopyableValueClick.call(this, e));
       this.modalElements.methods.addEventListener('keydown', (e) => DetectionUI.handleCopyableValueKeyDown.call(this, e));
     }

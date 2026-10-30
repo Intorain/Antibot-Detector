@@ -6,6 +6,8 @@
 if (typeof Categories === 'undefined' && typeof module !== 'undefined' && typeof require === 'function') {
   globalThis.Categories = require('../modules/core/categories.js');
 }
+// The revert timer of each element that shows copy feedback, so a second copy restarts it instead of stacking another
+const copyFeedbackTimers = new WeakMap();
 class FormatUtils {
 
   // Milliseconds per duration unit. A month counts as 30 days, a year as 365.
@@ -95,7 +97,8 @@ class FormatUtils {
       ? I18n.format(key, ...args)
       : null;
     if (msg) return msg;
-    return args.reduce((text, arg, i) => text.split('{' + i + '}').join(String(arg)), String(fallback));
+    // One pass: a value that itself holds "{1}" is not substituted again
+    return String(fallback).replace(/\{(\d+)\}/g, (placeholder, index) => (Number(index) < args.length ? String(args[Number(index)]) : placeholder));
   }
 
   /**
@@ -690,13 +693,19 @@ class FormatUtils {
 
     if (element && typeof document !== 'undefined') {
       const isInput = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
-      const originalValue = isInput ? element.value : element.textContent;
-      const originalHtml = !isInput ? element.innerHTML : null;
+      // A second copy while "Copied!" still shows keeps the first original (what is on screen now is the feedback, not
+      // the label) and restarts the revert: the first timer would restore the feedback text and the second find nothing
+      const showing = element.dataset.copyOriginal !== undefined;
+      if (!showing) {
+        const originalValue = isInput ? element.value : element.textContent;
+        const originalHtml = !isInput ? element.innerHTML : null;
 
-      element.dataset.copyOriginal = originalValue ?? '';
-      if (!isInput && originalHtml !== null && originalHtml !== undefined) {
-        element.dataset.copyOriginalHtml = originalHtml;
+        element.dataset.copyOriginal = originalValue ?? '';
+        if (!isInput && originalHtml !== null && originalHtml !== undefined) {
+          element.dataset.copyOriginalHtml = originalHtml;
+        }
       }
+      if (copyFeedbackTimers.has(element)) window.clearTimeout(copyFeedbackTimers.get(element));
 
       if (isInput) {
         element.value = inlineMessage;
@@ -706,7 +715,8 @@ class FormatUtils {
 
       element.classList.add('copy-feedback-active');
 
-      window.setTimeout(() => {
+      copyFeedbackTimers.set(element, window.setTimeout(() => {
+        copyFeedbackTimers.delete(element);
         if (!element.dataset) {
           return;
         }
@@ -728,7 +738,7 @@ class FormatUtils {
         if (element.dataset.copyOriginalHtml !== undefined) {
           delete element.dataset.copyOriginalHtml;
         }
-      }, revertDelay);
+      }, revertDelay));
     }
 
     return true;

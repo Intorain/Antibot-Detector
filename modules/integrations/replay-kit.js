@@ -16,7 +16,7 @@
   const NOTE = 'Note: protection cookies are tied to this browser session and expire, and a plain HTTP client does not reproduce the browser\'s TLS/HTTP2 fingerprint.';
 
   // Text for a comment line: a value can never end the comment early
-  const oneLine = (value) => String(value == null ? '' : value).replace(/[\r\n\u2028\u2029]+/g, ' ').trim();
+  const oneLine = (value) => String(value == null ? '' : value).replace(/[\r\n\u0085\u2028\u2029]+/g, ' ').trim();
 
   /** Accept-Language as Chrome builds it from navigator.languages: "en-US,en;q=0.9,es;q=0.8" */
   function acceptLanguage(languages) {
@@ -144,11 +144,42 @@
         lines.push(`    ${q(c.name)}: ${q(c.value)},${note}`);
       }
       lines.push('}');
+      // One Cookie header in UTF-8, as the browser sends it (cookies=cookies would send every cookie to any host a
+      // redirect leads to, and requests encodes it as Latin-1). requests drops a Cookie header when it follows a redirect
+      lines.push('headers["Cookie"] = "; ".join(f"{name}={value}" for name, value in cookies.items()).encode("utf-8")');
     }
-    lines.push('', `response = requests.get(url, headers=headers${p.cookies.length ? ', cookies=cookies' : ''}, timeout=30)`,
+    lines.push('', 'response = requests.get(url, headers=headers, timeout=30)',
       'print(response.status_code)', 'print(response.text[:500])');
     return lines.join('\n') + '\n';
   }
 
-  root.ReplayKit = Object.freeze({ NOTE, acceptLanguage, clientHints, browserHeaders, protectionCookies, pageUrl, curl, python });
+  /** A Node.js script using the built-in fetch (Node 18+); '' without a web page */
+  function node(input) {
+    const p = prepare(input);
+    if (!p.url || !quote) return '';
+    const q = quote.json;
+    const lines = [...header(p, '//'), '', `const url = ${q(p.url)};`, 'const headers = {'];
+    for (const [name, value] of p.headers) lines.push(`  ${q(name)}: ${q(value)},`);
+    lines.push('};');
+    if (p.cookies.length) {
+      lines.push('const cookies = [');
+      for (const c of p.cookies) {
+        const owners = p.owners.get(c.name);
+        const note = owners ? `  // ${owners.length ? owners.join(', ') : 'protection'}` : '';
+        lines.push(`  ${q(`${c.name}=${c.value}`)},${note}`);
+      }
+      lines.push('].join("; ");',
+        '// As the browser sends them, UTF-8 bytes (fetch takes only Latin-1 text for a header value)',
+        'headers.Cookie = Buffer.from(cookies, "utf8").toString("latin1");');
+    }
+    lines.push('', '(async () => {',
+      '  // Redirects are not followed: the cookies are only ever sent to this host',
+      '  const response = await fetch(url, { headers, redirect: "manual", signal: AbortSignal.timeout(30000) });',
+      '  console.log(response.status);',
+      '  console.log((await response.text()).slice(0, 500));',
+      '})();');
+    return lines.join('\n') + '\n';
+  }
+
+  root.ReplayKit = Object.freeze({ NOTE, acceptLanguage, clientHints, browserHeaders, protectionCookies, pageUrl, curl, python, node });
 })(typeof window !== 'undefined' ? window : globalThis);

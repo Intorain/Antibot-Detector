@@ -1087,6 +1087,9 @@
   "detectorsImportedSkippedFmt": {
     "message": "Detectores importados, exceto: {0} (não são válidos nesta versão)"
   },
+  "detectorsImportedKeptFmt": {
+    "message": "As regras oficiais já instaladas não foram substituídas: {0}"
+  },
   "detectorExportedFmt": {
     "message": "{0} exportado"
   },
@@ -3458,6 +3461,9 @@
   },
   "iconPickerFileTooLarge": {
     "message": "O arquivo do ícone deve ter menos de 100 KB"
+  },
+  "iconPickerNotAnImage": {
+    "message": "Escolha um arquivo de imagem (PNG, JPEG, GIF, WebP ou SVG)"
   },
   "iconPickerNoResults": {
     "message": "Nenhum ícone corresponde à sua pesquisa"
@@ -6320,6 +6326,9 @@
   "settingsUiErrHistoryWatch": {
     "message": "A lista de monitoramento deve estar desativada, diária ou semanal"
   },
+  "settingsUiErrChoiceFmt": {
+    "message": "Uma configuração tem um valor que a lista dela não oferece: {0}"
+  },
   "toolbarTitleOff": {
     "message": "A detecção está desativada"
   },
@@ -6346,6 +6355,9 @@
   },
   "detectionCopyMenuPython": {
     "message": "Python (requests)"
+  },
+  "detectionCopyMenuNode": {
+    "message": "Node.js (fetch)"
   },
   "detectionReplayNoPage": {
     "message": "Abra uma página da web para copiá-la como código"
@@ -6730,6 +6742,9 @@
   },
   "bulkScanWaiting": {
     "message": "Analisar as páginas que ainda aguardam"
+  },
+  "bulkScanFailedAgain": {
+    "message": "Analisar novamente as páginas que falharam"
   },
   "bulkNewList": {
     "message": "Nova lista"

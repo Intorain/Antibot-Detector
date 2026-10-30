@@ -130,8 +130,14 @@ class UpdateManager {
             // The pending list is exactly this check's result: an empty check
             // must not leave the badge showing updates from an older one.
             // Bundled updates (queued on extension update) are not on GitHub,
-            // so they stay until applied or dismissed.
-            const bundledPending = (await this.getPendingUpdates()).filter(u => u.source === 'bundled');
+            // so they stay until applied or dismissed, unless the local rule has caught up with them since
+            // (applied through another route, or replaced by a newer official version): then it is no update.
+            const storedForBundled = await this.loadStoredDetectors();
+            const bundledPending = (await this.getPendingUpdates()).filter(u => u.source === 'bundled')
+                .map(u => this.describeUpdate(u.category, u.id,
+                    { version: u.remoteVersion, name: u.name, minExtensionVersion: u.minExtensionVersion },
+                    this.findStored(storedForBundled, u.category, u.id)?.detector, 'bundled'))
+                .filter(Boolean);
             await this.setPendingUpdates(this.mergeUpdateLists(bundledPending, updates));
 
             Logger.storage(`UpdateManager: ${release.tag}: ${updates.length} compatible updates, ${incompatibleUpdates.length} incompatible, ${failed.length} not downloaded`);
@@ -1105,20 +1111,25 @@ class UpdateManager {
         const hours = Math.floor(diff / 3600000);
         const days = Math.floor(diff / 86400000);
 
+        // The UI language's own plural forms (Intl): "2 дня назад", not "2 дней назад" built from one message for every number.
+        // Without Intl or a language (tests, the worker before the translations load) the messages below are used.
+        const relative = (value, unit) => (typeof FormatUtils !== 'undefined' && typeof FormatUtils.formatRelative === 'function'
+            ? FormatUtils.formatRelative(-value, unit, 'long') : null);
+
         if (minutes < 1) return _get('timeJustNow', 'Just now');
         if (minutes < 60) {
-            return minutes === 1
+            return relative(minutes, 'minute') || (minutes === 1
                 ? _get('timeOneMinuteAgo', '1 minute ago')
-                : _fmt('timeMinutesAgoLongFmt', `${minutes} minutes ago`, minutes);
+                : _fmt('timeMinutesAgoLongFmt', `${minutes} minutes ago`, minutes));
         }
         if (hours < 24) {
-            return hours === 1
+            return relative(hours, 'hour') || (hours === 1
                 ? _get('timeOneHourAgo', '1 hour ago')
-                : _fmt('timeHoursAgoLongFmt', `${hours} hours ago`, hours);
+                : _fmt('timeHoursAgoLongFmt', `${hours} hours ago`, hours));
         }
-        return days === 1
+        return relative(days, 'day') || (days === 1
             ? _get('timeOneDayAgo', '1 day ago')
-            : _fmt('timeDaysAgoLongFmt', `${days} days ago`, days);
+            : _fmt('timeDaysAgoLongFmt', `${days} days ago`, days));
     }
 }
 

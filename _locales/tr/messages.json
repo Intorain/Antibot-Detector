@@ -1087,6 +1087,9 @@
   "detectorsImportedSkippedFmt": {
     "message": "Dedektörler içe aktarıldı, şunlar hariç: {0} (bu sürümde geçerli değil)"
   },
+  "detectorsImportedKeptFmt": {
+    "message": "Zaten yüklü resmî kurallar değiştirilmedi: {0}"
+  },
   "detectorExportedFmt": {
     "message": "{0} dışa aktarıldı"
   },
@@ -3458,6 +3461,9 @@
   },
   "iconPickerFileTooLarge": {
     "message": "Simge dosyası 100 KB'tan küçük olmalıdır"
+  },
+  "iconPickerNotAnImage": {
+    "message": "Bir resim dosyası seçin (PNG, JPEG, GIF, WebP veya SVG)"
   },
   "iconPickerNoResults": {
     "message": "Aramanızla eşleşen simge yok"
@@ -6320,6 +6326,9 @@
   "settingsUiErrHistoryWatch": {
     "message": "İzleme listesi kapalı, günlük veya haftalık olmalıdır"
   },
+  "settingsUiErrChoiceFmt": {
+    "message": "Bir ayarın değeri, listesinde bulunmuyor: {0}"
+  },
   "toolbarTitleOff": {
     "message": "Tespit kapalı"
   },
@@ -6346,6 +6355,9 @@
   },
   "detectionCopyMenuPython": {
     "message": "Python (requests)"
+  },
+  "detectionCopyMenuNode": {
+    "message": "Node.js (fetch)"
   },
   "detectionReplayNoPage": {
     "message": "Kod olarak kopyalamak için bir web sayfası açın"
@@ -6730,6 +6742,9 @@
   },
   "bulkScanWaiting": {
     "message": "Hâlâ bekleyen sayfaları tara"
+  },
+  "bulkScanFailedAgain": {
+    "message": "Başarısız olan sayfaları yeniden tara"
   },
   "bulkNewList": {
     "message": "Yeni liste"

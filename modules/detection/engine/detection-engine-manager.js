@@ -190,8 +190,11 @@ class DetectionEngineManager {
             // and no response capture; the MAIN world takes its early recorders off the page and its frames, along with
             // the frame accessors (only the bind shims stay, which keep the page's own calls working). The window checks
             // stay: they only read the page's globals
-            const hooksOff = ScanScope.hooksOff(actualSettings.detection, window.location?.hostname);
-            if (hooksOff) Logger.debug('DETECTION', 'JS hooks are off on this site');
+            // A site the person left out of scanning is never scanned, so nothing of the page is watched there either
+            const skipped = ScanScope.isExcluded(window.location?.href, actualSettings.detection);
+            const hooksOff = skipped || ScanScope.hooksOff(actualSettings.detection, window.location?.hostname);
+            if (skipped) Logger.debug('DETECTION', 'This site is not scanned, so the page is left alone');
+            else if (hooksOff) Logger.debug('DETECTION', 'JS hooks are off on this site');
 
             const detectorsData = result.scrapfly_detectors;
 
@@ -247,7 +250,7 @@ class DetectionEngineManager {
 
             dispatchInstallHooks({
                 hookDefinitions: hooksOff ? [] : hookDefinitions,
-                windowProperties,
+                windowProperties: skipped ? [] : windowProperties,
                 debugMode,
                 debugVerbose,
                 logCollectorEnabled,
@@ -812,11 +815,13 @@ class DetectionEngineManager {
             : [...cookies, ...(responseCookies || [])];
         // IMPORTANT: We do not treat localStorage/sessionStorage entries as cookies.
 
-            // Pre-build Maps for O(1) value lookup by name
+            // Pre-build Maps for O(1) value lookup by name: every cookie of a name (the same name can come from several
+            // domains or paths, and from the request and the response), not only the first
             const buildCookieMap = (cookieArray) => {
                 const map = new Map();
                 for (const c of cookieArray) {
-                    if (!map.has(c.name)) map.set(c.name, c);
+                    if (!map.has(c.name)) map.set(c.name, []);
+                    map.get(c.name).push(c);
                 }
                 return map;
             };
@@ -869,11 +874,14 @@ class DetectionEngineManager {
                         const matched = this.matchCookieName(cookie.name, cookiePattern.name, nameMatchOptions);
 
                         if (matched) {
-                            // If value pattern specified, use Map for O(1) lookup
+                            // If value pattern specified, use Map for O(1) lookup: the value of any cookie of that name
                             if (cookiePattern.value) {
-                                const cookieInValueScope = valueMap.get(cookie.name);
-                                if (cookieInValueScope) {
-                                    return this.matchPattern(cookieInValueScope.value || '', cookiePattern.value, valueMatchOptions);
+                                // The same source for name and value: the value of this very cookie (so a duplicate that does not match
+                                // is not the one reported)
+                                if (valueScope === nameScope) return this.matchPattern(cookie.value || '', cookiePattern.value, valueMatchOptions);
+                                const cookiesInValueScope = valueMap.get(cookie.name);
+                                if (cookiesInValueScope) {
+                                    return cookiesInValueScope.some(c => this.matchPattern(c.value || '', cookiePattern.value, valueMatchOptions));
                                 }
                                 return false;
                             }
@@ -1630,7 +1638,8 @@ class DetectionEngineManager {
                     continue;
                 }
                 const storedHostname = stored.hostname || UrlUtils.getHostnameFromUrl(stored.url || '');
-                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname) && sameHooks(stored) && !hidden(stored)) {
+                // The same site, so also the same port (www and the bare host share a result, localhost:3000 and :8080 do not)
+                if (UrlUtils.hostnamesMatch(requestedHostname, storedHostname) && UrlUtils.portOf(url) === UrlUtils.portOf(stored.url) && sameHooks(stored) && !hidden(stored)) {
                     if (!hostnameFallback ||
                         getStoredDetectionCount(stored) > getStoredDetectionCount(hostnameFallback) ||
                         (getStoredDetectionCount(stored) === getStoredDetectionCount(hostnameFallback) && stored.timestamp > hostnameFallback.timestamp)) {
@@ -2232,11 +2241,28 @@ class DetectionEngineManager {
             try {
                 const result = await chrome.storage.local.get([DetectionEngineManager.STORAGE_KEY]);
                 const storage = result[DetectionEngineManager.STORAGE_KEY] || {};
-                if (storage[urlHash]) {
-                    delete storage[urlHash];
-                    await chrome.storage.local.set({ [DetectionEngineManager.STORAGE_KEY]: storage });
-                    cleared = true;
+                // Everything getStoredDetection could answer this page with: its own key under each scope it tries (a
+                // "Domain" lookup also reads the path and exact-address keys) and, under the "Domain" scope, the entry of
+                // the same site under its other spelling (www.example.com / example.com) on the same port. Clearing only
+                // the one key left a reload served from another entry, so "cleared" meant nothing.
+                const keys = new Set();
+                const scopeOrder = ['domain', 'path', 'full'];
+                for (const scope of scopeOrder.slice(scopeOrder.indexOf(cacheScope))) keys.add(UrlUtils.hashUrl(request.url, scope));
+                if (cacheScope === 'domain') {
+                    const hostname = UrlUtils.getHostnameFromUrl(request.url);
+                    for (const [key, stored] of Object.entries(storage)) {
+                        if (!stored) continue;
+                        const storedHostname = stored.hostname || UrlUtils.getHostnameFromUrl(stored.url || '');
+                        if (UrlUtils.hostnamesMatch(hostname, storedHostname) && UrlUtils.portOf(request.url) === UrlUtils.portOf(stored.url)) keys.add(key);
+                    }
                 }
+                for (const key of keys) {
+                    if (storage[key]) {
+                        delete storage[key];
+                        cleared = true;
+                    }
+                }
+                if (cleared) await chrome.storage.local.set({ [DetectionEngineManager.STORAGE_KEY]: storage });
             } finally {
                 releaseStorageLock();
             }

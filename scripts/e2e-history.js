@@ -687,6 +687,40 @@ async function scenario(name, fn) {
     } finally { await page.close(); }
   });
 
+  await scenario('History details: an opened detection lists its matched detections, each row folded to its type and score until it is clicked', async () => {
+    const now = Date.now();
+    await setHistory([
+      { id: 'm1', url: 'https://match.example/', hostname: 'match.example', title: 'Match', timestamp: now, detections: [{ detector: { name: 'Cloudflare' }, category: 'Anti-Bot', confidence: 95, difficulty: 'Medium',
+        matches: [{ type: 'url', pattern: 'challenge-platform', confidence: 60 }, { type: 'cookie', pattern: 'cf_clearance', value: 'cf_clearance=abc', confidence: 90 }] }] }
+    ]);
+    const page = await openExtensionPage();
+    try {
+      await page.$eval('#nav-history', el => el.click());
+      await page.waitForSelector('.history-item');
+      await page.evaluate(() => {
+        globalThis.__copied = [];
+        FormatUtils.copyToClipboard = async (text) => { globalThis.__copied.push(text); return true; };
+        window.popupInstance.history.showHistoryItemDetails(window.popupInstance.history.historyItems[0]);
+      });
+      await page.waitForSelector('#historyModalContent .history-modal-detection-card.has-methods');
+      await page.$eval('#historyModalContent .history-modal-detection-header', el => el.click());
+      const rows = () => page.$$eval('#historyModalContent .history-modal-method-item', items => items.map(item => ({
+        head: item.querySelector('.history-modal-method-head').offsetParent !== null,
+        value: item.querySelector('.history-modal-method-value').offsetParent !== null,
+        expanded: item.querySelector('.history-modal-method-head').getAttribute('aria-expanded')
+      })));
+      assert.equal(await page.$eval('#historyModalContent .history-modal-match-count', el => el.offsetParent !== null), true, 'the section title is shown');
+      assert.deepEqual(await rows(), [{ head: true, value: false, expanded: 'false' }, { head: true, value: false, expanded: 'false' }], 'every row is folded');
+      await page.$$eval('#historyModalContent .history-modal-method-head', heads => heads[1].click());
+      assert.deepEqual((await rows()).map(r => [r.value, r.expanded]), [[false, 'false'], [true, 'true']], 'a click on a head shows that row only');
+      await page.$$eval('#historyModalContent .history-modal-method-value', values => values[1].click());
+      await page.waitForFunction(() => globalThis.__copied.length === 1, null, { polling: 100, timeout: 5000 });
+      assert.match(await page.evaluate(() => globalThis.__copied[0]), /cf_clearance=abc/, 'the value copies');
+      await page.$$eval('#historyModalContent .history-modal-method-head', heads => heads[1].click());
+      assert.deepEqual((await rows()).map(r => r.value), [false, false], 'another click folds it again');
+    } finally { await page.close(); }
+  });
+
   await scenario('Pinned entries survive auto-delete and the entry limit; unpinned ones go', async () => {
     const now = Date.now();
     const old = (id, ageDays, extra = {}) => ({ id, url: `https://${id}.example/`, hostname: `${id}.example`, title: id, timestamp: now - ageDays * DAY, detections: [{ detector: { name: 'X' }, category: 'Anti-Bot', confidence: 90 }], ...extra });

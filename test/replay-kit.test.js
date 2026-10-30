@@ -94,15 +94,49 @@ test('Python: a requests call whose dicts hold the exact values, with the protec
     'm.get = lambda url, **kw: calls.append([url, kw]) or R()',
     'sys.modules["requests"] = m',
     'exec(compile(sys.stdin.read(), "replay.py", "exec"), {})',
-    'sys.stdout.write("\\n" + json.dumps(calls[0], ensure_ascii=False))'
+    'sys.stdout.write("\\n" + json.dumps(calls[0], ensure_ascii=False, default=lambda o: o.decode("utf-8") if isinstance(o, bytes) else str(o)))'
   ].join('\n');
   const run = spawnSync('python3', ['-I', '-c', stub], { input: code, encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
   assert.strictEqual(run.status, 0, run.stderr);
   const [url, kw] = JSON.parse(run.stdout.trim().split('\n').pop());
   assert.strictEqual(url, 'https://shop.example/cart?q=a%20b&x=%271%27');
-  assert.deepStrictEqual(Object.entries(kw.headers), ReplayKit.browserHeaders(nav));
-  assert.deepStrictEqual(kw.cookies, { __cf_bm: cookies[0].value, cf_clearance: 'abc.def-123', lang: 'ñandú 日本 🍪', session: 'a=b; c=d' });
+  // The browser's headers, then one Cookie header (UTF-8): not cookies=, which would go to any host a redirect leads to
+  assert.deepStrictEqual(Object.entries(kw.headers).filter(([name]) => name !== 'Cookie'), ReplayKit.browserHeaders(nav));
+  assert.strictEqual(kw.headers.Cookie, `__cf_bm=${cookies[0].value}; cf_clearance=abc.def-123; lang=ñandú 日本 🍪; session=a=b; c=d`);
+  assert.strictEqual(kw.cookies, undefined);
+  assert.ok(!code.includes('cookies=cookies'));
   assert.strictEqual(kw.timeout, 30);
+});
+
+// The snippet is run with the real requests library against two local servers: the page's, which redirects to another
+// host, and that other host. Cookies must reach the first and never the second, and a non-ASCII value must arrive as UTF-8.
+test('Python: the cookies go to the page\'s own host only, also across a redirect, and non-ASCII values arrive as UTF-8',
+  { skip: spawnSync('python3', ['-c', 'import requests']).status !== 0 && 'no python3 with requests' }, async () => {
+  const http = require('node:http');
+  const seen = { first: null, second: null };
+  const second = http.createServer((req, res) => { seen.second = req.headers.cookie || null; res.end('second'); });
+  await new Promise(resolve => second.listen(0, '127.0.0.1', resolve));
+  const first = http.createServer((req, res) => {
+    seen.first = Buffer.from(req.headers.cookie || '', 'latin1').toString('utf8');
+    res.writeHead(302, { Location: `http://localhost:${second.address().port}/` });
+    res.end();
+  });
+  await new Promise(resolve => first.listen(0, '127.0.0.1', resolve));
+  try {
+    const code = ReplayKit.python({ url: `http://127.0.0.1:${first.address().port}/`, cookies: [{ name: 'sessionid', value: 'SECRET' }, { name: 'city', value: 'ñandú' }, { name: 'lang', value: '日本' }], headers: [] });
+    const run = await new Promise(resolve => {
+      const child = require('node:child_process').spawn('python3', ['-I', '-'], { env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+      let stderr = '';
+      child.stderr.on('data', chunk => { stderr += chunk; });
+      child.on('close', status => resolve({ status, stderr }));
+      child.stdin.end(code);
+    });
+    assert.strictEqual(run.status, 0, run.stderr);
+    assert.strictEqual(seen.first, 'sessionid=SECRET; city=ñandú; lang=日本', 'the page\'s host gets every cookie, as UTF-8');
+    assert.strictEqual(seen.second, null, 'the host the page redirected to gets none');
+  } finally {
+    first.close(); second.close();
+  }
 });
 
 test('a name with a line break cannot end a comment early', () => {
@@ -116,3 +150,53 @@ test('a name with a line break cannot end a comment early', () => {
     assert.ok(!/^import os/m.test(code));
   }
 });
+
+test('Node.js: a fetch script with the browser headers, the protection named beside its cookie, and nothing but http(s) pages', () => {
+  const code = ReplayKit.node(input);
+  assert.ok(code.startsWith('// Replays https://shop.example/cart?'), 'comment header, the fragment is never sent');
+  assert.ok(!code.includes('#frag'));
+  assert.ok(code.includes('// Detected: Cloudflare, DataDome'));
+  assert.ok(code.includes('TLS/HTTP2 fingerprint'));
+  assert.ok(code.includes('// Protection cookies: __cf_bm (Cloudflare), cf_clearance (Cloudflare)'));
+  assert.ok(/"__cf_bm=[^\n]*",  \/\/ Cloudflare$/m.test(code), 'the protection is named beside its cookie');
+  assert.ok(!/"datadome=/.test(code), 'a protection cookie the page does not hold is not invented');
+  assert.ok(code.includes('redirect: "manual"'), 'redirects are not followed');
+  assert.strictEqual(ReplayKit.node({ ...input, url: '' }), '');
+  assert.strictEqual(ReplayKit.node({ ...input, url: 'mailto:x@y.example' }), '');
+});
+
+// The script is run by node itself against two local servers: the page's, which redirects to another host, and that other
+// host. Cookies reach the first, never the second, and a non-ASCII value arrives as UTF-8, as a browser sends it.
+test('Node.js: the cookies go to the page\'s own host only, a redirect is not followed, and non-ASCII values arrive as UTF-8', async () => {
+  const http = require('node:http');
+  const seen = { first: null, second: null, headers: null };
+  const second = http.createServer((req, res) => { seen.second = req.headers.cookie || null; res.end('second'); });
+  await new Promise(resolve => second.listen(0, '127.0.0.1', resolve));
+  const first = http.createServer((req, res) => {
+    seen.first = Buffer.from(req.headers.cookie || '', 'latin1').toString('utf8');
+    seen.headers = req.headers;
+    res.writeHead(302, { Location: `http://localhost:${second.address().port}/` });
+    res.end();
+  });
+  await new Promise(resolve => first.listen(0, '127.0.0.1', resolve));
+  try {
+    const code = ReplayKit.node({ url: `http://127.0.0.1:${first.address().port}/`, cookies: [{ name: 'sessionid', value: 'SECRET' }, { name: 'city', value: 'ñandú' }, { name: 'lang', value: '日本' }],
+      headers: [['User-Agent', 'Replay/1'], ['Accept-Language', 'es-ES,es;q=0.9']] });
+    const run = await new Promise(resolve => {
+      const child = require('node:child_process').spawn(process.execPath, ['-'], { env: process.env });
+      let stdout = '', stderr = '';
+      child.stdout.on('data', chunk => { stdout += chunk; });
+      child.stderr.on('data', chunk => { stderr += chunk; });
+      child.on('close', status => resolve({ status, stdout, stderr }));
+      child.stdin.end(code);
+    });
+    assert.strictEqual(run.status, 0, run.stderr);
+    assert.strictEqual(run.stdout.split('\n')[0], '302', 'the redirect is reported, not followed');
+    assert.strictEqual(seen.first, 'sessionid=SECRET; city=ñandú; lang=日本', 'the page\'s host gets every cookie, as UTF-8');
+    assert.strictEqual(seen.second, null, 'the host the page redirected to gets none');
+    assert.strictEqual(seen.headers['user-agent'], 'Replay/1');
+  } finally {
+    first.close(); second.close();
+  }
+});
+

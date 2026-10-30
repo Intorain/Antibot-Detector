@@ -406,7 +406,14 @@ DetectionActions._sanitizeUrlForPaste = function(raw) {
       const u = new URL(raw);
       // A path can carry a secret too (a password-reset, invite or magic-link token): a segment that looks like one
       // is replaced, the readable ones (/reset, /invite) stay
-      const path = u.pathname.split('/').map(segment => (DetectionActions._looksLikeSecret(segment) ? ':token' : segment)).join('/');
+      // A path parameter (;jsessionid=…) is dropped, and a segment that holds an address (an email in /u/jane@x.example)
+      // is replaced
+      const path = u.pathname.split('/').map(raw => {
+        const segment = raw.split(';')[0];
+        const text = (() => { try { return decodeURIComponent(segment); } catch (_) { return segment; } })();
+        if (text.includes('@')) return ':email';
+        return DetectionActions._looksLikeSecret(segment) ? ':token' : segment;
+      }).join('/');
       return `${u.origin}${path}`;
     } catch {
       return null;
@@ -543,9 +550,9 @@ DetectionActions.replayInput = async function(pageUrl) {
     };
 };
 
-/** Copy menu (Detection tab): 'overview' (what Upload shares), 'markdown', 'json', or the replay kit's 'curl' and 'python'. */
+/** Copy menu (Detection tab): 'overview' (what Upload shares), 'markdown', 'json', or the replay kit's 'curl', 'python' and 'node'. */
 DetectionActions.copyDetectionsAs = async function(kind, pageUrl) {
-    if (kind === 'curl' || kind === 'python') {
+    if (kind === 'curl' || kind === 'python' || kind === 'node') {
       const input = await DetectionActions.replayInput.call(this, pageUrl);
       const code = ReplayKit[kind](input);
       if (!code) {

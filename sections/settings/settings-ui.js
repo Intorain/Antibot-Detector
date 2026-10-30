@@ -7,6 +7,14 @@ const SettingsUI = (typeof self !== 'undefined' && self.SettingsUI) ? self.Setti
 // Card heads that are a title (not a switch): the card folds under them
 SettingsUI.CARD_HEAD_SELECTOR = ':scope > .settings-card-head, :scope > .settings-row--head, :scope > .settings-stats-head, :scope > .data-card-head';
 
+// A card marked with this attribute starts open (and opens again each time Settings does)
+SettingsUI.OPEN_BY_DEFAULT_ATTRIBUTE = 'data-open-by-default';
+
+SettingsUI.foldCard = function(card, head, folded) {
+    card.classList.toggle('is-collapsed', folded);
+    if (head) head.setAttribute('aria-expanded', String(!folded));
+};
+
 /**
  * Cards topped by a title start folded, showing only that title; clicking it
  * (or Enter / Space) opens the card. Cards topped by a switch are left as
@@ -19,10 +27,10 @@ SettingsUI.setupCollapsibleCards = function(root) {
       if (card.classList.contains('is-collapsible')) return;
       const head = card.querySelector(SettingsUI.CARD_HEAD_SELECTOR);
       if (!head || head.querySelector('input, select, textarea, button')) return;
-      card.classList.add('is-collapsible', 'is-collapsed');
+      card.classList.add('is-collapsible');
+      SettingsUI.foldCard(card, head, !card.hasAttribute(SettingsUI.OPEN_BY_DEFAULT_ATTRIBUTE));
       head.setAttribute('role', 'button');
       head.tabIndex = 0;
-      head.setAttribute('aria-expanded', 'false');
       head.insertAdjacentHTML('beforeend', chevron);
       const toggle = () => {
         const open = card.classList.toggle('is-collapsed') === false;
@@ -37,13 +45,12 @@ SettingsUI.setupCollapsibleCards = function(root) {
     });
 };
 
-/** Every folding card closed again (each time Settings opens) */
+/** Every folding card back to where it starts (each time Settings opens): folded, unless it opens by default */
 SettingsUI.collapseCards = function(root) {
     if (!root) return;
     SettingsUI.setupCollapsibleCards(root);
     root.querySelectorAll('.settings-card.is-collapsible').forEach((card) => {
-      card.classList.add('is-collapsed');
-      card.querySelector(SettingsUI.CARD_HEAD_SELECTOR)?.setAttribute('aria-expanded', 'false');
+      SettingsUI.foldCard(card, card.querySelector(SettingsUI.CARD_HEAD_SELECTOR), !card.hasAttribute(SettingsUI.OPEN_BY_DEFAULT_ATTRIBUTE));
     });
 };
 
@@ -135,6 +142,13 @@ SettingsUI.loadSettings = async function() {
         detection.cacheUnit = 'hours';
       }
       for (const key of ['hooksConfig', 'reliabilityConfig', 'cacheDuration', 'cacheUnit', 'cacheScope', 'cacheHours', 'blacklistedDomains']) delete loaded[key];
+      // A cache time an older version allowed (48 hours) is shown as the form shows it (2 days): the saved copy, which an
+      // export, a backup and the unsaved-change check read, says the same, so it validates when it comes back
+      if (detection.cacheDuration !== undefined && typeof FormatUtils !== 'undefined' && typeof FormatUtils.normalizeCacheDuration === 'function') {
+        const cache = FormatUtils.normalizeCacheDuration(detection.cacheDuration, detection.cacheUnit);
+        detection.cacheDuration = cache.duration;
+        detection.cacheUnit = cache.unit;
+      }
       this.settings = loaded;
       this.settingsBaseline = JSON.parse(JSON.stringify(loaded));
       if (typeof Utils !== 'undefined' && typeof Utils.applyDebugMode === 'function') Utils.applyDebugMode(loaded);
@@ -652,7 +666,9 @@ SettingsUI.getSettingsFromUI = function() {
     // Update Settings
     settings.updates = {
       autoUpdate: document.querySelector('#autoUpdate')?.checked ?? this.settings.updates?.autoUpdate ?? false,
-      checkIntervalHours: parseInt(document.querySelector('#checkIntervalHours')?.value ?? this.settings.updates?.checkIntervalHours ?? Constants.DEFAULT_UPDATE_CHECK_INTERVAL_HOURS),
+      // (a select showing no option for a stored value reads '': that is the stored value, not NaN)
+      checkIntervalHours: parseInt(document.querySelector('#checkIntervalHours')?.value, 10)
+        || this.settings.updates?.checkIntervalHours || Constants.DEFAULT_UPDATE_CHECK_INTERVAL_HOURS,
       lastCheckTimestamp: this.settings.updates?.lastCheckTimestamp ?? 0 // Preserve timestamp, don't reset on save
     };
 
@@ -745,13 +761,28 @@ SettingsUI.validateSettings = function(settings) {
     }
 
     if (typeof SettingsUI.validateShareSettings === 'function') {
-      errors.push(...SettingsUI.validateShareSettings(settings.share, text));
+      errors.push(...SettingsUI.validateShareSettings(settings.share, text, this && this.settingsBaseline && this.settingsBaseline.share));
     }
 
     // A signing secret no server could check (accents, emoji, invisible characters, over 512): the message never repeats it
     if (settings.webhook && settings.webhook.webhookSecret !== undefined && typeof WebhookBody !== 'undefined'
       && !WebhookBody.isValidSecret(settings.webhook.webhookSecret)) {
       errors.push(text('webhookSecretInvalid', 'Signing secret: use up to 512 ASCII characters (no accents or emoji)'));
+    }
+
+    // Settings a list of choices feeds: a value the list does not offer (a hand-edited file) shows as a blank select and is
+    // read back as nothing on the next Save. Only a value that differs from the saved one is checked, so a stored value an
+    // older version allowed does not block an unrelated Save
+    const savedSettings = (this && this.settingsBaseline) || {};
+    const CHOICES = [['updates', 'checkIntervalHours', [6, 12, 24, 48, 168]], ['history', 'exportFormat', ['json', 'csv', 'txt', 'md']],
+      ['history', 'historyBackup', ['off', 'daily', 'weekly', 'monthly']], ['duplicatePrevention', 'duplicateUnit', ['minutes', 'hours', 'days']],
+      ['duplicatePrevention', 'duplicateScope', ['full_url', 'domain', 'path']], ['duplicatePrevention', 'duplicateAction', ['skip', 'update']],
+      ['detection', 'cacheScope', ['domain', 'path', 'full']]];
+    for (const [group, key, allowed] of CHOICES) {
+      const value = settings[group] && settings[group][key];
+      if (value !== undefined && value !== (savedSettings[group] || {})[key] && !allowed.includes(value)) {
+        errors.push(text('settingsUiErrChoiceFmt', `A setting has a value its list does not offer: ${group}.${key}`, `${group}.${key}`));
+      }
     }
 
     if (settings.detection && settings.detection.scanMode !== undefined && !ScanScope.MODES.includes(settings.detection.scanMode)) {

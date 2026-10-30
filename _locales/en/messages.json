@@ -1095,6 +1095,10 @@
     "message": "Detectors imported, except: {0} (not valid in this version)",
     "description": "Rules → Import (merge): the rules of the file that could not be imported, by name ({0} = their names)"
   },
+  "detectorsImportedKeptFmt": {
+    "message": "Official rules already installed were not replaced: {0}",
+    "description": "Toast after importing rules: official rules already installed are never replaced by a file, so the ones whose content differs are named. {0} = their names"
+  },
   "detectorExportedFmt": {
     "message": "Exported {0}"
   },
@@ -3651,6 +3655,9 @@
   },
   "iconPickerFileTooLarge": {
     "message": "Icon file size must be less than 100KB"
+  },
+  "iconPickerNotAnImage": {
+    "message": "Choose an image file (PNG, JPEG, GIF, WebP or SVG)"
   },
   "iconPickerNoResults": {
     "message": "No icons match your search",
@@ -6812,6 +6819,10 @@
     "message": "The watchlist must be off, daily or weekly",
     "description": "Error when the watchlist setting is not one of the offered choices"
   },
+  "settingsUiErrChoiceFmt": {
+    "message": "A setting has a value its list does not offer: {0}",
+    "description": "Settings validation: a value a setting's list of choices does not offer. {0} = the setting's name"
+  },
   "toolbarTitleOff": {
     "message": "Detection is switched off",
     "description": "Hover text of the toolbar icon (after 'Scrapfly: ') when the extension's main switch is off"
@@ -6845,6 +6856,9 @@
   },
   "detectionCopyMenuPython": {
     "message": "Python (requests)"
+  },
+  "detectionCopyMenuNode": {
+    "message": "Node.js (fetch)"
   },
   "detectionReplayNoPage": {
     "message": "Open a web page to copy it as code"
@@ -7355,7 +7369,11 @@
   },
   "bulkScanWaiting": {
     "message": "Scan the pages still waiting",
-    "description": "Bulk scan: start a new run with the pages a stopped run did not scan"
+    "description": "Bulk scan: scan the pages a stopped run did not scan; the pages already finished stay in the table"
+  },
+  "bulkScanFailedAgain": {
+    "message": "Scan the failed pages again",
+    "description": "Bulk scan: scan again the pages of a finished run that failed (a timeout or a load error); the rest of the run stays in the table"
   },
   "bulkNewList": {
     "message": "New list",
